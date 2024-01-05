@@ -1,4 +1,5 @@
 import { ReactEventHandler } from 'react';
+import { get12HourTimeString } from 'utils/helpers';
 
 type CustomerStatus = 'Waiting' | 'Serving' | 'Served' | 'No Show';
 
@@ -33,20 +34,12 @@ export default function CustomerItem({
     'No Show': 'text-french_gray_2'
   };
 
-  const get12HourTimeString = (date: Date) => {
-    const minutes = date.getMinutes();
-
-    return `${date.getHours() % 12}:${minutes < 10 ? `0${minutes}` : minutes} ${
-      minutes > 12 ? 'PM' : 'AM'
-    }`;
-  };
-
   return (
     <div
       onClick={onClick}
       className={`hover:bg-seasalt flex justify-between rounded-lg border-2 p-2 hover:cursor-pointer ${
         containerStylesByStatus[status]
-      } ${selected ? 'bg-antiflash_white-500 outline' : 'bg-transparent'}`}
+      } ${selected ? 'bg-seasalt outline' : 'bg-transparent'}`}
     >
       <div>
         <span

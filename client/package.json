@@ -4,13 +4,9 @@
   "version": "0.1.0",
   "private": true,
   "author": {
-    "name": "João Paulo Moraes",
-    "email": "joaopaulomoraes@outlook.com",
-    "url": "https://github.com/joaopaulomoraes"
-  },
-  "bugs": {
-    "url": "https://github.com/joaopaulomoraes/reactjs-vite-tailwindcss-boilerplate/issues",
-    "email": "joaopaulomoraes@outlook.com"
+    "name": "Matthew Hackmann",
+    "email": "mhackmann13@icloud.com",
+    "url": "https://github.com/mhackmann18"
   },
   "scripts": {
     "dev": "vite",
