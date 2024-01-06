@@ -1,17 +1,16 @@
 import CustomerItem from './CustomerItem';
+import FilterButton from './FilterButton';
 
 function App() {
   return (
     <div className="relative overflow-hidden bg-white">
-      <div className="border-b py-4 pl-16 shadow-sm">
+      <div className="border-b py-3 pl-16 shadow-sm">
         <span className="mr-2 inline-block border-r pr-2 font-semibold">
           Filter By Status
         </span>
-        <button className="border-french_gray_2-400 text-slate_gray rounded-full border-2 px-3 py-1 font-medium">
-          Waiting
-        </button>
-        <button>No Show</button>
-        <button>Served</button>
+        <FilterButton status="Waiting" active={true} />
+        <FilterButton status="No Show" />
+        <FilterButton status="Served" />
       </div>
       <div className="mx-16 my-4 max-w-3xl">
         <div className="mb-1 flex justify-between text-sm font-semibold">
@@ -27,6 +26,15 @@ function App() {
         <ul>
           <li className="mb-1">
             <CustomerItem
+              status="Served"
+              name="John Doe"
+              checkInTime={new Date()}
+              callTime={new Date()}
+              onClick={() => console.log('dsf')}
+            />
+          </li>
+          <li className="mb-1">
+            <CustomerItem
               status="Serving"
               name="John Doe"
               checkInTime={new Date()}
@@ -36,7 +44,16 @@ function App() {
           </li>
           <li className="mb-1">
             <CustomerItem
-              status="Served"
+              status="Waiting"
+              name="John Doe"
+              checkInTime={new Date()}
+              callTime={new Date()}
+              onClick={() => console.log('dsf')}
+            />
+          </li>
+          <li className="mb-1">
+            <CustomerItem
+              status="Waiting"
               name="John Doe"
               checkInTime={new Date()}
               callTime={new Date()}

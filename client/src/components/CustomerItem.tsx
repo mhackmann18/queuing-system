@@ -1,7 +1,6 @@
 import { ReactEventHandler } from 'react';
 import { get12HourTimeString } from 'utils/helpers';
-
-type CustomerStatus = 'Waiting' | 'Serving' | 'Served' | 'No Show';
+import { CustomerStatus } from './types';
 
 interface CustomerItemComponent {
   status: CustomerStatus;
@@ -21,14 +20,14 @@ export default function CustomerItem({
   onClick
 }: CustomerItemComponent) {
   const containerStylesByStatus = {
-    Waiting: 'border-slate_gray outline-slate_gray',
+    Waiting: 'border-slate_gray-600 outline-slate_gray-600',
     Serving: 'border-green-500 outline-green-500',
     Served: 'border-french_gray_2 outline-french_gray_2',
     'No Show': 'border-french_gray_2 outline-french_gray_2'
   };
 
   const statusTextColors = {
-    Waiting: 'text-slate_gray',
+    Waiting: 'text-slate_gray-600',
     Serving: 'text-green-500',
     Served: 'text-french_gray_2',
     'No Show': 'text-french_gray_2'
@@ -43,7 +42,7 @@ export default function CustomerItem({
     >
       <div>
         <span
-          className={`inline-block w-20 font-medium ${statusTextColors[status]}`}
+          className={`inline-block w-20 font-semibold ${statusTextColors[status]}`}
         >
           {status}
         </span>
