@@ -1,16 +1,35 @@
 import CustomerItem from './CustomerItem';
 import FilterButton from './FilterButton';
 
+const fn = () => null;
+
 function App() {
   return (
     <div className="relative overflow-hidden bg-white">
+      <div className="flex justify-between border-b px-16 py-4">
+        <div>
+          <h1 className="text-2xl font-bold">Motor Vehicle Customers</h1>
+        </div>
+        <div>
+          <span>9:31 AM</span>
+          <div>MV1</div>
+        </div>
+      </div>
       <div className="border-b py-3 pl-16 shadow-sm">
         <span className="mr-2 inline-block border-r pr-2 font-semibold">
           Filter By Status
         </span>
-        <FilterButton status="Waiting" active={true} />
-        <FilterButton status="No Show" />
-        <FilterButton status="Served" />
+        <ul className="inline-block">
+          <li className="mr-2 inline-block">
+            <FilterButton status="Waiting" onClick={fn} active={true} />
+          </li>
+          <li className="mr-2 inline-block">
+            <FilterButton status="No Show" onClick={fn} />
+          </li>
+          <li className="mr-2 inline-block">
+            <FilterButton status="Served" onClick={fn} />
+          </li>
+        </ul>
       </div>
       <div className="mx-16 my-4 max-w-3xl">
         <div className="mb-1 flex justify-between text-sm font-semibold">

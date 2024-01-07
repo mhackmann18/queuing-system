@@ -42,7 +42,7 @@ export default function CustomerItem({
     >
       <div>
         <span
-          className={`inline-block w-20 font-semibold ${statusTextColors[status]}`}
+          className={`inline-block w-20 font-medium ${statusTextColors[status]}`}
         >
           {status}
         </span>
