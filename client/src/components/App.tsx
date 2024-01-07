@@ -1,7 +1,95 @@
 import CustomerItem from './CustomerItem';
 import FilterButton from './FilterButton';
+import { Customer } from './types';
 
-const fn = () => null;
+const fn = () => console.log('run dummy function');
+
+const customers: Customer[] = [
+  {
+    id: 101,
+    status: 'No Show',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 102,
+    status: 'Served',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 103,
+    status: 'Served',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 1,
+    status: 'Serving',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 2,
+    status: 'At MV1',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 21,
+    status: 'At MV2',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 22,
+    status: 'At MV3',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 23,
+    status: 'At MV4',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 25,
+    status: 'At DL1',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 24,
+    status: 'At DL2',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 3,
+    status: 'Waiting',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  },
+  {
+    id: 4,
+    status: 'Waiting',
+    name: 'John Doe',
+    checkInTime: new Date(),
+    callTime: new Date()
+  }
+];
 
 function App() {
   return (
@@ -21,17 +109,20 @@ function App() {
         </span>
         <ul className="inline-block">
           <li className="mr-2 inline-block">
-            <FilterButton status="Waiting" onClick={fn} active={true} />
+            <FilterButton text="Waiting" onClick={fn} active={true} />
           </li>
           <li className="mr-2 inline-block">
-            <FilterButton status="No Show" onClick={fn} />
+            <FilterButton text="No Show" onClick={fn} />
           </li>
           <li className="mr-2 inline-block">
-            <FilterButton status="Served" onClick={fn} />
+            <FilterButton text="Served" onClick={fn} />
+          </li>
+          <li className="mr-2 inline-block">
+            <FilterButton text="At Other Station" onClick={fn} />
           </li>
         </ul>
       </div>
-      <div className="mx-16 my-4 max-w-3xl">
+      <div className="mx-32 my-4">
         <div className="mb-1 flex justify-between text-sm font-semibold">
           <div>
             <span className="inline-block w-20 pl-2">Status</span>
@@ -42,55 +133,17 @@ function App() {
             <span className="inline-block w-24 pl-1">Time Called</span>
           </div>
         </div>
-        <ul>
-          <li className="mb-1">
-            <CustomerItem
-              status="Served"
-              name="John Doe"
-              checkInTime={new Date()}
-              callTime={new Date()}
-              onClick={() => console.log('dsf')}
-            />
-          </li>
-          <li className="mb-1">
-            <CustomerItem
-              status="Serving"
-              name="John Doe"
-              checkInTime={new Date()}
-              callTime={new Date()}
-              onClick={() => console.log('dsf')}
-            />
-          </li>
-          <li className="mb-1">
-            <CustomerItem
-              status="Waiting"
-              name="John Doe"
-              checkInTime={new Date()}
-              callTime={new Date()}
-              onClick={() => console.log('dsf')}
-            />
-          </li>
-          <li className="mb-1">
-            <CustomerItem
-              status="Waiting"
-              name="John Doe"
-              checkInTime={new Date()}
-              callTime={new Date()}
-              onClick={() => console.log('dsf')}
-            />
-          </li>
-          <li className="mb-1">
-            <CustomerItem
-              status="Waiting"
-              name="John Doe"
-              checkInTime={new Date()}
-              callTime={new Date()}
-              onClick={() => console.log('dsf')}
-            />
-          </li>
-        </ul>
+        <ul>{customers.map(getCustomerItems)}</ul>
       </div>
     </div>
+  );
+}
+
+function getCustomerItems(c: Customer) {
+  return (
+    <li key={c.id} className="mb-1">
+      <CustomerItem customer={c} onClick={fn} />
+    </li>
   );
 }
 

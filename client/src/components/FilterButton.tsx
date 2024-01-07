@@ -1,14 +1,13 @@
 import { ReactEventHandler } from 'react';
-import { CustomerStatus } from './types';
 
 interface FilterButtonComponent {
   active?: boolean;
   onClick: ReactEventHandler;
-  status: CustomerStatus;
+  text: string;
 }
 
 export default function FilterButton({
-  status,
+  text,
   onClick,
   active = false
 }: FilterButtonComponent) {
@@ -19,7 +18,7 @@ export default function FilterButton({
         active ? 'bg-french_gray_2-400 text-white' : 'text-slate_gray'
       }`}
     >
-      {status}
+      {text}
     </button>
   );
 }
