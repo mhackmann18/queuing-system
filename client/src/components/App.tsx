@@ -1,6 +1,7 @@
 import CustomerItem from './CustomerItem';
 import FilterButton from './FilterButton';
 import { Customer } from './types';
+import { useState } from 'react';
 
 const fn = () => console.log('run dummy function');
 
@@ -91,7 +92,67 @@ const customers: Customer[] = [
   }
 ];
 
+const customerActions = {
+  finishServing: {
+    title: 'Finish Serving',
+    fn: (customer: Customer) => console.log(`Finish serving ${customer.name}`)
+  },
+  callCustomer: {
+    title: 'Call Customer',
+    fn: (customer: Customer) => console.log(`Call ${customer.name}`)
+  },
+  markAsNoShow: {
+    title: 'Mark as No Show',
+    fn: (customer: Customer) => console.log(`Mark ${customer.name} as No Show`)
+  },
+  returnToWaitingList: {
+    title: 'Return to Waiting List',
+    fn: (customer: Customer) =>
+      console.log(`Return ${customer.name} to Waiting List`)
+  },
+  transferService: {
+    title: 'Transfer Service',
+    fn: (customer: Customer) =>
+      console.log(`Transfer service of ${customer.name}`)
+  }
+};
+
 function App() {
+  const [activeFilters, setActiveFilters] = useState({
+    Waiting: true,
+    'No Show': false,
+    Served: false
+  });
+
+  const toggleFilter = (filterName: string) => {
+    activeFilters[filterName] = !activeFilters[filterName];
+
+    setActiveFilters({ ...activeFilters });
+  };
+
+  function getCustomerItems(c: Customer) {
+    const quickActions = [];
+
+    if (c.status === 'Waiting') {
+      quickActions.push(customerActions.callCustomer);
+    }
+
+    if (c.status === 'Serving') {
+      quickActions.push(customerActions.finishServing);
+      quickActions.push(customerActions.returnToWaitingList);
+      quickActions.push(customerActions.markAsNoShow);
+    }
+
+    if (!activeFilters[c.status] && c.status !== 'Serving') {
+      return;
+    }
+    return (
+      <li key={c.id} className="mb-1">
+        <CustomerItem customer={c} quickActions={quickActions} onClick={fn} />
+      </li>
+    );
+  }
+
   return (
     <div className="relative overflow-hidden bg-white">
       <div className="flex justify-between border-b px-16 py-4">
@@ -109,16 +170,25 @@ function App() {
         </span>
         <ul className="inline-block">
           <li className="mr-2 inline-block">
-            <FilterButton text="Waiting" onClick={fn} active={true} />
+            <FilterButton
+              text="Waiting"
+              onClick={() => toggleFilter('Waiting')}
+              active={activeFilters.Waiting}
+            />
           </li>
           <li className="mr-2 inline-block">
-            <FilterButton text="No Show" onClick={fn} />
+            <FilterButton
+              text="No Show"
+              onClick={() => toggleFilter('No Show')}
+              active={activeFilters['No Show']}
+            />
           </li>
           <li className="mr-2 inline-block">
-            <FilterButton text="Served" onClick={fn} />
-          </li>
-          <li className="mr-2 inline-block">
-            <FilterButton text="At Other Station" onClick={fn} />
+            <FilterButton
+              text="Served"
+              onClick={() => toggleFilter('Served')}
+              active={activeFilters['Served']}
+            />
           </li>
         </ul>
       </div>
@@ -126,7 +196,8 @@ function App() {
         <div className="mb-1 flex justify-between text-sm font-semibold">
           <div>
             <span className="inline-block w-20 pl-2">Status</span>
-            <span className="inline-block pl-2">Customer Name</span>
+            <span className="inline-block w-52 pl-2">Customer Name</span>
+            <span className="inline-block pl-5">Quick Actions</span>
           </div>
           <div>
             <span className="inline-block w-32 pl-1">Check In Time</span>
@@ -136,14 +207,6 @@ function App() {
         <ul>{customers.map(getCustomerItems)}</ul>
       </div>
     </div>
-  );
-}
-
-function getCustomerItems(c: Customer) {
-  return (
-    <li key={c.id} className="mb-1">
-      <CustomerItem customer={c} onClick={fn} />
-    </li>
   );
 }
 
