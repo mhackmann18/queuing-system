@@ -14,10 +14,10 @@ export default function CustomerItem({
   onClick
 }: CustomerItemComponent) {
   const containerStyles = {
-    Waiting: `border-slate_gray-700 outline-slate_gray-700`,
-    Serving: 'border-green-500 outline-green-500',
-    Served: 'border-french_gray_2-700 outline-french_gray_2-700',
-    'No Show': 'border-french_gray_2-700 outline-french_gray_2-700',
+    Waiting: `border-waiting outline-waiting`,
+    Serving: 'border-serving outline-serving',
+    Served: 'border-served outline-served',
+    'No Show': 'border-no_show outline-no_show',
     'At MV1': 'border-mv1 outline-mv1',
     'At MV2': 'border-mv2 outline-mv2',
     'At MV3': 'border-mv3 outline-mv3',
@@ -27,10 +27,10 @@ export default function CustomerItem({
   };
 
   const statusTextStyles = {
-    Waiting: 'text-slate_gray-700',
-    Serving: 'text-green-500',
-    Served: 'text-french_gray_2-700',
-    'No Show': 'text-french_gray_2-700',
+    Waiting: 'text-waiting',
+    Serving: 'text-serving',
+    Served: 'text-served',
+    'No Show': 'text-no_show',
     'At MV1': 'text-mv1',
     'At MV2': 'text-mv2',
     'At MV3': 'text-mv3',
@@ -40,7 +40,7 @@ export default function CustomerItem({
   };
 
   return (
-    <div
+    <button
       onClick={onClick}
       className={`hover:bg-seasalt flex justify-between rounded-lg border-2 p-2 hover:cursor-pointer ${
         containerStyles[status]
@@ -66,6 +66,6 @@ export default function CustomerItem({
           {get12HourTimeString(callTime)}
         </span>
       </div>
-    </div>
+    </button>
   );
 }

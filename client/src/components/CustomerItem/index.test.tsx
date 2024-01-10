@@ -1,4 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import CustomerItem from '.';
 import { Customer } from 'components/types';
 import { get12HourTimeString } from 'utils/helpers';
@@ -15,21 +17,21 @@ const mockCustomer: Customer = {
   callTime: new Date('2023-01-01T10:30:00Z')
 };
 
-test('renders CustomerItem component', () => {
+test('renders customer data', () => {
   render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
 
   // Check if the rendered component matches the snapshot
   expect(screen.getByTestId('customer-item')).toMatchSnapshot();
 });
 
-test('handles click event', () => {
+test('onClick function prop is called on click', async () => {
   render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
 
   // Simulate a click event
-  fireEvent.click(screen.getByTestId('customer-item'));
+  userEvent.click(screen.getByRole('button'));
 
   // Check if the onClick function was called
-  expect(mockOnClick).toHaveBeenCalledTimes(1);
+  waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
 });
 
 test('displays customer information correctly', () => {
@@ -47,14 +49,36 @@ test('displays customer information correctly', () => {
 });
 
 test('applies styles based on customer status', () => {
-  render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
+  const waitingCustomer: Customer = {
+    status: 'Waiting',
+    name: 'John Doe',
+    callTime: new Date(),
+    checkInTime: new Date(),
+    id: 1
+  };
+
+  const { rerender } = render(
+    <CustomerItem customer={waitingCustomer} onClick={mockOnClick} />
+  );
 
   // Check if the correct styles are applied based on the customer status
-  expect(screen.getByTestId('customer-item')).toHaveClass(
-    'border-slate_gray-700'
-  );
-  expect(screen.getByTestId('customer-item')).toHaveClass(
-    'text-slate_gray-700'
-  );
-  // Add more assertions for other styles...
+  expect(screen.getByRole('button')).toHaveClass('border-waiting');
+  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-waiting');
+
+  waitingCustomer.status = 'Serving';
+  rerender(<CustomerItem customer={waitingCustomer} onClick={mockOnClick} />);
+  expect(screen.getByRole('button')).toHaveClass('border-serving');
+  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-serving');
+
+  waitingCustomer.status = 'Served';
+
+  rerender(<CustomerItem customer={waitingCustomer} onClick={mockOnClick} />);
+  expect(screen.getByRole('button')).toHaveClass('border-served');
+  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-served');
+
+  waitingCustomer.status = 'No Show';
+
+  rerender(<CustomerItem customer={waitingCustomer} onClick={mockOnClick} />);
+  expect(screen.getByRole('button')).toHaveClass('border-no_show');
+  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-no_show');
 });

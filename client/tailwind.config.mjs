@@ -11,6 +11,10 @@ export default {
         mv4: { DEFAULT: '#34a853' },
         dl1: { DEFAULT: '#ff6d01' },
         dl2: { DEFAULT: '#46bdc6' },
+        waiting: { DEFAULT: '#a7adb2' },
+        serving: { DEFAULT: '#53db00' },
+        served: { DEFAULT: '#ced3d8' },
+        no_show: { DEFAULT: '#ced3d8' },
         seasalt: {
           DEFAULT: '#f8f9fa',
           100: '#29323a',
