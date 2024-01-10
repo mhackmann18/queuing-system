@@ -1,4 +1,4 @@
-import CustomerItem from './CustomerItem';
+import CustomerRow from './CustomerRow';
 import FilterButton from './FilterButton';
 import { Customer } from './types';
 import { useState } from 'react';
@@ -148,7 +148,7 @@ function App() {
     }
     return (
       <li key={c.id} className="mb-1">
-        <CustomerItem customer={c} onClick={fn} />
+        <CustomerRow customer={c} onClick={fn} />
       </li>
     );
   }

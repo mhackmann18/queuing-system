@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import CustomerItem from '.';
+import CustomerRow from '.';
 import { Customer, CustomerStatus } from 'components/types';
 import { get12HourTimeString } from 'utils/helpers';
 
@@ -18,7 +18,7 @@ const mockCustomer: Customer = {
 };
 
 test('calls onClick when clicked', async () => {
-  render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
+  render(<CustomerRow customer={mockCustomer} onClick={mockOnClick} />);
 
   userEvent.click(screen.getByRole('button'));
 
@@ -26,7 +26,7 @@ test('calls onClick when clicked', async () => {
 });
 
 test('displays customer information', () => {
-  render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
+  render(<CustomerRow customer={mockCustomer} onClick={mockOnClick} />);
 
   // Check if the status, name, check in time, and time called are rendered correctly
   expect(screen.getByText(mockCustomer.status)).toBeInTheDocument();
@@ -41,7 +41,7 @@ test('displays customer information', () => {
 
 test('applies outline style when selected', () => {
   render(
-    <CustomerItem
+    <CustomerRow
       customer={mockCustomer}
       onClick={mockOnClick}
       selected={true}
@@ -66,7 +66,7 @@ describe.each([
       id: 1
     };
 
-    render(<CustomerItem customer={customer} onClick={mockOnClick} />);
+    render(<CustomerRow customer={customer} onClick={mockOnClick} />);
 
     const colorName = customerStatus.toLowerCase().split(' ').join('_');
 

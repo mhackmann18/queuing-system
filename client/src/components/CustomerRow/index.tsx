@@ -2,17 +2,17 @@ import { ReactEventHandler } from 'react';
 import { get12HourTimeString } from 'utils/helpers';
 import { Customer } from '../types';
 
-interface CustomerItemComponent {
+interface CustomerRowComponent {
   customer: Customer;
   selected?: boolean;
   onClick: ReactEventHandler;
 }
 
-export default function CustomerItem({
+export default function CustomerRow({
   customer: { status, name, checkInTime, callTime },
   selected = false,
   onClick
-}: CustomerItemComponent) {
+}: CustomerRowComponent) {
   const containerStyles = {
     Waiting: `border-waiting outline-waiting`,
     Serving: 'border-serving outline-serving',
