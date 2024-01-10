@@ -148,7 +148,7 @@ function App() {
     }
     return (
       <li key={c.id} className="mb-1">
-        <CustomerItem customer={c} quickActions={quickActions} onClick={fn} />
+        <CustomerItem customer={c} onClick={fn} />
       </li>
     );
   }

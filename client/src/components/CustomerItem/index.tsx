@@ -42,7 +42,7 @@ export default function CustomerItem({
   return (
     <button
       onClick={onClick}
-      className={`hover:bg-seasalt flex justify-between rounded-lg border-2 p-2 hover:cursor-pointer ${
+      className={`hover:bg-seasalt flex w-full justify-between rounded-lg border-2 p-2 text-left hover:cursor-pointer ${
         containerStyles[status]
       } ${selected ? 'bg-seasalt outline' : 'bg-transparent'}`}
     >

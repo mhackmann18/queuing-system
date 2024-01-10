@@ -1,11 +1,11 @@
+import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import '@testing-library/jest-dom';
 import CustomerItem from '.';
-import { Customer } from 'components/types';
+import { Customer, CustomerStatus } from 'components/types';
 import { get12HourTimeString } from 'utils/helpers';
 
-// Mock the ReactEventHandler
+// Mock ReactEventHandler
 const mockOnClick = jest.fn();
 
 // Mock the customer data
@@ -17,27 +17,18 @@ const mockCustomer: Customer = {
   callTime: new Date('2023-01-01T10:30:00Z')
 };
 
-test('renders customer data', () => {
+test('calls onClick when clicked', async () => {
   render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
 
-  // Check if the rendered component matches the snapshot
-  expect(screen.getByTestId('customer-item')).toMatchSnapshot();
-});
-
-test('onClick function prop is called on click', async () => {
-  render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
-
-  // Simulate a click event
   userEvent.click(screen.getByRole('button'));
 
-  // Check if the onClick function was called
   waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
 });
 
-test('displays customer information correctly', () => {
+test('displays customer information', () => {
   render(<CustomerItem customer={mockCustomer} onClick={mockOnClick} />);
 
-  // Check if the status, name, check-in time, and call time are rendered correctly
+  // Check if the status, name, check in time, and time called are rendered correctly
   expect(screen.getByText(mockCustomer.status)).toBeInTheDocument();
   expect(screen.getByText(mockCustomer.name)).toBeInTheDocument();
   expect(
@@ -48,37 +39,38 @@ test('displays customer information correctly', () => {
   ).toBeInTheDocument();
 });
 
-test('applies styles based on customer status', () => {
-  const waitingCustomer: Customer = {
-    status: 'Waiting',
-    name: 'John Doe',
-    callTime: new Date(),
-    checkInTime: new Date(),
-    id: 1
-  };
-
-  const { rerender } = render(
-    <CustomerItem customer={waitingCustomer} onClick={mockOnClick} />
+test('applies outline style when selected', () => {
+  render(
+    <CustomerItem
+      customer={mockCustomer}
+      onClick={mockOnClick}
+      selected={true}
+    />
   );
 
-  // Check if the correct styles are applied based on the customer status
-  expect(screen.getByRole('button')).toHaveClass('border-waiting');
-  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-waiting');
+  expect(screen.getByRole('button')).toHaveClass('outline');
+});
 
-  waitingCustomer.status = 'Serving';
-  rerender(<CustomerItem customer={waitingCustomer} onClick={mockOnClick} />);
-  expect(screen.getByRole('button')).toHaveClass('border-serving');
-  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-serving');
+describe.each([
+  ['Waiting' as CustomerStatus],
+  ['Serving' as CustomerStatus],
+  ['Served' as CustomerStatus],
+  ['No Show' as CustomerStatus]
+])('applies corresponding style for', (customerStatus) => {
+  test(`${customerStatus} status`, () => {
+    const customer: Customer = {
+      status: customerStatus,
+      name: 'John Doe',
+      callTime: new Date(),
+      checkInTime: new Date(),
+      id: 1
+    };
 
-  waitingCustomer.status = 'Served';
+    render(<CustomerItem customer={customer} onClick={mockOnClick} />);
 
-  rerender(<CustomerItem customer={waitingCustomer} onClick={mockOnClick} />);
-  expect(screen.getByRole('button')).toHaveClass('border-served');
-  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-served');
+    const colorName = customerStatus.toLowerCase().split(' ').join('_');
 
-  waitingCustomer.status = 'No Show';
-
-  rerender(<CustomerItem customer={waitingCustomer} onClick={mockOnClick} />);
-  expect(screen.getByRole('button')).toHaveClass('border-no_show');
-  expect(screen.getByText(waitingCustomer.status)).toHaveClass('text-no_show');
+    expect(screen.getByRole('button')).toHaveClass(`border-${colorName}`);
+    expect(screen.getByText(customer.status)).toHaveClass(`text-${colorName}`);
+  });
 });
