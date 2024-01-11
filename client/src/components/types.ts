@@ -23,5 +23,6 @@ export interface Customer {
   status: CustomerStatus;
   name: string;
   checkInTime: Date;
-  callTime: Date;
+  callTimes: Date[];
+  reasonsForVisit?: string[];
 }
