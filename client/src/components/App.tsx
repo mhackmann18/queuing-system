@@ -1,7 +1,7 @@
 import CustomerPanel from './CustomerPanel';
 import CustomerRow from './CustomerRow';
 import FilterButton from './FilterButton';
-import { Customer } from './types';
+import { Customer, CustomerAction } from './types';
 import { useState } from 'react';
 
 const fn = () => console.log('run dummy function');
@@ -93,168 +93,35 @@ const customers: Customer[] = [
     name: 'John Doe',
     checkInTime: new Date(),
     callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 4,
-    status: 'Waiting',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
   }
 ];
 
 const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
-const customerActions = {
-  finishServing: {
+const customerActions: CustomerAction[] = [
+  {
     title: 'Finish Serving',
     fn: (customer: Customer) => console.log(`Finish serving ${customer.name}`)
   },
-  callCustomer: {
+  {
     title: 'Call Customer',
     fn: (customer: Customer) => console.log(`Call ${customer.name}`)
   },
-  markAsNoShow: {
+  {
     title: 'Mark as No Show',
     fn: (customer: Customer) => console.log(`Mark ${customer.name} as No Show`)
   },
-  returnToWaitingList: {
+  {
     title: 'Return to Waiting List',
     fn: (customer: Customer) =>
       console.log(`Return ${customer.name} to Waiting List`)
   },
-  transferService: {
+  {
     title: 'Transfer Service',
     fn: (customer: Customer) =>
       console.log(`Transfer service of ${customer.name}`)
   }
-};
+];
 
 function App() {
   const [activeFilters, setActiveFilters] = useState({
@@ -270,31 +137,23 @@ function App() {
   };
 
   function getCustomerItems(c: Customer) {
-    const quickActions = [];
-
-    if (c.status === 'Waiting') {
-      quickActions.push(customerActions.callCustomer);
-    }
-
-    if (c.status === 'Serving') {
-      quickActions.push(customerActions.finishServing);
-      quickActions.push(customerActions.returnToWaitingList);
-      quickActions.push(customerActions.markAsNoShow);
-    }
-
     if (!activeFilters[c.status] && c.status !== 'Serving') {
       return;
     }
     return (
       <li key={c.id} className="mb-1">
-        <CustomerRow customer={c} onClick={fn} />
+        <CustomerRow
+          customer={c}
+          onClick={fn}
+          selected={Boolean(c.id === selectedCustomerId)}
+        />
       </li>
     );
   }
 
   return (
-    <div className="relative h-lvh overflow-hidden bg-white">
-      <header className="fixed inset-x-0 top-0 bg-white">
+    <div className="h-screen bg-white">
+      <header className="h-28">
         {/* Header Row 1 */}
         <div className="border-b">
           <div className="mx-auto flex max-w-5xl justify-between">
@@ -339,24 +198,31 @@ function App() {
           </div>
         </div>
       </header>
-      <div className="relative mx-auto mt-32 flex h-full max-w-5xl justify-between">
-        <div className="w-2/3">
-          <div className="mb-1 flex justify-between text-sm font-semibold">
+      <div className="mx-auto flex h-[calc(100%-7rem)] max-w-5xl justify-between pt-4">
+        {/* Customer List */}
+        <div className="mr-4 flex grow flex-col">
+          <div className="mb-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
             <div>
-              <span className="inline-block w-20 pl-2">Status</span>
-              <span className="inline-block w-52 pl-2">Customer Name</span>
+              <span className="inline-block w-20">Status</span>
+              <span className="inline-block w-52 pl-1">Customer Name</span>
             </div>
             <div>
-              <span className="inline-block w-32 pl-1">Check In Time</span>
-              <span className="inline-block w-24 pl-1">Time Called</span>
+              <span className="inline-block w-32">Check In Time</span>
+              <span className="inline-block w-24">Time Called</span>
             </div>
           </div>
-          <ul className="h-full overflow-scroll">
+          <ul className="grow overflow-y-scroll border p-2">
             {customers.map(getCustomerItems)}
           </ul>
         </div>
-        <div className="absolute right-0 bg-white">
-          {selectedCustomer && <CustomerPanel customer={selectedCustomer} />}
+        {/* Customer Panel */}
+        <div>
+          {selectedCustomer && (
+            <CustomerPanel
+              customer={selectedCustomer}
+              customerActions={customerActions}
+            />
+          )}
         </div>
       </div>
     </div>

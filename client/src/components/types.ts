@@ -1,7 +1,7 @@
 export type Station = 'MV1' | 'MV2' | 'MV3' | 'MV4' | 'DL1' | 'DL2';
 
 export interface CustomerAction {
-  text: string;
+  title: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: any;
 }
