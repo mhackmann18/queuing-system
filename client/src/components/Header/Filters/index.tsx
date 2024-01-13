@@ -1,4 +1,4 @@
-import FilterButton from 'components/FilterButton';
+import FilterButton from 'components/Header/Filters/FilterButton';
 import { Filter } from 'components/types';
 
 interface FiltersComponentProps {

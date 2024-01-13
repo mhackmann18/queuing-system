@@ -37,6 +37,7 @@ const customerActions: CustomerAction[] = [
 const selectedCustomerId = 1;
 const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 const station: Station = 'MV1';
+const department = 'Motor Vehicle';
 
 function App() {
   const [activeFilters, setActiveFilters] = useState({
@@ -71,7 +72,7 @@ function App() {
         <div className="border-b">
           <div className="mx-auto flex h-16 max-w-5xl justify-between">
             <h1 className="mr-4 flex items-center text-2xl font-bold">
-              Customers
+              {department} Customers
             </h1>
             <div className="flex items-center">
               {/* Show DateToggler if current page is customers */}
