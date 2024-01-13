@@ -11,12 +11,9 @@ export type CustomerStatus =
   | 'Serving'
   | 'Served'
   | 'No Show'
-  | 'At MV1'
-  | 'At MV2'
-  | 'At MV3'
-  | 'At MV4'
-  | 'At DL1'
-  | 'At DL2';
+  | `At ${Station}`;
+
+export type Filter = 'Waiting' | 'Served' | 'No Show';
 
 export interface Customer {
   id: number;

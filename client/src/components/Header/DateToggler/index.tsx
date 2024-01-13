@@ -1,36 +1,28 @@
 import { FaChevronRight, FaChevronLeft } from 'react-icons/fa6';
-// import { CiCalendar } from 'react-icons/ci';
 import { useState } from 'react';
+import { MdCalendarToday } from 'react-icons/md';
 
-interface DateTogglerProps {
+interface DateTogglerComponentProps {
   date: Date;
 }
 
-export default function DateToggler({ date }: DateTogglerProps) {
+export default function DateToggler({ date }: DateTogglerComponentProps) {
   const [dated, setDated] = useState(date);
-  const weekday = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
-  ];
+  const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thurs', 'Fri', 'Sat'];
 
   const month = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Mar',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
   ];
 
   function sameDay(d1: Date, d2: Date) {
@@ -54,28 +46,32 @@ export default function DateToggler({ date }: DateTogglerProps) {
   console.log('rerender');
 
   return (
-    <div className="flex align-middle">
+    <div className="text-outer_space flex align-middle">
       <button
         onClick={() => {
           dated.setDate(dated.getDate() - 1);
           setDated(new Date(dated));
         }}
+        className="text-outer_space"
       >
         <FaChevronLeft />
       </button>
-      <span className="mx-2 flex items-center">{getDateString()}</span>
+      <span className="text-slate_gray-500 mx-2 flex min-w-32 items-center justify-center text-lg font-medium">
+        {getDateString()}
+      </span>
       <button
         onClick={() => {
           dated.setDate(dated.getDate() + 1);
           setDated(new Date(dated));
         }}
+        className="text-outer_space"
       >
         <FaChevronRight />
       </button>
       {/* TODO */}
-      {/* <button>
-        <CiCalendar size={28} />
-      </button> */}
+      <button className="text-outer_space ml-4">
+        <MdCalendarToday size={22} />
+      </button>
     </div>
   );
 }
