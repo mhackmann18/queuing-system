@@ -14,4 +14,41 @@ const get12HourTimeString = (date: Date) => {
   return dateString;
 };
 
-export { get12HourTimeString };
+/******************** DATES ********************/
+
+const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thurs', 'Fri', 'Sat'];
+
+const month = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mar',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec'
+];
+
+const sameDay = (d1: Date, d2: Date) => {
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+};
+
+const getDateString = (date: Date): string => {
+  if (sameDay(date, new Date())) {
+    return 'Today';
+  }
+
+  return `${weekday[date.getDay()]}, ${
+    month[date.getMonth()]
+  } ${date.getDate()}`;
+};
+
+export { get12HourTimeString, sameDay, getDateString };

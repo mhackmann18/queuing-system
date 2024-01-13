@@ -92,7 +92,10 @@ function App() {
               activeFilters={activeFilters}
               toggleFilter={toggleFilter}
             />
-            <DateToggler date={new Date()} />
+            <DateToggler
+              date={new Date()}
+              setDate={(date: Date) => console.log(date)}
+            />
           </div>
         </div>
       </header>
