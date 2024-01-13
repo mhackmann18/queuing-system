@@ -7,18 +7,17 @@ import customers from './customers';
 import { Customer, CustomerAction, Filter, Station } from './types';
 import { useState } from 'react';
 
-const fn = () => console.log('run dummy function');
 const customerActions: CustomerAction[] = [
   {
     title: 'Finish Serving',
     fn: (customer: Customer) => console.log(`Finish serving ${customer.name}`)
   },
   {
-    title: 'Call Customer',
+    title: 'Call',
     fn: (customer: Customer) => console.log(`Call ${customer.name}`)
   },
   {
-    title: 'Mark as No Show',
+    title: 'No Show',
     fn: (customer: Customer) => console.log(`Mark ${customer.name} as No Show`)
   },
   {
@@ -27,15 +26,18 @@ const customerActions: CustomerAction[] = [
       console.log(`Return ${customer.name} to Waiting List`)
   },
   {
-    title: 'Transfer Service',
+    title: 'Delete',
     fn: (customer: Customer) =>
-      console.log(`Transfer service of ${customer.name}`)
+      console.log(`Delete customer with id ${customer.id}`)
   }
+  // { TODO
+  //   title: 'Transfer Service',
+  //   fn: (customer: Customer) =>
+  //     console.log(`Transfer service of ${customer.name}`)
+  // }
 ];
 
 // Stand-in state
-const selectedCustomerId = 1;
-const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 const station: Station = 'MV1';
 const department = 'Motor Vehicle';
 
@@ -45,6 +47,8 @@ function App() {
     'No Show': false,
     Served: false
   });
+  const [selectedCustomerId, setSelectedCustomerId] = useState(1);
+  const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
   const toggleFilter = (filter: Filter) => {
     activeFilters[filter] = !activeFilters[filter];
@@ -57,7 +61,7 @@ function App() {
         <li key={c.id} className="mb-1">
           <CustomerRow
             customer={c}
-            onClick={fn}
+            onClick={(customer) => setSelectedCustomerId(customer.id)}
             selected={Boolean(c.id === selectedCustomerId)}
           />
         </li>

@@ -1,18 +1,19 @@
-import { ReactEventHandler } from 'react';
 import { get12HourTimeString } from 'utils/helpers';
 import { Customer } from '../types';
 
 interface CustomerRowProps {
   customer: Customer;
   selected?: boolean;
-  onClick: ReactEventHandler;
+  onClick: (customer: Customer) => void;
 }
 
 export default function CustomerRow({
-  customer: { status, name, checkInTime, callTimes },
+  customer,
   selected = false,
   onClick
 }: CustomerRowProps) {
+  const { status, name, checkInTime, callTimes } = customer;
+
   const containerStyles = {
     Waiting: `border-waiting outline-waiting`,
     Serving: 'border-serving outline-serving',
@@ -42,7 +43,7 @@ export default function CustomerRow({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => onClick(customer)}
       className={`hover:bg-seasalt flex w-full justify-between rounded-lg border-2 p-2 text-left hover:cursor-pointer ${
         containerStyles[status]
       } ${selected ? 'bg-seasalt outline' : 'bg-transparent'}`}

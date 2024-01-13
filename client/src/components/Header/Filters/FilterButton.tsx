@@ -14,8 +14,12 @@ export default function FilterButton({
   return (
     <button
       onClick={onClick}
-      className={`border-french_gray_2-400 rounded-full border px-3 py-1 font-medium ${
-        active ? 'bg-french_gray_2-400 text-white' : 'text-slate_gray'
+      type="button"
+      className={`rounded-full border px-3 py-1 font-medium ${
+        active
+          ? `bg-french_gray_2-400 border-french_gray_2-400 hover:bg-french_gray_2-300 
+          hover:border-french_gray_2-300 text-white`
+          : 'text-slate_gray border-french_gray_1-500 hover:bg-platinum-800 hover:border-slate_gray'
       }`}
     >
       {text}
