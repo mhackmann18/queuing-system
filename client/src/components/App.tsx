@@ -1,12 +1,15 @@
 import CustomerPanel from './CustomerPanel';
 import CustomerRow from './CustomerRow';
+import DateToggler from './Header/DateToggler';
 import FilterButton from './FilterButton';
-import { Customer, CustomerAction } from './types';
+import StationIcon from './Header/StationIcon';
+import { Customer, CustomerAction, Station } from './types';
 import { useState } from 'react';
 
 const fn = () => console.log('run dummy function');
 
 const selectedCustomerId = 1;
+const station: Station = 'MV1';
 
 const customers: Customer[] = [
   {
@@ -156,22 +159,40 @@ function App() {
       <header className="h-28">
         {/* Header Row 1 */}
         <div className="border-b">
-          <div className="mx-auto flex max-w-5xl justify-between">
-            <div>
+          <div className="mx-auto flex h-16 max-w-5xl justify-between">
+            <div className="flex">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="20"
+                height="20"
+                viewBox="0 0 50 50"
+              >
+                <path d="M 5 8 A 2.0002 2.0002 0 1 0 5 12 L 45 12 A 2.0002 2.0002 0 1 0 45 8 L 5 8 z M 5 23 A 2.0002 2.0002 0 1 0 5 27 L 45 27 A 2.0002 2.0002 0 1 0 45 23 L 5 23 z M 5 38 A 2.0002 2.0002 0 1 0 5 42 L 45 42 A 2.0002 2.0002 0 1 0 45 38 L 5 38 z"></path>
+              </svg>
               <h1 className="text-2xl font-bold">Motor Vehicle Customers</h1>
             </div>
-            <div>
+            <div className="flex items-center">
+              {/* Show DateToggler if current page is customers */}
+              <DateToggler date={new Date()} />
               <span>9:31 AM</span>
-              <div>MV1</div>
+              <StationIcon
+                onClick={() => {
+                  console.log('station icon clicked');
+                }}
+                station={station}
+              />
             </div>
           </div>
         </div>
         {/* Header Row 2 */}
         <div className="border-b shadow-sm">
-          <div className="mx-auto max-w-5xl py-3">
+          <div className="mx-auto max-w-5xl py-3 ">
             <span className="mr-2 inline-block border-r pr-2 font-semibold">
-              Filter By Status
+              Filters
             </span>
+            {/* Filters */}
             <ul className="inline-block">
               <li className="mr-2 inline-block">
                 <FilterButton
@@ -190,6 +211,13 @@ function App() {
               <li className="mr-2 inline-block">
                 <FilterButton
                   text="Served"
+                  onClick={() => toggleFilter('Served')}
+                  active={activeFilters['Served']}
+                />
+              </li>
+              <li className="mr-2 inline-block">
+                <FilterButton
+                  text="Reason for Visit"
                   onClick={() => toggleFilter('Served')}
                   active={activeFilters['Served']}
                 />
