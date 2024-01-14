@@ -4,38 +4,80 @@ import DateToggler from './Header/DateToggler';
 import Filters from './Header/Filters';
 import StationIcon from './Header/StationIcon';
 import customers from './customers';
-import { Customer, CustomerAction, Filter, Station } from './types';
+import {
+  Customer,
+  CustomerAction,
+  CustomerStatus,
+  Filter,
+  Station
+} from './types';
 import { useState } from 'react';
 
-const customerActions: CustomerAction[] = [
-  {
-    title: 'Finish Serving',
-    fn: (customer: Customer) => console.log(`Finish serving ${customer.name}`)
-  },
-  {
-    title: 'Call',
-    fn: (customer: Customer) => console.log(`Call ${customer.name}`)
-  },
-  {
-    title: 'No Show',
-    fn: (customer: Customer) => console.log(`Mark ${customer.name} as No Show`)
-  },
-  {
-    title: 'Return to Waiting List',
-    fn: (customer: Customer) =>
-      console.log(`Return ${customer.name} to Waiting List`)
-  },
-  {
-    title: 'Delete',
-    fn: (customer: Customer) =>
-      console.log(`Delete customer with id ${customer.id}`)
-  }
-  // { TODO
-  //   title: 'Transfer Service',
-  //   fn: (customer: Customer) =>
-  //     console.log(`Transfer service of ${customer.name}`)
-  // }
-];
+// TODO: Add 'transfer service action'
+const actionsByStatus: Record<CustomerStatus, CustomerAction[]> = {
+  Waiting: [
+    {
+      title: 'Call to Station',
+      fn: (customer: Customer) => console.log(`Call ${customer.name}`)
+    },
+    {
+      title: 'Delete',
+      fn: (customer: Customer) =>
+        console.log(`Delete customer with id ${customer.id}`)
+    }
+  ],
+  Serving: [
+    {
+      title: 'Finish Serving',
+      fn: (customer: Customer) => console.log(`Finish serving ${customer.name}`)
+    },
+    {
+      title: 'Mark No Show',
+      fn: (customer: Customer) =>
+        console.log(`Mark ${customer.name} as No Show`)
+    },
+    {
+      title: 'Return to Waiting List',
+      fn: (customer: Customer) =>
+        console.log(`Return ${customer.name} to Waiting List`)
+    },
+    {
+      title: 'Delete',
+      fn: (customer: Customer) =>
+        console.log(`Delete customer with id ${customer.id}`)
+    }
+  ],
+  Served: [
+    {
+      title: 'Return to Waiting List',
+      fn: (customer: Customer) =>
+        console.log(`Return ${customer.name} to Waiting List`)
+    },
+    {
+      title: 'Delete',
+      fn: (customer: Customer) =>
+        console.log(`Delete customer with id ${customer.id}`)
+    }
+  ],
+  'No Show': [
+    {
+      title: 'Return to Waiting List',
+      fn: (customer: Customer) =>
+        console.log(`Return ${customer.name} to Waiting List`)
+    },
+    {
+      title: 'Delete',
+      fn: (customer: Customer) =>
+        console.log(`Delete customer with id ${customer.id}`)
+    }
+  ],
+  'At MV1': [],
+  'At MV2': [],
+  'At MV3': [],
+  'At MV4': [],
+  'At DL1': [],
+  'At DL2': []
+};
 
 // Stand-in state
 const station: Station = 'MV1';
@@ -125,7 +167,7 @@ function App() {
           {selectedCustomer && (
             <CustomerPanel
               customer={selectedCustomer}
-              customerActions={customerActions}
+              customerActions={actionsByStatus[selectedCustomer.status]}
             />
           )}
         </div>

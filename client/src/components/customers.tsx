@@ -6,7 +6,7 @@ const customers: Customer[] = [
     status: 'No Show',
     name: 'John Doe',
     checkInTime: new Date(),
-    callTimes: [new Date()]
+    callTimes: [new Date(), new Date(), new Date()]
   },
   {
     id: 102,
