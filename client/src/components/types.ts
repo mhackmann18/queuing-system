@@ -21,5 +21,5 @@ export interface Customer {
   name: string;
   checkInTime: Date;
   callTimes: Date[];
-  reasonsForVisit?: string[];
+  reasonsForVisit: string[];
 }

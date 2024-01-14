@@ -4,22 +4,25 @@ const customers: Customer[] = [
   {
     id: 101,
     status: 'No Show',
-    name: 'John Doe',
+    name: 'Christopher Pratt',
     checkInTime: new Date(),
+    reasonsForVisit: ['Motor Vehicle'],
     callTimes: [new Date(), new Date(), new Date()]
   },
   {
     id: 102,
     status: 'Served',
-    name: 'John Doe',
+    name: 'Robert Downey Jr.',
     checkInTime: new Date(),
+    reasonsForVisit: ['Motor Vehicle'],
     callTimes: [new Date()]
   },
   {
     id: 103,
     status: 'Served',
-    name: 'John Doe',
+    name: 'Christopher Evans',
     checkInTime: new Date(),
+    reasonsForVisit: ['Motor Vehicle'],
     callTimes: [new Date()]
   },
   {
@@ -30,60 +33,72 @@ const customers: Customer[] = [
     callTimes: [new Date()],
     reasonsForVisit: ['Motor Vehicle', "Driver's License"]
   },
-  {
-    id: 2,
-    status: 'At MV1',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 21,
-    status: 'At MV2',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 22,
-    status: 'At MV3',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 23,
-    status: 'At MV4',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 25,
-    status: 'At DL1',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
-  {
-    id: 24,
-    status: 'At DL2',
-    name: 'John Doe',
-    checkInTime: new Date(),
-    callTimes: [new Date()]
-  },
+  // {
+  //   id: 2,
+  //   status: 'At MV1',
+  //   name: 'John Doe',
+  //   checkInTime: new Date(),
+  //   reasonsForVisit: ['Motor Vehicle'],
+
+  //   callTimes: [new Date()]
+  // },
+  // {
+  //   id: 21,
+  //   status: 'At MV2',
+  //   name: 'John Doe',
+  //   checkInTime: new Date(),
+  //   reasonsForVisit: ['Motor Vehicle'],
+
+  //   callTimes: [new Date()]
+  // },
+  // {
+  //   id: 22,
+  //   status: 'At MV3',
+  //   name: 'John Doe',
+  //   checkInTime: new Date(),
+  //   reasonsForVisit: ['Motor Vehicle'],
+
+  //   callTimes: [new Date()]
+  // },
+  // {
+  //   id: 23,
+  //   status: 'At MV4',
+  //   name: 'John Doe',
+  //   checkInTime: new Date(),
+  //   reasonsForVisit: ['Motor Vehicle'],
+
+  //   callTimes: [new Date()]
+  // },
+  // {
+  //   id: 25,
+  //   status: 'At DL1',
+  //   name: 'John Doe',
+  //   checkInTime: new Date(),
+  //   reasonsForVisit: ['Motor Vehicle'],
+
+  //   callTimes: [new Date()]
+  // },
+  // {
+  //   id: 24,
+  //   status: 'At DL2',
+  //   name: 'John Doe',
+  //   checkInTime: new Date(),
+  //   callTimes: [new Date()]
+  // },
   {
     id: 3,
     status: 'Waiting',
-    name: 'John Doe',
+    name: 'Jeremy Renner',
     checkInTime: new Date(),
+    reasonsForVisit: ['Motor Vehicle'],
     callTimes: [new Date()]
   },
   {
     id: 4,
     status: 'Waiting',
-    name: 'John Doe',
+    name: 'Scarlett Johansson',
     checkInTime: new Date(),
+    reasonsForVisit: ['Motor Vehicle'],
     callTimes: [new Date()]
   }
 ];

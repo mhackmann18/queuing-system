@@ -37,46 +37,44 @@ export default function CustomerPanel({
     ));
 
   return (
-    <div className="w-80 rounded-lg border px-8  py-4">
+    <div className="border-french_gray_1 w-80 rounded-lg border px-8 py-4 shadow-md">
       <p className="text-french_gray_1-500">Selected</p>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">{name}</h2>
+      <div className="mb-4 flex items-start justify-between border-b pb-1.5">
+        <h2 className="max-w-36 text-xl font-bold">{name}</h2>
         <span
-          className={`rounded-md border-2 px-1 py-0.5 text-xs font-semibold ${statusStyles[status]}`}
+          className={`mt-1 rounded-md border-2 px-1 py-0.5 text-xs font-semibold ${statusStyles[status]}`}
         >
           {status}
         </span>
       </div>
 
-      <h3 className="mt-2">Actions</h3>
+      <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
       <div className="mb-4">{getCustomerActionButtons()}</div>
 
-      <h4 className="text-french_gray_2-600 mt-2 text-sm font-medium">
+      <h4 className="text-french_gray_1-500 mt-2 text-sm font-medium">
         Check In Time
       </h4>
-      <p className="text-lg">{get12HourTimeString(checkInTime)}</p>
+      <p className="">{get12HourTimeString(checkInTime)}</p>
 
-      <h4 className="text-french_gray_2-600 mt-2 text-sm font-medium">
+      <h4 className="text-french_gray_1-500 mt-2 text-sm font-medium">
         Times Called
       </h4>
       <ul>
         {callTimes.length ? (
           callTimes.map((c) => (
-            <li className="text-lg" key={c.toUTCString()}>
+            <li className="" key={c.toUTCString()}>
               {get12HourTimeString(c)}
             </li>
           ))
         ) : (
-          <li className="text-french_gray_2-600 text-sm font-medium">--</li>
+          <li className="text-french_gray_1-500 text-sm font-medium">--</li>
         )}
       </ul>
 
-      <h4 className="text-french_gray_2-600 mt-2 text-sm font-medium">
+      <h4 className="text-french_gray_1-500 mt-2 text-sm font-medium">
         Reasons for Visit
       </h4>
-      <p className="text-lg">
-        {reasonsForVisit ? reasonsForVisit?.join(', ') : '--'}
-      </p>
+      <p className="">{reasonsForVisit ? reasonsForVisit?.join(', ') : '--'}</p>
     </div>
   );
 }
