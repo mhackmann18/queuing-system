@@ -3,7 +3,7 @@ import CustomerRow from './CustomerRow';
 import DateToggler from './Header/DateToggler';
 import Filters from './Header/Filters';
 import StationIcon from './Header/StationIcon';
-import customers from './customers';
+import CustomerController from './CustomerController';
 import {
   Customer,
   CustomerAction,
@@ -11,73 +11,8 @@ import {
   Filter,
   Station
 } from './types';
-import { useState } from 'react';
-
-// TODO: Add 'transfer service action'
-const actionsByStatus: Record<CustomerStatus, CustomerAction[]> = {
-  Waiting: [
-    {
-      title: 'Call to Station',
-      fn: (customer: Customer) => console.log(`Call ${customer.name}`)
-    },
-    {
-      title: 'Delete',
-      fn: (customer: Customer) =>
-        console.log(`Delete customer with id ${customer.id}`)
-    }
-  ],
-  Serving: [
-    {
-      title: 'Finish Serving',
-      fn: (customer: Customer) => console.log(`Finish serving ${customer.name}`)
-    },
-    {
-      title: 'Mark No Show',
-      fn: (customer: Customer) =>
-        console.log(`Mark ${customer.name} as No Show`)
-    },
-    {
-      title: 'Return to Waiting List',
-      fn: (customer: Customer) =>
-        console.log(`Return ${customer.name} to Waiting List`)
-    },
-    {
-      title: 'Delete',
-      fn: (customer: Customer) =>
-        console.log(`Delete customer with id ${customer.id}`)
-    }
-  ],
-  Served: [
-    {
-      title: 'Return to Waiting List',
-      fn: (customer: Customer) =>
-        console.log(`Return ${customer.name} to Waiting List`)
-    },
-    {
-      title: 'Delete',
-      fn: (customer: Customer) =>
-        console.log(`Delete customer with id ${customer.id}`)
-    }
-  ],
-  'No Show': [
-    {
-      title: 'Return to Waiting List',
-      fn: (customer: Customer) =>
-        console.log(`Return ${customer.name} to Waiting List`)
-    },
-    {
-      title: 'Delete',
-      fn: (customer: Customer) =>
-        console.log(`Delete customer with id ${customer.id}`)
-    }
-  ],
-  'At MV1': [],
-  'At MV2': [],
-  'At MV3': [],
-  'At MV4': [],
-  'At DL1': [],
-  'At DL2': []
-};
+import { useEffect, useState } from 'react';
+import ConfirmAction from './ConfirmAction';
 
 // Stand-in state
 const station: Station = 'MV1';
@@ -90,12 +25,109 @@ function App() {
     Served: false
   });
   const [selectedCustomerId, setSelectedCustomerId] = useState(1);
-  const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [date, setDate] = useState(new Date());
+  const selectedCustomer =
+    customers.length && customers.find((c) => c.id === selectedCustomerId);
 
   const toggleFilter = (filter: Filter) => {
     activeFilters[filter] = !activeFilters[filter];
     setActiveFilters({ ...activeFilters });
   };
+
+  // TODO: Add 'transfer service action'
+  const actionsByStatus: Record<CustomerStatus, CustomerAction[]> = {
+    Waiting: [
+      {
+        title: 'Call to Station',
+        fn: (customer: Customer) => console.log(`Call ${customer.name}`)
+      },
+      {
+        title: 'Delete',
+        ConfirmationComponent: ({ onCancel, onConfirm }) => (
+          <ConfirmAction
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+            title="Delete Customer?"
+            message="This action cannot be undone."
+            confirmBtnStyles="bg-red-500 text-white"
+          />
+        ),
+        fn: async (customer: Customer) => {
+          const res = await CustomerController.deleteOne(customer);
+
+          if (!res.error) {
+            setCustomers(res.data);
+          }
+        }
+      }
+    ],
+    Serving: [
+      {
+        title: 'Finish Serving',
+        fn: (customer: Customer) =>
+          console.log(`Finish serving ${customer.name}`)
+      },
+      {
+        title: 'Mark No Show',
+        fn: (customer: Customer) =>
+          console.log(`Mark ${customer.name} as No Show`)
+      },
+      {
+        title: 'Return to Waiting List',
+        fn: (customer: Customer) =>
+          console.log(`Return ${customer.name} to Waiting List`)
+      },
+      {
+        title: 'Delete',
+        fn: (customer: Customer) =>
+          console.log(`Delete customer with id ${customer.id}`)
+      }
+    ],
+    Served: [
+      {
+        title: 'Return to Waiting List',
+        fn: (customer: Customer) =>
+          console.log(`Return ${customer.name} to Waiting List`)
+      },
+      {
+        title: 'Delete',
+        fn: (customer: Customer) =>
+          console.log(`Delete customer with id ${customer.id}`)
+      }
+    ],
+    'No Show': [
+      {
+        title: 'Return to Waiting List',
+        fn: (customer: Customer) =>
+          console.log(`Return ${customer.name} to Waiting List`)
+      },
+      {
+        title: 'Delete',
+        fn: (customer: Customer) =>
+          console.log(`Delete customer with id ${customer.id}`)
+      }
+    ],
+    'At MV1': [],
+    'At MV2': [],
+    'At MV3': [],
+    'At MV4': [],
+    'At DL1': [],
+    'At DL2': []
+  };
+
+  useEffect(() => {
+    const loadCustomers = async () => {
+      const { error, data } = await CustomerController.getCustomers({ date });
+      if (!error) {
+        setCustomers(data);
+      } else {
+        // setError(res.error)
+      }
+    };
+
+    loadCustomers();
+  }, [date]);
 
   function getCustomerItems(c: Customer) {
     if (c.status === 'Serving' || activeFilters[c.status]) {
@@ -139,15 +171,15 @@ function App() {
               toggleFilter={toggleFilter}
             />
             <DateToggler
-              date={new Date()}
-              setDate={(date: Date) => console.log(date)}
+              date={date}
+              setDate={(newDate: Date) => setDate(newDate)}
             />
           </div>
         </div>
       </header>
       <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
         {/* Customer List */}
-        <div className="mr-4 flex grow flex-col">
+        <div className="flex grow flex-col">
           <div className="mb-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
             <div>
               <span className="inline-block w-20">Status</span>
@@ -163,14 +195,14 @@ function App() {
           </ul>
         </div>
         {/* Customer Panel */}
-        <div>
-          {selectedCustomer && (
+        {selectedCustomer && (
+          <div className="ml-4">
             <CustomerPanel
               customer={selectedCustomer}
               customerActions={actionsByStatus[selectedCustomer.status]}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

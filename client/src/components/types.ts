@@ -1,7 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ReactElement } from 'react';
+
 export type Station = 'MV1' | 'MV2' | 'MV3' | 'MV4' | 'DL1' | 'DL2';
 
 export interface CustomerAction {
   title: string;
+  ConfirmationComponent?: ({
+    onCancel,
+    onConfirm
+  }: {
+    onCancel: any;
+    onConfirm: any;
+  }) => ReactElement;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: any;
 }
