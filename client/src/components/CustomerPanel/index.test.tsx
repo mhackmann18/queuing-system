@@ -42,3 +42,33 @@ test('displays customer information', () => {
     screen.getByText(mockCustomer.reasonsForVisit![1])
   ).toBeInTheDocument();
 });
+
+// ALL STATUSES
+
+test(
+  "renders confirmation messages and buttons when 'Delete' button is clicked"
+);
+
+test(
+  "CustomerController.deleteOne runs when 'Delete' confirmation button is clicked"
+);
+
+// WAITING
+
+test("displays 'Delete' and 'Call Customer' buttons");
+
+test("makes api update request when 'Call to Station' button is clicked");
+
+test(
+  "changes status to 'Serving' after 'Call to Station' is clicked and api request returns data"
+);
+
+test("shows error when 'Call to Station' api request returns error");
+
+// Serving
+
+test(
+  "displays 'Finish Serving', 'Mark No Show', 'Return to Waiting List', and 'Delete' buttons"
+);
+
+test('');

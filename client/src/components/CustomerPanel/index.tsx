@@ -22,36 +22,40 @@ export default function CustomerPanel({
     'No Show': 'text-no_show border-no_show',
     Serving: 'text-serving border-serving',
     Waiting: 'text-waiting border-waiting',
-    'At MV1': 'text-mv1',
-    'At MV2': 'text-mv2',
-    'At MV3': 'text-mv3',
-    'At MV4': 'text-mv4',
-    'At DL1': 'text-dl1',
-    'At DL2': 'text-dl2'
+    'At MV1': 'text-mv1 border-mv1',
+    'At MV2': 'text-mv2 border-mv2',
+    'At MV3': 'text-mv3 border-mv3',
+    'At MV4': 'text-mv4 border-mv4',
+    'At DL1': 'text-dl1 border-mv5',
+    'At DL2': 'text-dl2 border-mv6'
   };
 
   const renderActionBtns = (): ReactElement[] =>
-    customerActions.map(({ title, ConfirmationComponent, fn }) => (
-      <button
-        key={title}
-        onClick={() => {
-          if (ConfirmationComponent) {
-            setConfirmationComponent(
-              <ConfirmationComponent
-                onCancel={() => setConfirmationComponent(null)}
-                onConfirm={() => fn(customer)}
-              />
-            );
-          } else {
-            fn(customer);
-          }
-        }}
-        className=" bg-french_gray_1-700 text-onyx mt-2 block w-full rounded-md border 
+    customerActions.map(({ title, ConfirmationComponent, fn }) => {
+      const handleBtnClick = () => {
+        if (ConfirmationComponent) {
+          setConfirmationComponent(
+            <ConfirmationComponent
+              onCancel={() => setConfirmationComponent(null)}
+              onConfirm={() => fn(customer)}
+            />
+          );
+        } else {
+          fn(customer);
+        }
+      };
+
+      return (
+        <button
+          key={title}
+          onClick={handleBtnClick}
+          className=" bg-french_gray_1-700 text-onyx mt-2 block w-full rounded-md border 
         px-3 py-2 text-left text-sm font-semibold"
-      >
-        {title}
-      </button>
-    ));
+        >
+          {title}
+        </button>
+      );
+    });
 
   useEffect(() => {
     setConfirmationComponent(null);

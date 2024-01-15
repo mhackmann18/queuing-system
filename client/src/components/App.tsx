@@ -118,7 +118,7 @@ function App() {
 
   useEffect(() => {
     const loadCustomers = async () => {
-      const { error, data } = await CustomerController.getCustomers({ date });
+      const { error, data } = await CustomerController.get({ date });
       if (!error) {
         setCustomers(data);
       } else {

@@ -14,7 +14,8 @@ const mockCustomer: Customer = {
   status: 'Served',
   name: 'John Doe',
   checkInTime: new Date('2023-01-01T10:00:00Z'),
-  callTimes: [new Date('2023-01-01T10:30:00Z')]
+  callTimes: [new Date('2023-01-01T10:30:00Z')],
+  reasonsForVisit: ['Motor Vehicle']
 };
 
 test('calls onClick when clicked', async () => {
@@ -63,7 +64,8 @@ describe.each([
       name: 'John Doe',
       callTimes: [new Date()],
       checkInTime: new Date(),
-      id: 1
+      id: 1,
+      reasonsForVisit: ['Motor Vehicle']
     };
 
     render(<CustomerRow customer={customer} onClick={mockOnClick} />);

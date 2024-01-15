@@ -6,24 +6,18 @@ interface GetCustomerRequestBody {
   date: Date;
 }
 
-// interface FetchResponse {
-//   error?: string;
-//   data: object;
-// }
+interface FetchResponse {
+  error?: string;
+  data: Customer[];
+}
 
 export default class CustomerController {
-  static async getCustomers({
-    date
-  }: GetCustomerRequestBody): Promise<{ error?: string; data: Customer[] }> {
+  static async get({ date }: GetCustomerRequestBody): Promise<FetchResponse> {
     const result = customers.filter((c) => sameDay(c.checkInTime, date));
     return { data: result };
   }
 
-  static async deleteOne({
-    id
-  }: {
-    id: number;
-  }): Promise<{ error?: string; data: Customer[] }> {
+  static async deleteOne({ id }: { id: number }): Promise<FetchResponse> {
     return { data: customers.filter((c) => c.id !== id) };
   }
 }
