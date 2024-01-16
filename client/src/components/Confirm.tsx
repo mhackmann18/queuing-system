@@ -1,4 +1,4 @@
-interface ConfirmActionComponentProps {
+interface ConfirmProps {
   title: string;
   message: string;
   onCancel: () => void;
@@ -8,7 +8,7 @@ interface ConfirmActionComponentProps {
   confirmBtnDisabled?: boolean;
 }
 
-export default function ConfirmAction({
+export default function Confirm({
   title,
   message,
   confirmBtnText = 'Confirm',
@@ -16,7 +16,7 @@ export default function ConfirmAction({
   onCancel,
   onConfirm,
   confirmBtnDisabled = true
-}: ConfirmActionComponentProps) {
+}: ConfirmProps) {
   return (
     <div>
       <h3 className="text-eerie_black mt-2 font-semibold">{title}</h3>

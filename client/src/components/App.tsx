@@ -5,15 +5,15 @@ import StationIcon from './Header/StationIcon';
 import CustomerController from './CustomerController';
 import { Customer, CustomerStatus, Filter, Station } from './types';
 import { useEffect, useState } from 'react';
-import ActionButton from './CustomerPanel/ActionButton';
-import ConfirmAction from './ConfirmAction';
+import CustomerPanelActionButton from './CustomerPanel/ActionButton';
+import Confirm from './Confirm';
 import CustomerList from './CustomerList';
-import CustomerInfo from './CustomerPanel/Info';
+import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
 
 // Stand-in state
-const station: Station = 'MV1';
-const department = 'Motor Vehicle';
+const currentStation: Station = 'MV1';
+const currentDepartment = 'Motor Vehicle';
 
 function App() {
   const [activeFilters, setActiveFilters] = useState({
@@ -36,6 +36,7 @@ function App() {
     setActiveFilters({ ...activeFilters });
   };
 
+  // Get customers from api when component mounts
   useEffect(() => {
     const loadCustomers = async () => {
       const { error, data } = await CustomerController.get({ date });
@@ -49,101 +50,112 @@ function App() {
     loadCustomers();
   }, [date]);
 
-  useEffect(() => {
-    if (selectedCustomer) {
-      const actions: Record<CustomerStatus, Record<string, () => void>[]> = {
-        Waiting: [
-          {
-            'Call to Station': () => null
-          },
-          { Delete: () => null }
-        ],
-        Serving: [
-          {
-            'Finish Serving': () => null
-          },
-          {
-            'Mark No Show': () => null
-          },
-          {
-            'Return to Waiting List': () => setSelectingCustomerPosition(true)
-          },
-          {
-            Delete: () => null
-          }
-        ],
-        Served: [
-          {
-            'Return to Waiting List': () => null
-          },
-          {
-            Delete: () => null
-          }
-        ],
-        'No Show': [
-          {
-            'Return to Waiting List': () => null
-          },
-          {
-            Delete: () => null
-          }
-        ],
-        'At MV1': [],
-        'At MV2': [],
-        'At MV3': [],
-        'At MV4': [],
-        'At DL1': [],
-        'At DL2': []
-      };
+  // Determine the children of CustomerPanel
+  useEffect(managePanelComponent, [
+    selectedCustomer,
+    customerPosition,
+    selectingCustomerPosition
+  ]);
 
-      const renderActionBtns = () =>
-        actions[selectedCustomer.status].map((action) => {
-          const [actionName, actionFn] = Object.entries(action)[0];
-          return (
-            <ActionButton
-              key={actionName}
-              text={actionName}
-              onClick={() => actionFn()}
-            />
-          );
-        });
+  function managePanelComponent() {
+    if (!selectedCustomer) {
+      return;
+    }
 
-      if (selectingCustomerPosition) {
-        setPanelChild(
-          <ConfirmAction
-            title="Return Customer to Waiting List"
-            message="Select where to place this customer."
-            onCancel={() => setSelectingCustomerPosition(false)}
-            onConfirm={() =>
-              console.log(
-                `Place ${selectedCustomer.name} at position ${customerPosition}`
-              )
-            }
-            confirmBtnDisabled={!customerPosition}
+    const actions: Record<CustomerStatus, Record<string, () => void>[]> = {
+      Waiting: [
+        {
+          'Call to Station': () => null
+        },
+        { Delete: () => null }
+      ],
+      Serving: [
+        {
+          'Finish Serving': () => null
+        },
+        {
+          'Mark No Show': () => null
+        },
+        {
+          'Return to Waiting List': () => setSelectingCustomerPosition(true)
+        },
+        {
+          Delete: () => null
+        }
+      ],
+      Served: [
+        {
+          'Return to Waiting List': () => null
+        },
+        {
+          Delete: () => null
+        }
+      ],
+      'No Show': [
+        {
+          'Return to Waiting List': () => null
+        },
+        {
+          Delete: () => null
+        }
+      ],
+      'At MV1': [],
+      'At MV2': [],
+      'At MV3': [],
+      'At MV4': [],
+      'At DL1': [],
+      'At DL2': []
+    };
+
+    const renderActionBtns = () =>
+      actions[selectedCustomer.status].map((action) => {
+        const [actionName, actionFn] = Object.entries(action)[0];
+        return (
+          <CustomerPanelActionButton
+            key={actionName}
+            text={actionName}
+            onClick={() => actionFn()}
           />
         );
-      } else {
-        setCustomerPosition(null);
-        setPanelChild(
-          <div>
-            <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
-            <div className="mb-4">{renderActionBtns()}</div>
-            <CustomerInfo customer={selectedCustomer} />
-          </div>
-        );
-      }
+      });
+
+    if (selectingCustomerPosition) {
+      setPanelChild(
+        <Confirm
+          title="Return Customer to Waiting List"
+          message="Select where to place this customer."
+          onCancel={() => setSelectingCustomerPosition(false)}
+          onConfirm={() =>
+            console.log(
+              `Place ${selectedCustomer.name} at position ${customerPosition}`
+            )
+          }
+          confirmBtnDisabled={!customerPosition}
+        />
+      );
+    } else {
+      setCustomerPosition(null);
+      setPanelChild(
+        <div>
+          <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
+          <div className="mb-4">{renderActionBtns()}</div>
+          <CustomerPanelInfo customer={selectedCustomer} />
+        </div>
+      );
     }
-  }, [selectedCustomer, customerPosition, selectingCustomerPosition]);
+  }
 
   return (
     <div className="h-screen bg-white">
-      {selectingCustomerPosition && <DarkOverlay />}
+      {selectingCustomerPosition && (
+        <div className="w-lvh fixed inset-0 h-lvh bg-black opacity-50" />
+      )}
       <header className="h-28">
         {/* Header Row 1 */}
         <div className="border-b">
           <div className="mx-auto flex h-16 max-w-5xl justify-between">
             <h1 className="mr-4 flex items-center text-2xl font-bold">
-              {department} Customers
+              {currentDepartment} Customers
             </h1>
             <div className="flex items-center">
               {/* Show DateToggler if current page is customers */}
@@ -151,7 +163,7 @@ function App() {
                 onClick={() => {
                   console.log('station icon clicked');
                 }}
-                station={station}
+                station={currentStation}
               />
             </div>
           </div>
@@ -174,7 +186,9 @@ function App() {
         {/* Customer List */}
         <CustomerList
           customers={customers.filter(
-            (c) => c.status === 'Serving' || activeFilters[c.status]
+            !selectingCustomerPosition
+              ? (c) => c.status === 'Serving' || activeFilters[c.status]
+              : (c) => c.status === 'Waiting'
           )}
           selectedCustomerId={selectedCustomerId}
           setSelectedCustomerId={setSelectedCustomerId}
@@ -195,10 +209,6 @@ function App() {
       </div>
     </div>
   );
-}
-
-function DarkOverlay() {
-  return <div className="w-lvh fixed inset-0 h-lvh bg-black opacity-50"></div>;
 }
 
 export default App;

@@ -1,6 +1,6 @@
 import { ReactEventHandler } from 'react';
 
-export default function ActionButton({
+export default function CustomerPanelActionButton({
   text,
   onClick
 }: {

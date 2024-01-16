@@ -1,7 +1,7 @@
 import { Customer } from 'components/types';
 import { get12HourTimeString } from 'utils/helpers';
 
-export default function CustomerInfo({
+export default function CustomerPanelInfo({
   customer: { checkInTime, callTimes, reasonsForVisit }
 }: {
   customer: Customer;
