@@ -1,13 +1,14 @@
-import CustomerPanel from './CustomerPanel';
+import CustomerPanelWrapper from './CustomerPanel/Wrapper';
 import DateToggler from './Header/DateToggler';
 import Filters from './Header/Filters';
 import StationIcon from './Header/StationIcon';
 import CustomerController from './CustomerController';
 import { Customer, CustomerStatus, Filter, Station } from './types';
-import { ReactEventHandler, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import ActionButton from './CustomerPanel/ActionButton';
 import ConfirmAction from './ConfirmAction';
 import CustomerList from './CustomerList';
-import CustomerInfo from './CustomerPanel/CustomerInfo';
+import CustomerInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
 
 // Stand-in state
@@ -50,24 +51,6 @@ function App() {
 
   useEffect(() => {
     if (selectedCustomer) {
-      const ActionButton = ({
-        text,
-        onClick
-      }: {
-        text: string;
-        onClick: ReactEventHandler;
-      }) => {
-        return (
-          <button
-            onClick={onClick}
-            className=" bg-french_gray_1-700 text-onyx mt-2 block w-full rounded-md border 
-px-3 py-2 text-left text-sm font-semibold"
-          >
-            {text}
-          </button>
-        );
-      };
-
       const actions: Record<CustomerStatus, Record<string, () => void>[]> = {
         Waiting: [
           {
@@ -201,12 +184,12 @@ px-3 py-2 text-left text-sm font-semibold"
         {/* Customer Panel */}
         {selectedCustomer && (
           <div className="ml-4">
-            <CustomerPanel
+            <CustomerPanelWrapper
               customer={selectedCustomer}
               containerStyles={selectingCustomerPosition ? 'z-10' : ''}
             >
               {panelChild}
-            </CustomerPanel>
+            </CustomerPanelWrapper>
           </div>
         )}
       </div>

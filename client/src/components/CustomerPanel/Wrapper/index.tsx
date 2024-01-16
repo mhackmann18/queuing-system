@@ -1,17 +1,17 @@
 import { Customer, CustomerStatus } from 'components/types';
 import { ReactElement } from 'react';
 
-interface CustomerPanelProps {
+interface CustomerPanelWrapperProps {
   customer: Customer;
   children: ReactElement | null;
   containerStyles?: string;
 }
 
-export default function CustomerPanel({
+export default function CustomerPanelWrapper({
   customer: { name, status },
   children,
   containerStyles = ''
-}: CustomerPanelProps) {
+}: CustomerPanelWrapperProps) {
   const statusStyles: Record<CustomerStatus, string> = {
     Served: 'text-served border-served',
     'No Show': 'text-no_show border-no_show',
