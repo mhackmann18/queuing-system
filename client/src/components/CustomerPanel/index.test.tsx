@@ -10,7 +10,11 @@ const mockCustomer: Customer = {
   status: 'Serving',
   reasonsForVisit: ['Motor Vehicle', "Driver's License"],
   checkInTime: new Date(),
-  callTimes: [new Date(), new Date(), new Date()]
+  callTimes: [
+    new Date('December 17, 1995 03:24:00'),
+    new Date('December 17, 1995 03:28:00'),
+    new Date('December 17, 1995 03:49:30')
+  ]
 };
 
 const mockCustomerActions: CustomerAction[] = [
@@ -32,43 +36,72 @@ test('displays customer information', () => {
   expect(
     screen.getByText(get12HourTimeString(mockCustomer.checkInTime))
   ).toBeInTheDocument();
-  expect(
-    screen.getByText(get12HourTimeString(mockCustomer.callTimes[0]))
-  ).toBeInTheDocument();
-  expect(
-    screen.getByText(mockCustomer.reasonsForVisit![0])
-  ).toBeInTheDocument();
-  expect(
-    screen.getByText(mockCustomer.reasonsForVisit![1])
-  ).toBeInTheDocument();
+  mockCustomer.callTimes.forEach((time) =>
+    expect(
+      screen.getByText(new RegExp(get12HourTimeString(time)))
+    ).toBeInTheDocument()
+  );
+  mockCustomer.reasonsForVisit.forEach((r) => {
+    expect(screen.getByText(new RegExp(r))).toBeInTheDocument();
+  });
 });
 
 // ALL STATUSES
 
-test(
+test.todo(
   "renders confirmation messages and buttons when 'Delete' button is clicked"
 );
 
-test(
+test.todo(
   "CustomerController.deleteOne runs when 'Delete' confirmation button is clicked"
 );
 
 // WAITING
 
-test("displays 'Delete' and 'Call Customer' buttons");
+test.todo("displays 'Delete' and 'Call Customer' buttons");
 
-test("makes api update request when 'Call to Station' button is clicked");
+test.todo("makes api update request when 'Call to Station' button is clicked");
 
-test(
+test.todo(
   "changes status to 'Serving' after 'Call to Station' is clicked and api request returns data"
 );
 
-test("shows error when 'Call to Station' api request returns error");
+test.todo("displays error when 'Call to Station' api request returns error");
 
-// Serving
+describe("when status is 'Serving'", () => {
+  it.todo(
+    "displays 'Finish Serving', 'Mark No Show', 'Return to Waiting List', and 'Delete' buttons"
+  );
 
-test(
-  "displays 'Finish Serving', 'Mark No Show', 'Return to Waiting List', and 'Delete' buttons"
-);
+  describe("when 'Finish Serving' button is clicked", () => {
+    it.todo('makes api request');
 
-test('');
+    it.todo('when api returns error, should display error');
+
+    it.todo("when api returns success, should change status to 'Served'");
+  });
+
+  describe("when 'Mark No Show' button is clicked", () => {
+    it.todo('makes api request');
+
+    it.todo('when api returns error, should display error');
+
+    it.todo("when api returns success, should change status to 'No Show'");
+  });
+
+  describe("when 'Return to Waiting List' button is clicked", () => {
+    it.todo('displays position picker');
+
+    describe('when position picker is displayed', () => {
+      describe('when clicking a position', () => {
+        it('makes api request', () => {
+          expect(screen.getByText('DFDSFSDF')).toBeInTheDocument();
+        });
+
+        it.todo('when api returns error, should display error');
+
+        it.todo("when api returns success, should change status to 'Waiting'");
+      });
+    });
+  });
+});
