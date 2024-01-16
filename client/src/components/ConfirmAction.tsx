@@ -1,17 +1,21 @@
 interface ConfirmActionComponentProps {
   title: string;
   message: string;
-  confirmBtnStyles: string;
   onCancel: () => void;
   onConfirm: () => void;
+  confirmBtnStyles?: string;
+  confirmBtnText?: string;
+  confirmBtnDisabled?: boolean;
 }
 
 export default function ConfirmAction({
   title,
   message,
-  confirmBtnStyles,
+  confirmBtnText = 'Confirm',
+  confirmBtnStyles = 'bg-eerie_black text-white',
   onCancel,
-  onConfirm
+  onConfirm,
+  confirmBtnDisabled = true
 }: ConfirmActionComponentProps) {
   return (
     <div>
@@ -28,9 +32,10 @@ export default function ConfirmAction({
         <button
           onClick={onConfirm}
           type="button"
-          className={`rounded-md px-3 py-1.5 font-medium ${confirmBtnStyles}`}
+          className={`rounded-md px-3 py-1.5 font-medium ${confirmBtnStyles} disabled:opacity-10`}
+          disabled={confirmBtnDisabled}
         >
-          Delete
+          {confirmBtnText}
         </button>
       </div>
     </div>

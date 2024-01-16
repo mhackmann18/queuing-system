@@ -1,10 +1,11 @@
 import { get12HourTimeString } from 'utils/helpers';
 import { Customer } from '../types';
+import { ReactEventHandler } from 'react';
 
 interface CustomerRowProps {
   customer: Customer;
   selected?: boolean;
-  onClick: (customer: Customer) => void;
+  onClick: (customer: Customer) => void | ReactEventHandler;
 }
 
 export default function CustomerRow({
