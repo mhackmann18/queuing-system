@@ -3,32 +3,47 @@ import { Customer } from 'components/types';
 
 interface CustomerListProps {
   customers: Customer[];
-  selectedCustomerId: number;
+  selectedCustomer: Customer;
   setSelectedCustomerId: (newId: number) => void;
   selectingCustomerPosition?: boolean;
   setCustomerPosition: (positionIndex: number) => void;
+  customerPosition: number | null;
 }
 
 export default function CustomerList({
   customers,
-  selectedCustomerId,
+  selectedCustomer,
   setSelectedCustomerId,
   selectingCustomerPosition = false,
-  setCustomerPosition
+  setCustomerPosition,
+  customerPosition
 }: CustomerListProps) {
+  const selectedCustomerId = selectedCustomer.id;
+
   const renderCustomerRow = (c: Customer) => {
     return (
-      <li key={c.id} className="mb-1">
-        <CustomerRow
-          customer={c}
-          onClick={
-            !selectingCustomerPosition
-              ? (customer) => setSelectedCustomerId(customer.id)
-              : () => setCustomerPosition(1)
-          }
-          selected={Boolean(c.id === selectedCustomerId)}
-        />
-      </li>
+      <>
+        <li className="mb-1">
+          <CustomerRow
+            customer={c}
+            onClick={
+              !selectingCustomerPosition
+                ? (customer) => setSelectedCustomerId(customer.id)
+                : () => setCustomerPosition(c.id)
+            }
+            selected={Boolean(c.id === selectedCustomerId)}
+          />
+        </li>
+        {customerPosition === c.id && (
+          <li className="mb-1">
+            <CustomerRow
+              customer={selectedCustomer}
+              selected={Boolean(true)}
+              onClick={() => undefined}
+            />
+          </li>
+        )}
+      </>
     );
   };
 

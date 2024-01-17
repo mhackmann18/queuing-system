@@ -15,7 +15,7 @@ export default function Confirm({
   confirmBtnStyles = 'bg-eerie_black text-white',
   onCancel,
   onConfirm,
-  confirmBtnDisabled = true
+  confirmBtnDisabled = false
 }: ConfirmProps) {
   return (
     <div>

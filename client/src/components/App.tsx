@@ -51,23 +51,49 @@ function App() {
   }, [date]);
 
   // Determine the children of CustomerPanel
-  useEffect(managePanelComponent, [
+  useEffect(managePanelChild, [
     selectedCustomer,
     customerPosition,
     selectingCustomerPosition
   ]);
 
-  function managePanelComponent() {
+  function managePanelChild() {
     if (!selectedCustomer) {
       return;
     }
 
+    const displayDeleteCustomer = () => {
+      setPanelChild(
+        <Confirm
+          title="Delete Customer"
+          message="Are you sure you want to delete this customer?"
+          onConfirm={() => {
+            console.log('Delete customer');
+            displayPanelActionButtons();
+          }}
+          onCancel={displayPanelActionButtons}
+          confirmBtnStyles="bg-red-500 text-white"
+          confirmBtnText="Delete"
+        />
+      );
+    };
+
     const actions: Record<CustomerStatus, Record<string, () => void>[]> = {
       Waiting: [
         {
-          'Call to Station': () => null
+          'Call to Station': async () => {
+            const { data, error } = await CustomerController.updateStatus(
+              selectedCustomer.id,
+              { status: 'Serving' }
+            );
+            if (!error) {
+              console.log(data);
+            } else {
+              console.log(error);
+            }
+          }
         },
-        { Delete: () => null }
+        { Delete: displayDeleteCustomer }
       ],
       Serving: [
         {
@@ -80,23 +106,23 @@ function App() {
           'Return to Waiting List': () => setSelectingCustomerPosition(true)
         },
         {
-          Delete: () => null
+          Delete: displayDeleteCustomer
         }
       ],
       Served: [
         {
-          'Return to Waiting List': () => null
+          'Return to Waiting List': () => setSelectingCustomerPosition(true)
         },
         {
-          Delete: () => null
+          Delete: displayDeleteCustomer
         }
       ],
       'No Show': [
         {
-          'Return to Waiting List': () => null
+          'Return to Waiting List': () => setSelectingCustomerPosition(true)
         },
         {
-          Delete: () => null
+          Delete: displayDeleteCustomer
         }
       ],
       'At MV1': [],
@@ -106,6 +132,18 @@ function App() {
       'At DL1': [],
       'At DL2': []
     };
+
+    function displayPanelActionButtons() {
+      if (selectedCustomer) {
+        setPanelChild(
+          <div>
+            <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
+            <div className="mb-4">{renderActionBtns()}</div>
+            <CustomerPanelInfo customer={selectedCustomer} />
+          </div>
+        );
+      }
+    }
 
     const renderActionBtns = () =>
       actions[selectedCustomer.status].map((action) => {
@@ -123,25 +161,26 @@ function App() {
       setPanelChild(
         <Confirm
           title="Return Customer to Waiting List"
-          message="Select where to place this customer."
+          message={`Select which customer to place ${selectedCustomer.name} behind.`}
           onCancel={() => setSelectingCustomerPosition(false)}
-          onConfirm={() =>
-            console.log(
-              `Place ${selectedCustomer.name} at position ${customerPosition}`
-            )
-          }
+          onConfirm={async () => {
+            const { error } =
+              await CustomerController.updatePositionInWaitingList({
+                customerId: selectedCustomer.id,
+                placeAfterCustomerId: customerPosition!
+              });
+            if (error) {
+              // Show error
+            } else {
+              setSelectingCustomerPosition(false);
+            }
+          }}
           confirmBtnDisabled={!customerPosition}
         />
       );
     } else {
       setCustomerPosition(null);
-      setPanelChild(
-        <div>
-          <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
-          <div className="mb-4">{renderActionBtns()}</div>
-          <CustomerPanelInfo customer={selectedCustomer} />
-        </div>
-      );
+      displayPanelActionButtons();
     }
   }
 
@@ -184,17 +223,20 @@ function App() {
       </header>
       <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
         {/* Customer List */}
-        <CustomerList
-          customers={customers.filter(
-            !selectingCustomerPosition
-              ? (c) => c.status === 'Serving' || activeFilters[c.status]
-              : (c) => c.status === 'Waiting'
-          )}
-          selectedCustomerId={selectedCustomerId}
-          setSelectedCustomerId={setSelectedCustomerId}
-          selectingCustomerPosition={selectingCustomerPosition}
-          setCustomerPosition={setCustomerPosition}
-        />
+        {customers.length && (
+          <CustomerList
+            customers={customers.filter(
+              !selectingCustomerPosition
+                ? (c) => c.status === 'Serving' || activeFilters[c.status]
+                : (c) => c.status === 'Waiting'
+            )}
+            selectedCustomer={selectedCustomer}
+            setSelectedCustomerId={setSelectedCustomerId}
+            selectingCustomerPosition={selectingCustomerPosition}
+            setCustomerPosition={setCustomerPosition}
+            customerPosition={customerPosition}
+          />
+        )}
         {/* Customer Panel */}
         {selectedCustomer && (
           <div className="ml-4">
