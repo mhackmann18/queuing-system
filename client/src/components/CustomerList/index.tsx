@@ -6,9 +6,7 @@ export default function CustomerList({
   customers,
   selectedCustomer,
   setSelectedCustomerId,
-  selectingCustomerPosition = false,
-  setCustomerPosition,
-  customerPosition
+  selectedCustomerPositionControl
 }: CustomerListProps) {
   const selectedCustomerId = selectedCustomer.id;
 
@@ -18,15 +16,15 @@ export default function CustomerList({
         <li className="mb-1">
           <CustomerRow
             customer={c}
-            onClick={
-              !selectingCustomerPosition
-                ? (customer) => setSelectedCustomerId(customer.id)
-                : () => setCustomerPosition(c.id)
+            onClick={() =>
+              !selectedCustomerPositionControl
+                ? setSelectedCustomerId(c.id)
+                : selectedCustomerPositionControl?.setPositionAfterId(c.id)
             }
             selected={Boolean(c.id === selectedCustomerId)}
           />
         </li>
-        {customerPosition === c.id && (
+        {selectedCustomerPositionControl?.positionAfterId === c.id && (
           <li className="mb-1">
             <CustomerRow
               customer={selectedCustomer}
@@ -40,7 +38,11 @@ export default function CustomerList({
   };
 
   return (
-    <div className="flex grow flex-col">
+    <div
+      className={`flex grow flex-col bg-white ${
+        selectedCustomerPositionControl && selectingCustomerContainerStyles
+      }`}
+    >
       <div className="mb-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
         <div>
           <span className="inline-block w-20">Status</span>
@@ -51,14 +53,11 @@ export default function CustomerList({
           <span className="inline-block w-24">Time Called</span>
         </div>
       </div>
-      <ul
-        className={`grow overflow-y-scroll border bg-white p-2 ${
-          selectingCustomerPosition &&
-          'outline-eerie_black z-10 outline outline-2'
-        }`}
-      >
+      <ul className={`grow overflow-y-scroll border p-2`}>
         {customers.map(renderCustomerRow)}
       </ul>
     </div>
   );
 }
+
+export const selectingCustomerContainerStyles = 'z-10 rounded-lg';

@@ -232,9 +232,10 @@ function App() {
             )}
             selectedCustomer={selectedCustomer}
             setSelectedCustomerId={setSelectedCustomerId}
-            selectingCustomerPosition={selectingCustomerPosition}
-            setCustomerPosition={setCustomerPosition}
-            customerPosition={customerPosition}
+            selectedCustomerPositionControl={{
+              positionAfterId: customerPosition,
+              setPositionAfterId: setCustomerPosition
+            }}
           />
         )}
         {/* Customer Panel */}
