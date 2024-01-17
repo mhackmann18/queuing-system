@@ -30,13 +30,13 @@ export default class CustomerController {
     return { data: `Updated customer with id ${id} to status '${status}'` };
   }
 
-  static async updatePositionInWaitingList({
+  static async updateWaitingListIndex({
     customerId,
-    placeAfterCustomerId
+    index
   }: {
     customerId: number;
-    placeAfterCustomerId: number;
+    index: number;
   }) {
-    return { error: false, data: [customerId, placeAfterCustomerId] };
+    return { error: false, data: [customerId, index] };
   }
 }

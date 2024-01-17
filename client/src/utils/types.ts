@@ -17,3 +17,8 @@ export interface Customer {
   callTimes: Date[];
   reasonsForVisit: string[];
 }
+
+export interface WaitingListPositionControl {
+  waitingListIndex: number;
+  setWaitingListIndex: (index: number) => void;
+}

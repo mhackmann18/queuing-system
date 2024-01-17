@@ -1,49 +1,53 @@
 import CustomerRow from 'components/CustomerList/Row';
 import { Customer } from 'utils/types';
 import { CustomerListProps } from './types';
+import { useEffect, useState } from 'react';
 
 export default function CustomerList({
   customers,
   selectedCustomer,
   setSelectedCustomerId,
-  selectedCustomerPositionControl
+  waitingListPositionControl
 }: CustomerListProps) {
-  const selectedCustomerId = selectedCustomer.id;
+  const [orderedCustomers, setOrderedCustomers] =
+    useState<Customer[]>(customers);
 
-  const renderCustomerRow = (c: Customer) => {
+  useEffect(() => {
+    if (waitingListPositionControl) {
+      const { waitingListIndex } = waitingListPositionControl;
+      const waitingList = [...customers];
+      waitingList.splice(waitingListIndex, 0, selectedCustomer);
+      setOrderedCustomers(waitingList);
+    } else {
+      setOrderedCustomers(customers);
+    }
+  }, [waitingListPositionControl, customers, selectedCustomer]);
+
+  const mapCustomersToListItem = (c: Customer, index: number) => {
     return (
-      <>
-        <li className="mb-1">
-          <CustomerRow
-            customer={c}
-            onClick={() =>
-              !selectedCustomerPositionControl
-                ? setSelectedCustomerId(c.id)
-                : selectedCustomerPositionControl?.setPositionAfterId(c.id)
+      <li className="mb-1">
+        <CustomerRow
+          customer={c}
+          onClick={() => {
+            if (!waitingListPositionControl) {
+              setSelectedCustomerId(c.id);
+            } else if (c.id !== selectedCustomer.id) {
+              waitingListPositionControl.setWaitingListIndex(index);
             }
-            selected={Boolean(c.id === selectedCustomerId)}
-          />
-        </li>
-        {selectedCustomerPositionControl?.positionAfterId === c.id && (
-          <li className="mb-1">
-            <CustomerRow
-              customer={selectedCustomer}
-              selected={Boolean(true)}
-              onClick={() => undefined}
-            />
-          </li>
-        )}
-      </>
+          }}
+          selected={c.id === selectedCustomer.id}
+        />
+      </li>
     );
   };
 
   return (
     <div
       className={`flex grow flex-col bg-white ${
-        selectedCustomerPositionControl && selectingCustomerContainerStyles
+        waitingListPositionControl && selectingCustomerContainerStyles
       }`}
     >
-      <div className="mb-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
+      <div className="my-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
         <div>
           <span className="inline-block w-20">Status</span>
           <span className="inline-block w-52 pl-1">Customer Name</span>
@@ -54,7 +58,7 @@ export default function CustomerList({
         </div>
       </div>
       <ul className={`grow overflow-y-scroll border p-2`}>
-        {customers.map(renderCustomerRow)}
+        {orderedCustomers.map(mapCustomersToListItem)}
       </ul>
     </div>
   );
