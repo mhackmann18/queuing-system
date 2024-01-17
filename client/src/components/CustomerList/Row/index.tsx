@@ -1,18 +1,11 @@
 import { get12HourTimeString } from 'utils/helpers';
-import { Customer } from '../types';
-import { ReactEventHandler } from 'react';
+import { CustomerListRowProps } from './types';
 
-interface CustomerRowProps {
-  customer: Customer;
-  selected?: boolean;
-  onClick: (customer: Customer) => void | ReactEventHandler;
-}
-
-export default function CustomerRow({
+export default function CustomerListRow({
   customer,
   selected = false,
   onClick
-}: CustomerRowProps) {
+}: CustomerListRowProps) {
   const { status, name, checkInTime, callTimes } = customer;
 
   const containerStyles = {

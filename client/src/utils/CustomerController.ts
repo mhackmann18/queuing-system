@@ -1,6 +1,6 @@
 import customers from './customers';
 import { sameDay } from 'utils/helpers';
-import { Customer, CustomerStatus } from 'components/types';
+import { Customer, CustomerStatus } from 'utils/types';
 
 interface GetCustomerRequestBody {
   date: Date;

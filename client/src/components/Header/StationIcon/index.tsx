@@ -1,10 +1,4 @@
-import { ReactEventHandler } from 'react';
-import { Station } from 'components/types';
-
-interface StationIconProps {
-  onClick: ReactEventHandler;
-  station: Station;
-}
+import { StationIconProps } from './types';
 
 export default function StationIcon({ onClick, station }: StationIconProps) {
   const styles = {

@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import CustomerRow from '.';
-import { Customer, CustomerStatus } from 'components/types';
+import { Customer, CustomerStatus } from 'utils/types';
 import { get12HourTimeString } from 'utils/helpers';
 
 // Mock ReactEventHandler

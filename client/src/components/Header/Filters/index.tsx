@@ -1,15 +1,8 @@
 import FilterButton from 'components/Header/Filters/FilterButton';
-import { Filter } from 'components/types';
+import { Filter } from 'utils/types';
+import { FiltersProps } from './types';
 
-interface FiltersComponentProps {
-  activeFilters: Record<Filter, boolean>;
-  toggleFilter: (filter: Filter) => void;
-}
-
-export default function Filters({
-  activeFilters,
-  toggleFilter
-}: FiltersComponentProps) {
+export default function Filters({ activeFilters, toggleFilter }: FiltersProps) {
   return (
     <div>
       <span className="mr-2 inline-block border-r pr-2 font-semibold">

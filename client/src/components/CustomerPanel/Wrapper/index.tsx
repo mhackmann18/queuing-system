@@ -1,11 +1,5 @@
-import { Customer, CustomerStatus } from 'components/types';
-import { ReactElement } from 'react';
-
-interface CustomerPanelWrapperProps {
-  customer: Customer;
-  children: ReactElement | null;
-  containerStyles?: string;
-}
+import { CustomerStatus } from 'utils/types';
+import { CustomerPanelWrapperProps } from './types';
 
 export default function CustomerPanelWrapper({
   customer: { name, status },

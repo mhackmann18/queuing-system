@@ -1,16 +1,9 @@
 import { FaChevronRight, FaChevronLeft } from 'react-icons/fa6';
 import { MdCalendarToday } from 'react-icons/md';
 import { getDateString, sameDay } from 'utils/helpers';
+import { DateTogglerProps } from './types';
 
-interface DateTogglerComponentProps {
-  date: Date;
-  setDate: (date: Date) => void;
-}
-
-export default function DateToggler({
-  date,
-  setDate
-}: DateTogglerComponentProps) {
+export default function DateToggler({ date, setDate }: DateTogglerProps) {
   return (
     <div className="text-outer_space flex align-middle">
       {/* Previous Date */}

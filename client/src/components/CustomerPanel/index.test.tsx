@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import { get12HourTimeString } from 'utils/helpers';
 import CustomerPanel from '.';
-import { Customer, CustomerAction } from 'components/types';
+import { Customer, CustomerAction } from 'utils/types';
 
 const mockCustomer: Customer = {
   id: 1,

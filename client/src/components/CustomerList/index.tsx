@@ -1,14 +1,6 @@
-import CustomerRow from 'components/CustomerRow';
-import { Customer } from 'components/types';
-
-interface CustomerListProps {
-  customers: Customer[];
-  selectedCustomer: Customer;
-  setSelectedCustomerId: (newId: number) => void;
-  selectingCustomerPosition?: boolean;
-  setCustomerPosition: (positionIndex: number) => void;
-  customerPosition: number | null;
-}
+import CustomerRow from 'components/CustomerList/Row';
+import { Customer } from 'utils/types';
+import { CustomerListProps } from './types';
 
 export default function CustomerList({
   customers,
