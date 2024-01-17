@@ -3,6 +3,8 @@ import { Customer } from 'utils/types';
 import { CustomerListProps } from './types';
 import { useEffect, useState } from 'react';
 
+// TODO drag and drop position picker
+
 export default function CustomerList({
   customers,
   selectedCustomer,
@@ -25,16 +27,26 @@ export default function CustomerList({
 
   const mapCustomersToListItem = (c: Customer, index: number) => {
     return (
-      <li className="mb-1">
+      <li className="mb-1" key={c.id}>
         <CustomerRow
           customer={c}
           onClick={() => {
             if (!waitingListPositionControl) {
               setSelectedCustomerId(c.id);
-            } else if (c.id !== selectedCustomer.id) {
-              waitingListPositionControl.setWaitingListIndex(index);
+            } else if (c.id === selectedCustomer.id) {
+              waitingListPositionControl.setPositionChosen(
+                !waitingListPositionControl.positionChosen
+              );
             }
           }}
+          {...(waitingListPositionControl &&
+          !waitingListPositionControl.positionChosen
+            ? {
+                onMouseEnter: () =>
+                  waitingListPositionControl.setWaitingListIndex(index),
+                styles: 'hover:cursor-grabbing'
+              }
+            : c.id === selectedCustomer.id && { styles: 'hover:cursor-grab' })}
           selected={c.id === selectedCustomer.id}
         />
       </li>
@@ -64,4 +76,5 @@ export default function CustomerList({
   );
 }
 
-export const selectingCustomerContainerStyles = 'z-10 rounded-lg';
+export const selectingCustomerContainerStyles =
+  'z-10 rounded-lg outline outline-french_gray_1';

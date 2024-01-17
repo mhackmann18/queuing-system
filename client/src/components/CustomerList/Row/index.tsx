@@ -4,7 +4,9 @@ import { CustomerListRowProps } from './types';
 export default function CustomerListRow({
   customer,
   selected = false,
-  onClick
+  onClick,
+  onMouseEnter,
+  styles = ''
 }: CustomerListRowProps) {
   const { status, name, checkInTime, callTimes } = customer;
 
@@ -37,10 +39,11 @@ export default function CustomerListRow({
   return (
     <button
       type="button"
-      onClick={() => onClick(customer)}
+      onClick={onClick}
       className={`hover:bg-seasalt flex w-full justify-between rounded-lg border-2 p-2 text-left hover:cursor-pointer ${
         containerStyles[status]
-      } ${selected ? 'bg-seasalt outline' : 'bg-transparent'}`}
+      } ${selected ? 'bg-seasalt outline' : 'bg-transparent'} ${styles}`}
+      {...{ onMouseEnter }}
     >
       <div>
         {/* Status */}

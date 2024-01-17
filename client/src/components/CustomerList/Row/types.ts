@@ -4,5 +4,7 @@ import { Customer } from 'utils/types';
 export interface CustomerListRowProps {
   customer: Customer;
   selected?: boolean;
-  onClick: (customer: Customer) => void | ReactEventHandler;
+  onClick: ReactEventHandler;
+  onMouseEnter?: ReactEventHandler;
+  styles?: string;
 }
