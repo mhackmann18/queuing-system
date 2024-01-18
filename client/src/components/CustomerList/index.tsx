@@ -14,6 +14,7 @@ export default function CustomerList({
   const [orderedCustomers, setOrderedCustomers] =
     useState<Customer[]>(customers);
 
+  // Position the selected customer at the proper WL index when the WL position picker is active
   useEffect(() => {
     if (waitingListPositionControl) {
       const { waitingListIndex } = waitingListPositionControl;
@@ -26,28 +27,49 @@ export default function CustomerList({
   }, [waitingListPositionControl, customers, selectedCustomer]);
 
   const mapCustomersToListItem = (c: Customer, index: number) => {
+    let handleClick;
+    let handleMouseEnter;
+    let styles = '';
+
+    // Determine what should happen when customer is clicked
+    if (!waitingListPositionControl) {
+      handleClick = () => setSelectedCustomerId(c.id);
+    } else if (c.id === selectedCustomer.id) {
+      // Lock in or repick the selected customer's postion in WL
+      handleClick = () =>
+        waitingListPositionControl.setPositionChosen(
+          !waitingListPositionControl.positionChosen
+        );
+    }
+
+    // Reposition the selected customer at the index of the customer being moused over
+    if (
+      waitingListPositionControl &&
+      !waitingListPositionControl.positionChosen
+    ) {
+      handleMouseEnter = () =>
+        waitingListPositionControl.setWaitingListIndex(index);
+    }
+
+    // Determine cursor style for customers when WL position picker is active
+    if (waitingListPositionControl) {
+      const { positionChosen } = waitingListPositionControl;
+
+      if (c.id === selectedCustomer.id) {
+        styles = positionChosen ? 'hover:cursor-grab' : 'hover:cursor-grabbing';
+      } else {
+        styles = 'hover:cursor-default hover:bg-white';
+      }
+    }
+
     return (
       <li className="mb-1" key={c.id}>
         <CustomerRow
           customer={c}
-          onClick={() => {
-            if (!waitingListPositionControl) {
-              setSelectedCustomerId(c.id);
-            } else if (c.id === selectedCustomer.id) {
-              waitingListPositionControl.setPositionChosen(
-                !waitingListPositionControl.positionChosen
-              );
-            }
-          }}
-          {...(waitingListPositionControl &&
-          !waitingListPositionControl.positionChosen
-            ? {
-                onMouseEnter: () =>
-                  waitingListPositionControl.setWaitingListIndex(index),
-                styles: 'hover:cursor-grabbing'
-              }
-            : c.id === selectedCustomer.id && { styles: 'hover:cursor-grab' })}
           selected={c.id === selectedCustomer.id}
+          onClick={handleClick}
+          onMouseEnter={handleMouseEnter}
+          styles={styles}
         />
       </li>
     );
@@ -56,7 +78,7 @@ export default function CustomerList({
   return (
     <div
       className={`flex grow flex-col bg-white ${
-        waitingListPositionControl && selectingCustomerContainerStyles
+        waitingListPositionControl && selectingWLPositionContainerStyles
       }`}
     >
       <div className="my-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
@@ -76,5 +98,5 @@ export default function CustomerList({
   );
 }
 
-export const selectingCustomerContainerStyles =
+export const selectingWLPositionContainerStyles =
   'z-10 rounded-lg outline outline-french_gray_1';
