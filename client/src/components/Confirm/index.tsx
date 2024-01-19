@@ -5,6 +5,7 @@ interface ConfirmProps {
   onConfirm: () => void;
   confirmBtnStyles?: string;
   confirmBtnText?: string;
+  cancelBtnText?: string;
   confirmBtnDisabled?: boolean;
 }
 
@@ -13,6 +14,7 @@ export default function Confirm({
   message,
   confirmBtnText = 'Confirm',
   confirmBtnStyles = 'bg-eerie_black text-white',
+  cancelBtnText = 'Cancel',
   onCancel,
   onConfirm,
   confirmBtnDisabled = false
@@ -27,7 +29,7 @@ export default function Confirm({
           type="button"
           className={`border-slate_gray text-slate_gray mr-2 rounded-md border-2 px-3 py-1.5 font-medium`}
         >
-          Cancel
+          {cancelBtnText}
         </button>
         <button
           onClick={onConfirm}

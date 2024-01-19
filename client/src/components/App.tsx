@@ -3,7 +3,7 @@ import DateToggler from './Header/DateToggler';
 import Filters from './Header/Filters';
 import StationIcon from './Header/StationIcon';
 import CustomerController from '../utils/CustomerController';
-import { Customer, CustomerStatus, Filter, Station } from '../utils/types';
+import { Customer, Filter, Station } from '../utils/types';
 import { useEffect, useState } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
@@ -25,6 +25,8 @@ function App() {
   const [selectedCustomerId, setSelectedCustomerId] = useState(1);
   const selectedCustomer =
     customers.length && customers.find((c) => c.id === selectedCustomerId);
+  const servingCustomer =
+    customers.length && customers.find((c) => c.status === 'Serving');
   const [date, setDate] = useState(new Date());
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
   const [waitingListPosition, setWaitingListPosition] = useState<{
@@ -51,15 +53,19 @@ function App() {
     loadCustomers();
   }, [date]);
 
-  // Determine the children of CustomerPanel
-  useEffect(managePanelChild, [selectedCustomer, waitingListPosition]);
+  // Set the child of CustomerPanel
+  useEffect(updatePanelChildEffect, [
+    selectedCustomer,
+    servingCustomer,
+    waitingListPosition
+  ]);
 
-  function managePanelChild() {
+  function updatePanelChildEffect() {
     if (!selectedCustomer) {
       return;
     }
 
-    const displayDeleteCustomer = () => {
+    const deleteCustomer = async () => {
       setPanelChild(
         <Confirm
           title="Delete Customer"
@@ -75,70 +81,162 @@ function App() {
       );
     };
 
-    const returnToWaitingList = () => {
+    const returnToWaitingList = async () => {
       setWaitingListPosition({
         index: 0,
         chosen: false
       });
     };
 
-    const actions: Record<CustomerStatus, Record<string, () => void>[]> = {
-      Waiting: [
-        {
-          'Call to Station': async () => {
-            const { data, error } = await CustomerController.updateStatus(
-              selectedCustomer.id,
-              { status: 'Serving' }
-            );
-            if (!error) {
-              console.log(data);
-            } else {
-              console.log(error);
-            }
-          }
-        },
-        { Delete: displayDeleteCustomer }
-      ],
-      Serving: [
-        {
-          'Finish Serving': () => null
-        },
-        {
-          'Mark No Show': () => null
-        },
-        {
-          'Return to Waiting List': returnToWaitingList
-        },
-        {
-          Delete: displayDeleteCustomer
+    const callToStation = async () => {
+      if (servingCustomer) {
+        console.log('You are already serving a customer');
+      } else {
+        const { data, error } = await CustomerController.updateStatus(
+          selectedCustomer.id,
+          { status: 'Serving' }
+        );
+        if (!error) {
+          console.log(data);
+        } else {
+          console.log(error);
         }
-      ],
-      Served: [
-        {
-          'Return to Waiting List': returnToWaitingList
-        },
-        {
-          Delete: displayDeleteCustomer
-        }
-      ],
-      'No Show': [
-        {
-          'Return to Waiting List': returnToWaitingList
-        },
-        {
-          Delete: displayDeleteCustomer
-        }
-      ],
-      'At MV1': [],
-      'At MV2': [],
-      'At MV3': [],
-      'At MV4': [],
-      'At DL1': [],
-      'At DL2': []
+      }
     };
 
-    function displayPanelActionButtons() {
+    const finishServing = async () => {
+      const { data, error } = await CustomerController.finishServing(
+        selectedCustomer.id
+      );
+      if (error) {
+        // Show error
+        console.log(data);
+      } else {
+        // Show success indicator
+        setPanelChild(
+          <Confirm
+            title={'Call Next Customer?'}
+            message={
+              'Would you like to call the next customer in the waiting list to your station?'
+            }
+            cancelBtnText="No"
+            onCancel={displayPanelActionButtons}
+            confirmBtnStyles="bg-serving text-white"
+            confirmBtnText="Yes"
+            onConfirm={async () => {
+              const { data, error } =
+                await CustomerController.callNext(currentStation);
+
+              if (!error) {
+                // setSelectedCustomerId to "Serving" customer
+                console.log(data);
+              } else {
+                // display error
+                console.log(error);
+                displayPanelActionButtons();
+              }
+            }}
+          />
+        );
+      }
+    };
+
+    const markNoShow = async () => {
+      setPanelChild(
+        <Confirm
+          title={'Mark Customer as a No Show?'}
+          message={
+            'Marking this customer as a no show will remove them from the waiting list and require them to re-check in.'
+          }
+          onCancel={displayPanelActionButtons}
+          confirmBtnText="Mark No Show"
+          onConfirm={async () => {
+            const { error } = await CustomerController.markNoShow(
+              selectedCustomer.id
+            );
+
+            if (error) {
+              // Give error indication
+              console.log(error);
+            } else {
+              // Give success indication
+              displayPanelActionButtons();
+            }
+          }}
+        />
+      );
+    };
+
+    const getAvailableActions = (
+      customer: Customer
+    ): Record<string, () => Promise<void>>[] => {
+      let actions: Record<string, () => Promise<void>>[] = [];
+      const { status, callTimes } = customer;
+
+      switch (status) {
+        case 'Waiting':
+          actions.push({
+            'Call to Station': callToStation
+          });
+          if (callTimes.length) {
+            actions.push({ 'Mark No Show': markNoShow });
+          }
+          actions.push({ Delete: deleteCustomer });
+          break;
+        case 'Serving':
+          actions = [
+            {
+              'Finish Serving': finishServing
+            },
+            {
+              'Mark No Show': markNoShow
+            },
+            {
+              'Return to Waiting List': returnToWaitingList
+            },
+            {
+              Delete: deleteCustomer
+            }
+          ];
+          break;
+        case 'Served':
+          actions = [
+            {
+              Delete: deleteCustomer
+            }
+          ];
+          break;
+        case 'No Show':
+          actions = [
+            {
+              'Return to Waiting List': returnToWaitingList
+            },
+            {
+              Delete: deleteCustomer
+            }
+          ];
+          break;
+        default:
+          actions = [];
+      }
+
+      return actions;
+    };
+
+    const displayPanelActionButtons = () => {
       if (selectedCustomer) {
+        const renderActionBtns = () =>
+          getAvailableActions(selectedCustomer).map((action) => {
+            const [actionName, actionFn] = Object.entries(action)[0];
+            return (
+              <CustomerPanelActionButton
+                key={actionName}
+                text={actionName}
+                onClick={() => actionFn()}
+              />
+            );
+          });
+
         setPanelChild(
           <div>
             <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
@@ -147,19 +245,7 @@ function App() {
           </div>
         );
       }
-    }
-
-    const renderActionBtns = () =>
-      actions[selectedCustomer.status].map((action) => {
-        const [actionName, actionFn] = Object.entries(action)[0];
-        return (
-          <CustomerPanelActionButton
-            key={actionName}
-            text={actionName}
-            onClick={() => actionFn()}
-          />
-        );
-      });
+    };
 
     if (waitingListPosition) {
       setPanelChild(

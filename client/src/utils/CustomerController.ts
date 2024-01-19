@@ -39,4 +39,20 @@ export default class CustomerController {
   }) {
     return { error: false, data: [customerId, index] };
   }
+
+  static async callToStation(id: number): Promise<FetchResponse> {
+    return { data: `Begin serving customer with id ${id}` };
+  }
+
+  static async callNext(stationId: string): Promise<FetchResponse> {
+    return { data: `Call next customer to station ${stationId}` };
+  }
+
+  static async finishServing(id: number): Promise<FetchResponse> {
+    return { data: `Finished serving customer with id ${id}` };
+  }
+
+  static async markNoShow(id: number): Promise<FetchResponse> {
+    return { data: `Mark customer with id ${id} as No Show` };
+  }
 }
