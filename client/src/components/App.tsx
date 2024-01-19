@@ -44,6 +44,7 @@ function App() {
     const loadCustomers = async () => {
       const { error, data } = await CustomerController.get({ date });
       if (!error) {
+        console.log(data);
         setCustomers(data);
       } else {
         // setError(res.error)

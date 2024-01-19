@@ -15,12 +15,12 @@ export default function CustomerListRow({
     Serving: 'border-serving outline-serving',
     Served: 'border-served outline-served',
     'No Show': 'border-no_show outline-no_show',
-    'At MV1': 'border-mv1 outline-mv1',
-    'At MV2': 'border-mv2 outline-mv2',
-    'At MV3': 'border-mv3 outline-mv3',
-    'At MV4': 'border-mv4 outline-mv4',
-    'At DL1': 'border-dl1 outline-dl1',
-    'At DL2': 'border-dl2 outline-dl2'
+    MV1: 'border-mv1 outline-mv1',
+    MV2: 'border-mv2 outline-mv2',
+    MV3: 'border-mv3 outline-mv3',
+    MV4: 'border-mv4 outline-mv4',
+    DL1: 'border-dl1 outline-dl1',
+    DL2: 'border-dl2 outline-dl2'
   };
 
   const statusTextStyles = {
@@ -28,12 +28,12 @@ export default function CustomerListRow({
     Serving: 'text-serving',
     Served: 'text-served',
     'No Show': 'text-no_show',
-    'At MV1': 'text-mv1',
-    'At MV2': 'text-mv2',
-    'At MV3': 'text-mv3',
-    'At MV4': 'text-mv4',
-    'At DL1': 'text-dl1',
-    'At DL2': 'text-dl2'
+    MV1: 'text-mv1',
+    MV2: 'text-mv2',
+    MV3: 'text-mv3',
+    MV4: 'text-mv4',
+    DL1: 'text-dl1',
+    DL2: 'text-dl2'
   };
 
   return (

@@ -5,12 +5,12 @@ export type CustomerStatus =
   | 'Serving'
   | 'Served'
   | 'No Show'
-  | `At ${Station}`;
+  | `${Station}`;
 
 export type Filter = 'Waiting' | 'Served' | 'No Show';
 
 export interface Customer {
-  id: number;
+  id: number; // This should be a string?
   status: CustomerStatus;
   name: string;
   checkInTime: Date;

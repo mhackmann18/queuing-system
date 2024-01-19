@@ -11,12 +11,12 @@ export default function CustomerPanelWrapper({
     'No Show': 'text-no_show border-no_show',
     Serving: 'text-serving border-serving',
     Waiting: 'text-waiting border-waiting',
-    'At MV1': 'text-mv1 border-mv1',
-    'At MV2': 'text-mv2 border-mv2',
-    'At MV3': 'text-mv3 border-mv3',
-    'At MV4': 'text-mv4 border-mv4',
-    'At DL1': 'text-dl1 border-mv5',
-    'At DL2': 'text-dl2 border-mv6'
+    MV1: 'text-mv1 border-mv1',
+    MV2: 'text-mv2 border-mv2',
+    MV3: 'text-mv3 border-mv3',
+    MV4: 'text-mv4 border-mv4',
+    DL1: 'text-dl1 border-mv5',
+    DL2: 'text-dl2 border-mv6'
   };
 
   return (
