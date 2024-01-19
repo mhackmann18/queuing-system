@@ -10,6 +10,7 @@ import Confirm from './Confirm';
 import CustomerList from './CustomerList';
 import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
+import generateCustomers from 'utils/generateCustomers';
 
 // Stand-in state
 const currentStation: Station = 'MV1';
@@ -43,7 +44,7 @@ function App() {
   useEffect(() => {
     const loadCustomers = async () => {
       const { error, data } = await CustomerController.get({ date });
-      if (!error) {
+      if (!error && data) {
         console.log(data);
         setCustomers(data);
       } else {
@@ -53,6 +54,8 @@ function App() {
 
     loadCustomers();
   }, [date]);
+
+  useEffect(() => generateCustomers(), []);
 
   // Set the child of CustomerPanel
   useEffect(updatePanelChildEffect, [
