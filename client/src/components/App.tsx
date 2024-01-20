@@ -23,7 +23,9 @@ function App() {
     Served: false
   });
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState(1);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(
+    null
+  );
   const selectedCustomer =
     customers.length && customers.find((c) => c.id === selectedCustomerId);
   const servingCustomer =
@@ -46,6 +48,8 @@ function App() {
       const { error, data } = await CustomerController.get({ date });
       if (!error && data) {
         console.log(data);
+        // Find selected customer
+        setSelectedCustomerId(data[0].id);
         setCustomers(data);
       } else {
         // setError(res.error)

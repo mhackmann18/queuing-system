@@ -1,28 +1,4 @@
-type CustomerRawStatus =
-  | 'Waiting'
-  | 'Served'
-  | 'No Show'
-  | 'MV1'
-  | 'MV2'
-  | 'MV3'
-  | 'MV4'
-  | 'DL1'
-  | 'DL2';
-
-export interface CustomerRaw {
-  id: number;
-  firstName: string;
-  lastName: string;
-  checkInTime: string;
-  motorVehicle?: {
-    status: CustomerRawStatus;
-    callTimes: string[] | [];
-  };
-  driversLicense?: {
-    status: CustomerRawStatus;
-    callTimes: string[] | [];
-  };
-}
+import { CustomerRawStatus, CustomerRaw } from './CustomerController';
 
 // Function to generate a unique ID
 const generateUniqueId = (() => {
@@ -70,21 +46,9 @@ class CustomerGenerator {
     this.driversLicenseStationsRemaing = ['DL1', 'DL2'];
   }
 
-  #statusOptions: CustomerRawStatus[] = [
-    'Waiting',
-    'Served',
-    'No Show',
-    'MV1',
-    'MV2',
-    'MV3',
-    'MV4',
-    'DL1',
-    'DL2'
-  ];
-
   getNext(): CustomerRaw {
     const id = generateUniqueId();
-    const checkInTime = getRandomDateWithinHoursRange(9, 18); // Restricted to 9 AM to 6 PM
+    const checkInTime = getRandomDateWithinHoursRange(7, new Date().getHours()); // Restricted to 9 AM to 6 PM
 
     // Determine whether customer is MV, DL, or both
     const isMotorVehicleCustomer = Math.random() < 0.8; // 80% chance of having 'motorVehicle' status
