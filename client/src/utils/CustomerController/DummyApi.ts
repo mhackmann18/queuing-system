@@ -113,10 +113,22 @@ class CustomerGenerator {
   }
 }
 
+export type ApiResponse = Promise<{
+  data: string | null;
+  error?: string;
+}>;
+
 export interface GetCustomersBody {
   date: Date;
   department?: 'Motor Vehicle' | "Driver's License";
   statuses?: CustomerRawStatus[];
+}
+
+export interface UpdateCustomerBody {
+  department: 'Motor Vehicle' | "Driver's License";
+  addCallTime?: Date;
+  waitingListIndex?: number;
+  status?: CustomerRawStatus;
 }
 
 export default class DummyApi {
@@ -128,7 +140,7 @@ export default class DummyApi {
       c.getNext()
     );
 
-    const sortedCustomers = sortCustomers(customers);
+    const sortedCustomers = getSortedCustomers(customers);
 
     // Convert the array to JSON
     const customersJSON = JSON.stringify(sortedCustomers, null, 2);
@@ -140,10 +152,7 @@ export default class DummyApi {
     date,
     department,
     statuses
-  }: GetCustomersBody): Promise<{
-    data: string | null;
-    error?: string;
-  }> {
+  }: GetCustomersBody): ApiResponse {
     const customers = localStorage.getItem('customers');
 
     if (!customers) {
@@ -196,9 +205,7 @@ export default class DummyApi {
     return { data: JSON.stringify(result) };
   }
 
-  static async deleteCustomer(
-    id: number
-  ): Promise<{ data: string | null; error?: string }> {
+  static async deleteCustomer(id: number): ApiResponse {
     const customers = localStorage.getItem('customers');
 
     if (!customers) {
@@ -219,10 +226,59 @@ export default class DummyApi {
 
     return { data: JSON.stringify(deletedCustomer) };
   }
+
+  static async updateCustomer(
+    id: number,
+    { addCallTime, status, waitingListIndex, department }: UpdateCustomerBody
+  ): ApiResponse {
+    const customers = localStorage.getItem('customers');
+
+    if (!customers) {
+      return { data: null, error: 'The database has not yet been initialized' };
+    }
+
+    const rawCustomers: CustomerRaw[] = JSON.parse(customers);
+
+    const indexOfCustomerToUpdate = rawCustomers.findIndex((c) => c.id === id);
+
+    if (indexOfCustomerToUpdate === -1) {
+      return { data: null, error: `No customer exists with id: ${id}` };
+    }
+
+    const deptKey =
+      department === 'Motor Vehicle' ? 'motorVehicle' : 'driversLicense';
+
+    if (!rawCustomers[indexOfCustomerToUpdate][deptKey]) {
+      return {
+        data: null,
+        error: `No customer exists in the department: ${department} with id: ${id}`
+      };
+    } else {
+      if (addCallTime) {
+        rawCustomers[indexOfCustomerToUpdate][deptKey]!.callTimes.push(
+          addCallTime.toISOString()
+        );
+      }
+      if (status) {
+        rawCustomers[indexOfCustomerToUpdate][deptKey]!.status = status;
+      }
+      if (waitingListIndex) {
+        // find insertion point
+      }
+    }
+
+    const updatedCustomer = rawCustomers[indexOfCustomerToUpdate];
+
+    const sortedRawCustomers = getSortedCustomers(rawCustomers);
+
+    localStorage.setItem('customers', JSON.stringify(sortedRawCustomers));
+
+    return { data: JSON.stringify(updatedCustomer) };
+  }
 }
 
 // ONLY GIVES MV CUSTOMERS
-function sortCustomers(customers: CustomerRaw[]) {
+function getSortedCustomers(customers: CustomerRaw[]) {
   const servedCustomers = [];
   const servingCustomers = [];
   const waitingCustomers = [];

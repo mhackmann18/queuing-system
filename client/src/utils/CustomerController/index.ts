@@ -51,7 +51,7 @@ export default class CustomerController {
     return { data: result };
   }
 
-  static async updateOne(
+  async updateOne(
     id: number,
     {
       status,
@@ -60,17 +60,36 @@ export default class CustomerController {
     }: {
       status?: CustomerStatus;
       waitingListIndex?: number;
-      addCallTime?: string; // Date string ISO 8601 format = "2024-01-19T21:03:27.178Z"
+      addCallTime?: Date;
     }
-  ): Promise<{ data: Customer | null; error?: string }> {}
+  ): Promise<{ data: Customer | null; error?: string }> {
+    const { data, error } = await DummyApi.updateCustomer(id, {
+      department:
+        this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
+      status: status === 'Serving' ? this.station : status,
+      waitingListIndex,
+      addCallTime
+    });
+
+    if (!data) {
+      return { data: null, error };
+    }
+
+    const rawCustomer: CustomerRaw = JSON.parse(data);
+
+    const result = this.#sanitizeCustomer(rawCustomer);
+
+    return { data: result };
+  }
 
   // OTHER
 
-  static async updateStatus(
+  async updateStatus(
     id: number,
     { status }: { status: CustomerStatus }
   ): Promise<{ data: Customer | null; error?: string }> {
-    return { data: `Updated customer with id ${id} to status '${status}'` };
+    const res = await this.updateOne(id, { status });
+    return res;
   }
 
   static async updateWaitingListIndex({
@@ -87,7 +106,7 @@ export default class CustomerController {
     return { data: `Begin serving customer with id ${id}` };
   }
 
-  static async callNext(stationId: string): Promise<FetchResponse> {
+  static async callNext(): Promise<{ data: Customer | null; error?: string }> {
     return { data: `Call next customer to station ${stationId}` };
   }
 

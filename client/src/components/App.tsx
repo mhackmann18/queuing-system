@@ -123,12 +123,13 @@ function App() {
       if (servingCustomer) {
         console.log('You are already serving a customer');
       } else {
-        const { data, error } = await CustomerController.updateStatus(
+        const { data, error } = await apiController.current.updateOne(
           selectedCustomer.id,
-          { status: 'Serving' }
+          { status: 'Serving', addCallTime: new Date() }
         );
         if (!error) {
           console.log(data);
+          loadCustomers();
         } else {
           console.log(error);
         }
@@ -136,8 +137,9 @@ function App() {
     };
 
     const finishServing = async () => {
-      const { data, error } = await CustomerController.finishServing(
-        selectedCustomer.id
+      const { data, error } = await apiController.current.updateOne(
+        selectedCustomer.id,
+        { status: 'Served' }
       );
       if (error) {
         // Show error
@@ -155,11 +157,12 @@ function App() {
             confirmBtnStyles="bg-serving text-white"
             confirmBtnText="Yes"
             onConfirm={async () => {
-              const { data, error } =
-                await CustomerController.callNext(currentStation);
+              const { data, error } = await apiController.current.callNext();
 
               if (!error) {
                 // setSelectedCustomerId to "Serving" customer
+                loadCustomers();
+
                 console.log(data);
               } else {
                 // display error
@@ -182,8 +185,9 @@ function App() {
           onCancel={displayPanelActionButtons}
           confirmBtnText="Mark No Show"
           onConfirm={async () => {
-            const { error } = await CustomerController.markNoShow(
-              selectedCustomer.id
+            const { error } = await apiController.current.updateOne(
+              selectedCustomer.id,
+              { status: 'No Show' }
             );
 
             if (error) {
@@ -191,6 +195,7 @@ function App() {
               console.log(error);
             } else {
               // Give success indication
+              loadCustomers();
               displayPanelActionButtons();
             }
           }}
