@@ -3,21 +3,21 @@ import DateToggler from './Header/DateToggler';
 import Filters from './Header/Filters';
 import StationIcon from './Header/StationIcon';
 import CustomerController from '../utils/CustomerController';
-import { Customer, Filter, Station } from '../utils/types';
-import { useEffect, useState } from 'react';
+import { Customer, CustomerStatus, Filter, Station } from '../utils/types';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
 import CustomerList from './CustomerList';
 import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
-import generateCustomers from 'utils/generateCustomers';
+import DummyApi from 'utils/CustomerController/DummyApi';
 
 // Stand-in state
 const currentStation: Station = 'MV1';
 const currentDepartment = 'Motor Vehicle';
 
 function App() {
-  const [activeFilters, setActiveFilters] = useState({
+  const [activeFilters, setActiveFilters] = useState<Record<Filter, boolean>>({
     Waiting: true,
     'No Show': false,
     Served: false
@@ -32,6 +32,7 @@ function App() {
     customers.length && customers.find((c) => c.status === 'Serving');
   const [date, setDate] = useState(new Date());
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
+  const apiController = useRef(new CustomerController(currentStation));
   const [waitingListPosition, setWaitingListPosition] = useState<{
     index: number;
     chosen: boolean;
@@ -42,30 +43,45 @@ function App() {
     setActiveFilters({ ...activeFilters });
   };
 
+  // Init stand-in dummy api
+  useEffect(() => DummyApi.init(), []);
+
+  const loadCustomers = useCallback(async () => {
+    const { error, data } = await apiController.current.get({
+      date,
+      department: currentDepartment,
+      statuses: (() => {
+        const statuses: CustomerStatus[] = ['Serving'];
+        Object.entries(activeFilters).forEach(([filter, active]) => {
+          if (active) {
+            const customerStatus = filter as CustomerStatus;
+            statuses.push(customerStatus);
+          }
+        });
+        return statuses;
+      })()
+    });
+    if (!error && data) {
+      console.log(data);
+      // Find selected customer
+      setSelectedCustomerId(data[0].id);
+      setCustomers(data);
+    } else {
+      // setError(res.error)
+    }
+  }, [date, activeFilters]);
+
   // Get customers from api when component mounts
   useEffect(() => {
-    const loadCustomers = async () => {
-      const { error, data } = await CustomerController.get({ date });
-      if (!error && data) {
-        console.log(data);
-        // Find selected customer
-        setSelectedCustomerId(data[0].id);
-        setCustomers(data);
-      } else {
-        // setError(res.error)
-      }
-    };
-
     loadCustomers();
-  }, [date]);
-
-  useEffect(() => generateCustomers(), []);
+  }, [loadCustomers]);
 
   // Set the child of CustomerPanel
   useEffect(updatePanelChildEffect, [
     selectedCustomer,
     servingCustomer,
-    waitingListPosition
+    waitingListPosition,
+    loadCustomers
   ]);
 
   function updatePanelChildEffect() {
@@ -78,8 +94,15 @@ function App() {
         <Confirm
           title="Delete Customer"
           message="Are you sure you want to delete this customer?"
-          onConfirm={() => {
-            console.log('Delete customer');
+          onConfirm={async () => {
+            const { data, error } = await apiController.current.delete(
+              selectedCustomer.id
+            );
+            if (data) {
+              loadCustomers();
+            } else {
+              console.log(error);
+            }
             displayPanelActionButtons();
           }}
           onCancel={displayPanelActionButtons}
