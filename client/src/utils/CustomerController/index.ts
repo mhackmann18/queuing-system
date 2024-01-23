@@ -7,8 +7,8 @@ interface CustomerControllerSingleResult {
   error?: string;
 }
 
-// For these two types, there should only be an error when the data is null.
-// Likewise, the data should only be null when there's an error.
+// For these two Result types, there should only be an error when the data is null.
+// Similarly, the data should only be null when there's an error.
 
 interface CustomerControllerManyResult {
   data: Customer[] | null;
@@ -43,7 +43,7 @@ export default class CustomerController {
     department?: 'Motor Vehicle' | "Driver's License";
     statuses?: CustomerStatus[];
   }): Promise<CustomerControllerManyResult> {
-    // Make API POST request /api/v1/customers
+    // TODO: Make POST request /api/v1/customers
     const response = await DummyApi.getCustomers({
       date,
       department,
@@ -73,7 +73,7 @@ export default class CustomerController {
    * @param {number} id - The id of the customer to delete.
    */
   async delete(id: number): Promise<CustomerControllerSingleResult> {
-    // Make API delete reuest to /api/v1/customers/id
+    // TODO: Make DELETE request to /api/v1/customers/id
     const response = await DummyApi.deleteCustomer(id);
     const { data, error } = response;
 
@@ -81,6 +81,7 @@ export default class CustomerController {
       return { data: null, error };
     }
 
+    // Deleted customer data
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
     const result = this.#sanitizeCustomer(rawCustomer);
@@ -105,14 +106,15 @@ export default class CustomerController {
       addCallTime?: Date;
     }
   ): Promise<CustomerControllerSingleResult> {
+    const { status, waitingListIndex, addCallTime } = updatedProperties;
+
+    // Error checks
     if (!Object.keys(updatedProperties).length) {
       return {
         data: null,
         error: 'You must provide at least one property to update'
       };
     }
-
-    const { status, waitingListIndex, addCallTime } = updatedProperties;
 
     if (waitingListIndex && status && status !== 'Waiting') {
       return {
@@ -122,6 +124,7 @@ export default class CustomerController {
       };
     }
 
+    // TODO: Make PUT request to /api/v1/customers/id
     const { data, error } = await DummyApi.updateCustomer(id, {
       department:
         this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
@@ -134,11 +137,12 @@ export default class CustomerController {
       return { data: null, error };
     }
 
+    // Updated customer data
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
-    const result = this.#sanitizeCustomer(rawCustomer);
+    const updatedCustomer = this.#sanitizeCustomer(rawCustomer);
 
-    return { data: result };
+    return { data: updatedCustomer };
   }
 
   /*********************/
