@@ -2,6 +2,19 @@ import { Customer, CustomerStatus, Station } from 'utils/types';
 import { CustomerRaw } from './types';
 import DummyApi from './DummyApi';
 
+interface CustomerControllerSingleResult {
+  data: Customer | null;
+  error?: string;
+}
+
+// For these two types, there should only be an error when the data is null.
+// Likewise, the data should only be null when there's an error.
+
+interface CustomerControllerManyResult {
+  data: Customer[] | null;
+  error?: string;
+}
+
 export default class CustomerController {
   station: Station;
 
@@ -9,6 +22,18 @@ export default class CustomerController {
     this.station = station;
   }
 
+  /******************/
+  /* CORE FUNCTIONS */
+  /******************/
+
+  /**
+   * Gets an array of customers matching the specified filter criteria.
+   *
+   * @param {Object} filters - An object with filter properties.
+   * @param {Date} filters.date - The date for filtering customers.
+   * @param {('Motor Vehicle' | "Driver's License")} [filters.department] - The department for filtering customers.
+   * @param {CustomerStatus[]} [filters.statuses] - An array of customer statuses for filtering.
+   */
   async get({
     date,
     department,
@@ -17,28 +42,40 @@ export default class CustomerController {
     date: Date;
     department?: 'Motor Vehicle' | "Driver's License";
     statuses?: CustomerStatus[];
-  }): Promise<{ data: Customer[] | null; error?: string }> {
-    // The serving status only exists on the client. In the api it is translated to the current station.
-    const { data, error } = await DummyApi.getCustomers({
+  }): Promise<CustomerControllerManyResult> {
+    // Make API POST request /api/v1/customers
+    const response = await DummyApi.getCustomers({
       date,
       department,
       statuses:
+        // The 'Serving' status only exists on the client
         statuses && statuses.map((s) => (s === 'Serving' ? this.station : s))
     });
 
+    const { data, error } = response;
+
     if (!data) {
-      return { data: null, error };
+      return { data: null, error: error };
     }
 
     const rawCustomers: CustomerRaw[] = JSON.parse(data);
 
-    const result = rawCustomers.map((c) => this.#sanitizeCustomer(c));
+    const sanitizedCustomers = rawCustomers.map((c) =>
+      this.#sanitizeCustomer(c)
+    );
 
-    return { data: result };
+    return { data: sanitizedCustomers };
   }
 
-  async delete(id: number): Promise<{ data: Customer | null; error?: string }> {
-    const { data, error } = await DummyApi.deleteCustomer(id);
+  /**
+   * Deletes a customer with the specified id.
+   *
+   * @param {number} id - The id of the customer to delete.
+   */
+  async delete(id: number): Promise<CustomerControllerSingleResult> {
+    // Make API delete reuest to /api/v1/customers/id
+    const response = await DummyApi.deleteCustomer(id);
+    const { data, error } = response;
 
     if (!data) {
       return { data: null, error };
@@ -51,18 +88,40 @@ export default class CustomerController {
     return { data: result };
   }
 
-  async updateOne(
+  /**
+   * Updates the properties of a customer.
+   *
+   * @param {number} id - The id of the customer to update.
+   * @param {Object} updatedProperties - The customer properties to update.
+   * @param {CustomerStatus} [updatedProperties.status] - Updated status.
+   * @param {number} [updatedProperties.waitingListIndex] - Updated position in the waiting list.
+   * @param {Date} [updatedProperties.addCallTime] - New call time to add to existing call times.
+   */
+  async update(
     id: number,
-    {
-      status,
-      waitingListIndex,
-      addCallTime
-    }: {
+    updatedProperties: {
       status?: CustomerStatus;
       waitingListIndex?: number;
       addCallTime?: Date;
     }
-  ): Promise<{ data: Customer | null; error?: string }> {
+  ): Promise<CustomerControllerSingleResult> {
+    if (!Object.keys(updatedProperties).length) {
+      return {
+        data: null,
+        error: 'You must provide at least one property to update'
+      };
+    }
+
+    const { status, waitingListIndex, addCallTime } = updatedProperties;
+
+    if (waitingListIndex && status && status !== 'Waiting') {
+      return {
+        data: null,
+        error:
+          "A customer cannot have a waitingListIndex if their status isn't equal to 'Waiting'"
+      };
+    }
+
     const { data, error } = await DummyApi.updateCustomer(id, {
       department:
         this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
@@ -82,41 +141,77 @@ export default class CustomerController {
     return { data: result };
   }
 
-  // OTHER
+  /*********************/
+  /* DERIVED FUNCTIONS */
+  /*********************/
 
-  async updateStatus(
-    id: number,
-    { status }: { status: CustomerStatus }
-  ): Promise<{ data: Customer | null; error?: string }> {
-    const res = await this.updateOne(id, { status });
+  async updateWaitingListIndex({
+    id,
+    index
+  }: {
+    id: number;
+    index: number;
+  }): Promise<CustomerControllerSingleResult> {
+    const res = await this.update(id, {
+      waitingListIndex: index
+    });
+
     return res;
   }
 
-  static async updateWaitingListIndex({
-    customerId,
-    index
-  }: {
-    customerId: number;
-    index: number;
-  }) {
-    return { error: false, data: [customerId, index] };
+  async callToStation(id: number): Promise<CustomerControllerSingleResult> {
+    const res = await this.update(id, {
+      status: 'Serving',
+      addCallTime: new Date()
+    });
+    return res;
   }
 
-  static async callToStation(id: number): Promise<FetchResponse> {
-    return { data: `Begin serving customer with id ${id}` };
+  async callNext(): Promise<{ data: Customer | null; error?: string }> {
+    // Get customers in the WL
+    const res = await this.get({
+      date: new Date(),
+      department:
+        this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
+      statuses: ['Waiting']
+    });
+
+    if (res.error || !res.data) {
+      return { data: null, error: res.error };
+    }
+
+    if (!res.data.length) {
+      return {
+        data: null,
+        error: 'There are no customers in the waiting list'
+      };
+    }
+
+    // Get id of first customer in WL
+    const idOfCustomerToCall = res.data[0].id;
+
+    const result = await this.callToStation(idOfCustomerToCall);
+
+    return result;
   }
 
-  static async callNext(): Promise<{ data: Customer | null; error?: string }> {
-    return { data: `Call next customer to station ${stationId}` };
+  async finishServing(id: number): Promise<CustomerControllerSingleResult> {
+    const res = await this.update(id, {
+      status: 'Served'
+    });
+    return res;
   }
 
-  static async finishServing(id: number): Promise<FetchResponse> {
-    return { data: `Finished serving customer with id ${id}` };
+  async markNoShow(id: number): Promise<CustomerControllerSingleResult> {
+    const res = await this.update(id, {
+      status: 'No Show'
+    });
+    return res;
   }
 
-  static async markNoShow(id: number): Promise<FetchResponse> {
-    return { data: `Mark customer with id ${id} as No Show` };
-  }
+  /********************/
+  /* HELPER FUNCTIONS */
+  /********************/
 
   #sanitizeCustomer(customer: CustomerRaw): Customer {
     const currentDepartment =

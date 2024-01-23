@@ -1,9 +1,9 @@
 import { DLStation, MVStation, RequireAtLeastOne } from 'utils/types';
 
-type CRawStatus = 'Waiting' | 'Served' | 'No Show';
+export type CustomerRawGenericStatus = 'Waiting' | 'Served' | 'No Show';
 
-export type DLCustomerRawStatus = DLStation | CRawStatus;
-export type MVCustomerRawStatus = MVStation | CRawStatus;
+export type DLCustomerRawStatus = DLStation | CustomerRawGenericStatus;
+export type MVCustomerRawStatus = MVStation | CustomerRawGenericStatus;
 
 export type CustomerRawStatus = DLCustomerRawStatus | MVCustomerRawStatus;
 
@@ -14,11 +14,11 @@ interface CRaw {
   checkInTime: string;
   motorVehicle?: {
     status: MVCustomerRawStatus;
-    callTimes: string[] | [];
+    callTimes: string[];
   };
   driversLicense?: {
     status: DLCustomerRawStatus;
-    callTimes: string[] | [];
+    callTimes: string[];
   };
 }
 

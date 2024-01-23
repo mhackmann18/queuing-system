@@ -12,6 +12,10 @@ import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
 import DummyApi from 'utils/CustomerController/DummyApi';
 
+// WL = Waiting List
+// MV = Motor Vehicle
+// DL = Driver's License
+
 // Stand-in state
 const currentStation: Station = 'MV1';
 const currentDepartment = 'Motor Vehicle';
@@ -43,7 +47,7 @@ function App() {
     setActiveFilters({ ...activeFilters });
   };
 
-  // Init stand-in dummy api
+  // Init stand-in dummy api -- TODO: Delete this line
   useEffect(() => DummyApi.init(), []);
 
   const loadCustomers = useCallback(async () => {
@@ -101,6 +105,7 @@ function App() {
             if (data) {
               loadCustomers();
             } else {
+              // TODO Display error
               console.log(error);
             }
             displayPanelActionButtons();
@@ -113,6 +118,7 @@ function App() {
     };
 
     const returnToWaitingList = async () => {
+      // Switches panel to WL position picker
       setWaitingListPosition({
         index: 0,
         chosen: false
@@ -120,32 +126,30 @@ function App() {
     };
 
     const callToStation = async () => {
+      // Can't serve two customers at once
       if (servingCustomer) {
+        // TODO display error
         console.log('You are already serving a customer');
       } else {
-        const { data, error } = await apiController.current.updateOne(
-          selectedCustomer.id,
-          { status: 'Serving', addCallTime: new Date() }
+        const { data, error } = await apiController.current.callToStation(
+          selectedCustomer.id
         );
-        if (!error) {
-          console.log(data);
+        if (data) {
           loadCustomers();
         } else {
+          // TODO display error
           console.log(error);
         }
       }
     };
 
     const finishServing = async () => {
-      const { data, error } = await apiController.current.updateOne(
+      const { data, error } = await apiController.current.update(
         selectedCustomer.id,
         { status: 'Served' }
       );
-      if (error) {
+      if (data) {
         // Show error
-        console.log(data);
-      } else {
-        // Show success indicator
         setPanelChild(
           <Confirm
             title={'Call Next Customer?'}
@@ -172,6 +176,9 @@ function App() {
             }}
           />
         );
+      } else {
+        // TODO show error
+        console.log(error);
       }
     };
 
@@ -185,7 +192,7 @@ function App() {
           onCancel={displayPanelActionButtons}
           confirmBtnText="Mark No Show"
           onConfirm={async () => {
-            const { error } = await apiController.current.updateOne(
+            const { error } = await apiController.current.update(
               selectedCustomer.id,
               { status: 'No Show' }
             );
@@ -292,13 +299,18 @@ function App() {
           }
           onCancel={() => setWaitingListPosition(null)}
           onConfirm={async () => {
-            const { error } = await CustomerController.updateWaitingListIndex({
-              customerId: selectedCustomer.id,
-              index: waitingListPosition.index
-            });
+            console.log(waitingListPosition.index);
+            const { error } = await apiController.current.update(
+              selectedCustomer.id,
+              {
+                status: 'Waiting',
+                waitingListIndex: waitingListPosition.index
+              }
+            );
             if (error) {
               // Show error
             } else {
+              loadCustomers();
               setWaitingListPosition(null);
             }
           }}
