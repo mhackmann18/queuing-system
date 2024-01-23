@@ -1,19 +1,10 @@
 import { Customer, CustomerStatus, Station } from 'utils/types';
-import { CustomerRaw } from './types';
+import {
+  CustomerRaw,
+  CustomerControllerManyResult,
+  CustomerControllerSingleResult
+} from './types';
 import DummyApi from './DummyApi';
-
-interface CustomerControllerSingleResult {
-  data: Customer | null;
-  error?: string;
-}
-
-// For these two Result types, there should only be an error when the data is null.
-// Similarly, the data should only be null when there's an error.
-
-interface CustomerControllerManyResult {
-  data: Customer[] | null;
-  error?: string;
-}
 
 export default class CustomerController {
   station: Station;
@@ -34,15 +25,13 @@ export default class CustomerController {
    * @param {('Motor Vehicle' | "Driver's License")} [filters.department] - The department for filtering customers.
    * @param {CustomerStatus[]} [filters.statuses] - An array of customer statuses for filtering.
    */
-  async get({
-    date,
-    department,
-    statuses
-  }: {
+  async get(filters: {
     date: Date;
     department?: 'Motor Vehicle' | "Driver's License";
     statuses?: CustomerStatus[];
   }): Promise<CustomerControllerManyResult> {
+    const { date, department, statuses } = filters;
+
     // TODO: Make POST request /api/v1/customers
     const response = await DummyApi.getCustomers({
       date,
@@ -73,6 +62,13 @@ export default class CustomerController {
    * @param {number} id - The id of the customer to delete.
    */
   async delete(id: number): Promise<CustomerControllerSingleResult> {
+    if (!id || id <= 0) {
+      return {
+        data: null,
+        error: 'Must provide a positive, non-zero integer for id argument'
+      };
+    }
+
     // TODO: Make DELETE request to /api/v1/customers/id
     const response = await DummyApi.deleteCustomer(id);
     const { data, error } = response;
@@ -171,7 +167,7 @@ export default class CustomerController {
     return res;
   }
 
-  async callNext(): Promise<{ data: Customer | null; error?: string }> {
+  async callNext(): Promise<CustomerControllerSingleResult> {
     // Get customers in the WL
     const res = await this.get({
       date: new Date(),

@@ -12,10 +12,6 @@ import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
 import DummyApi from 'utils/CustomerController/DummyApi';
 
-// WL = Waiting List
-// MV = Motor Vehicle
-// DL = Driver's License
-
 // Stand-in state
 const currentStation: Station = 'MV1';
 const currentDepartment = 'Motor Vehicle';

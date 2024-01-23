@@ -1,4 +1,4 @@
-import { DLStation, MVStation, RequireAtLeastOne } from 'utils/types';
+import { DLStation, MVStation, RequireAtLeastOne, Customer } from 'utils/types';
 
 export type CustomerRawGenericStatus = 'Waiting' | 'Served' | 'No Show';
 
@@ -26,3 +26,17 @@ export type CustomerRaw = RequireAtLeastOne<
   CRaw,
   'motorVehicle' | 'driversLicense'
 >;
+
+// There should only be an error when the data is null.
+// Similarly, the data should only be null when there's an error.
+export interface CustomerControllerSingleResult {
+  data: Customer | null;
+  error?: string;
+}
+
+// There should only be an error when the data is null.
+// Similarly, the data should only be null when there's an error.
+export interface CustomerControllerManyResult {
+  data: Customer[] | null;
+  error?: string;
+}
