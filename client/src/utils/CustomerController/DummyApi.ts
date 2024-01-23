@@ -248,6 +248,24 @@ export default class DummyApi {
     return { data: JSON.stringify(result) };
   }
 
+  static async getCustomerById(id: number): ApiResponse {
+    const customers = localStorage.getItem('customers');
+
+    if (!customers) {
+      return { data: null, error: 'The database has not yet been initialized' };
+    }
+
+    const rawCustomers: CustomerRaw[] = JSON.parse(customers);
+
+    const customer = rawCustomers.find((c) => c.id === id);
+
+    if (!customer) {
+      return { data: null, error: `No customer exists with id ${id}` };
+    }
+
+    return { data: JSON.stringify(customer) };
+  }
+
   static async deleteCustomer(id: number): ApiResponse {
     const customers = localStorage.getItem('customers');
 
@@ -297,8 +315,11 @@ export default class DummyApi {
         error: `No customer exists in the department: ${department} with id: ${id}`
       };
     } else {
+      // Call time is most recent, it should appear at beginning of array
       if (addCallTime) {
-        rawCustomers[indexOfCustomerToUpdate][deptKey]!.callTimes.push(
+        rawCustomers[indexOfCustomerToUpdate][deptKey]!.callTimes.splice(
+          0,
+          0,
           addCallTime.toISOString()
         );
       }
@@ -317,8 +338,6 @@ export default class DummyApi {
         }
 
         let deleteIndex = indexOfCustomerToUpdate;
-
-        console.log(insertIndex);
 
         // Insert updated customer
         rawCustomers.splice(insertIndex, 0, customerToUpdate);
@@ -365,7 +384,6 @@ export default class DummyApi {
     }
 
     const updatedCustomer = rawCustomers[indexOfCustomerToUpdate];
-    console.log(rawCustomers);
 
     localStorage.setItem('customers', JSON.stringify(rawCustomers));
 

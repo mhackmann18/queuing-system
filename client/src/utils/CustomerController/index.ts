@@ -57,6 +57,28 @@ export default class CustomerController {
   }
 
   /**
+   * Gets a single customer by id.
+   *
+   * @param {number} id - An object with filter properties.
+   */
+  async getOne(id: number): Promise<CustomerControllerSingleResult> {
+    // TODO: Make GET request /api/v1/customers/${id}
+    const response = await DummyApi.getCustomerById(id);
+
+    const { data, error } = response;
+
+    if (!data) {
+      return { data: null, error: error };
+    }
+
+    const rawCustomer = JSON.parse(data);
+
+    const selectedCustomer = this.#sanitizeCustomer(rawCustomer);
+
+    return { data: selectedCustomer };
+  }
+
+  /**
    * Deletes a customer with the specified id.
    *
    * @param {number} id - The id of the customer to delete.

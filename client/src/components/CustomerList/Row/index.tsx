@@ -62,7 +62,7 @@ export default function CustomerListRow({
         </span>
         {/* Time Called */}
         <span className="inline-block w-20">
-          {callTimes.length && get12HourTimeString(callTimes[0])}
+          {callTimes.length ? get12HourTimeString(callTimes[0]) : ''}
         </span>
       </div>
     </button>

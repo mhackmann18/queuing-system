@@ -3,7 +3,7 @@ import DateToggler from './Header/DateToggler';
 import Filters from './Header/Filters';
 import StationIcon from './Header/StationIcon';
 import CustomerController from '../utils/CustomerController';
-import { Customer, CustomerStatus, Filter, Station } from '../utils/types';
+import { Customer, CustomerStatus, Station, Filter } from '../utils/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
@@ -28,8 +28,9 @@ function App() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(
     null
   );
-  const selectedCustomer =
-    customers.length && customers.find((c) => c.id === selectedCustomerId);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
   const servingCustomer =
     customers.length && customers.find((c) => c.status === 'Serving');
   const [date, setDate] = useState(new Date());
@@ -57,6 +58,47 @@ function App() {
   // Init stand-in dummy api -- TODO: Delete this line
   useEffect(() => DummyApi.init(), []);
 
+  // Set selected customer
+  useEffect(() => {
+    if (customers && customers.length) {
+      const foundSelectedCustomer = customers.find(
+        (c) => c.id === selectedCustomerId
+      );
+
+      if (foundSelectedCustomer) {
+        setSelectedCustomer(foundSelectedCustomer);
+      } else {
+        const servingCustomer = customers.find((c) => c.status === 'Serving');
+
+        if (servingCustomer) {
+          setSelectedCustomer(servingCustomer);
+        } else {
+          setSelectedCustomerId(customers[0].id);
+        }
+      }
+    }
+  }, [customers, selectedCustomerId]);
+
+  // Get customers from api when component mounts
+  useEffect(() => {
+    const loadInitialCustomers = async () => {
+      const { error, data } = await apiController.current.get({
+        date: new Date(),
+        department: currentDepartment,
+        statuses: ['Waiting', 'Serving']
+      });
+      if (!error && data) {
+        const c = data.find((c) => c.status === 'Serving') || data[0];
+        setSelectedCustomerId(c.id);
+        setCustomers(data);
+      } else {
+        // setError(res.error)
+      }
+    };
+
+    loadInitialCustomers();
+  }, []);
+
   const loadCustomers = useCallback(async () => {
     const { error, data } = await apiController.current.get({
       date,
@@ -73,18 +115,11 @@ function App() {
       })()
     });
     if (!error && data) {
-      // Find selected customer
-      setSelectedCustomerId(data[0].id);
       setCustomers(data);
     } else {
       // setError(res.error)
     }
   }, [date, activeFilters]);
-
-  // Get customers from api when component mounts
-  useEffect(() => {
-    loadCustomers();
-  }, [loadCustomers]);
 
   // Set the child of CustomerPanel
   useEffect(updatePanelChildEffect, [
@@ -371,7 +406,9 @@ function App() {
           <CustomerList
             customers={customers.filter(
               !WLPosPicker
-                ? (c) => c.status === 'Serving' || activeFilters[c.status]
+                ? (c) =>
+                    c.status === 'Serving' ||
+                    Object.keys(activeFilters).includes(c.status)
                 : (c) => c.status === 'Waiting'
             )}
             selectedCustomer={selectedCustomer}
