@@ -12,6 +12,8 @@ import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
 import DummyApi from 'utils/CustomerController/DummyApi';
 
+// WL = Waiting List
+
 // Stand-in state
 const currentStation: Station = 'MV1';
 const currentDepartment = 'Motor Vehicle';
@@ -33,10 +35,19 @@ function App() {
   const [date, setDate] = useState(new Date());
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
   const apiController = useRef(new CustomerController(currentStation));
-  const [waitingListPosition, setWaitingListPosition] = useState<{
+  // Should be null when position picker is inactive
+  const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
-    chosen: boolean;
+    locked: boolean;
   } | null>(null);
+
+  // prop for CustomerList to control WLPosPicker
+  const customerListWLPosPickerController = WLPosPicker && {
+    index: WLPosPicker.index,
+    setIndex: (index: number) => setWLPosPicker({ ...WLPosPicker, index }),
+    locked: WLPosPicker.locked,
+    setLocked: (locked: boolean) => setWLPosPicker({ ...WLPosPicker, locked })
+  };
 
   const toggleFilter = (filter: Filter) => {
     activeFilters[filter] = !activeFilters[filter];
@@ -62,7 +73,6 @@ function App() {
       })()
     });
     if (!error && data) {
-      console.log(data);
       // Find selected customer
       setSelectedCustomerId(data[0].id);
       setCustomers(data);
@@ -80,7 +90,7 @@ function App() {
   useEffect(updatePanelChildEffect, [
     selectedCustomer,
     servingCustomer,
-    waitingListPosition,
+    WLPosPicker,
     loadCustomers
   ]);
 
@@ -115,9 +125,9 @@ function App() {
 
     const returnToWaitingList = async () => {
       // Switches panel to WL position picker
-      setWaitingListPosition({
+      setWLPosPicker({
         index: 0,
-        chosen: false
+        locked: false
       });
     };
 
@@ -286,31 +296,31 @@ function App() {
       }
     };
 
-    if (waitingListPosition) {
+    if (WLPosPicker) {
       setPanelChild(
         <Confirm
           title="Return Customer to Waiting List"
           message={
             'Select where this customer should appear in the waiting list.'
           }
-          onCancel={() => setWaitingListPosition(null)}
+          onCancel={() => setWLPosPicker(null)}
           onConfirm={async () => {
-            console.log(waitingListPosition.index);
+            console.log(WLPosPicker.index);
             const { error } = await apiController.current.update(
               selectedCustomer.id,
               {
                 status: 'Waiting',
-                waitingListIndex: waitingListPosition.index
+                waitingListIndex: WLPosPicker.index
               }
             );
             if (error) {
               // Show error
             } else {
               loadCustomers();
-              setWaitingListPosition(null);
+              setWLPosPicker(null);
             }
           }}
-          confirmBtnDisabled={!waitingListPosition.chosen}
+          confirmBtnDisabled={!WLPosPicker.locked}
         />
       );
     } else {
@@ -320,7 +330,7 @@ function App() {
 
   return (
     <div className="h-screen bg-white">
-      {waitingListPosition && (
+      {WLPosPicker && (
         <div className="w-lvh fixed inset-0 h-lvh bg-black opacity-50" />
       )}
       <header className="h-28">
@@ -360,22 +370,13 @@ function App() {
         {customers.length && selectedCustomer && (
           <CustomerList
             customers={customers.filter(
-              !waitingListPosition
+              !WLPosPicker
                 ? (c) => c.status === 'Serving' || activeFilters[c.status]
                 : (c) => c.status === 'Waiting'
             )}
             selectedCustomer={selectedCustomer}
             setSelectedCustomerId={setSelectedCustomerId}
-            waitingListPositionControl={
-              waitingListPosition && {
-                waitingListIndex: waitingListPosition.index,
-                setWaitingListIndex: (index: number) =>
-                  setWaitingListPosition({ ...waitingListPosition, index }),
-                positionChosen: waitingListPosition.chosen,
-                setPositionChosen: (chosen: boolean) =>
-                  setWaitingListPosition({ ...waitingListPosition, chosen })
-              }
-            }
+            WLPosPicker={customerListWLPosPickerController}
           />
         )}
         {/* Customer Panel */}
@@ -383,7 +384,7 @@ function App() {
           <div className="ml-4">
             <CustomerPanelWrapper
               customer={selectedCustomer}
-              containerStyles={waitingListPosition ? 'z-10' : ''}
+              containerStyles={WLPosPicker ? 'z-10' : ''}
             >
               {panelChild}
             </CustomerPanelWrapper>

@@ -3,63 +3,56 @@ import { Customer } from 'utils/types';
 import { CustomerListProps } from './types';
 import { useEffect, useState } from 'react';
 
-// TODO drag and drop position picker
+// TODO: Implement drag and drop position picker
 
 export default function CustomerList({
   customers,
   selectedCustomer,
   setSelectedCustomerId,
-  waitingListPositionControl
+  WLPosPicker
 }: CustomerListProps) {
   const [orderedCustomers, setOrderedCustomers] =
     useState<Customer[]>(customers);
 
   // Position the selected customer at the proper WL index when the WL position picker is active
   useEffect(() => {
-    if (waitingListPositionControl) {
-      const { waitingListIndex } = waitingListPositionControl;
+    if (WLPosPicker) {
       const waitingList = [...customers];
-      waitingList.splice(waitingListIndex, 0, selectedCustomer);
+      waitingList.splice(WLPosPicker.index, 0, selectedCustomer);
       setOrderedCustomers(waitingList);
     } else {
       setOrderedCustomers(customers);
     }
-  }, [waitingListPositionControl, customers, selectedCustomer]);
+  }, [WLPosPicker, customers, selectedCustomer]);
 
   const mapCustomersToListItem = (c: Customer, index: number) => {
     let handleClick;
     let handleMouseEnter;
     let styles = '';
 
-    // Determine what should happen when customer is clicked
-    if (!waitingListPositionControl) {
-      handleClick = () => setSelectedCustomerId(c.id);
-    } else if (c.id === selectedCustomer.id) {
-      // Lock in or repick the selected customer's postion in WL
-      handleClick = () =>
-        waitingListPositionControl.setPositionChosen(
-          !waitingListPositionControl.positionChosen
-        );
-    }
-
-    // Reposition the selected customer at the index of the customer being moused over
-    if (
-      waitingListPositionControl &&
-      !waitingListPositionControl.positionChosen
-    ) {
-      handleMouseEnter = () =>
-        waitingListPositionControl.setWaitingListIndex(index);
-    }
-
-    // Determine cursor style for customers when WL position picker is active
-    if (waitingListPositionControl) {
-      const { positionChosen } = waitingListPositionControl;
-
+    // If WL position picker is active, applies appropriate behaviors to the CustomerRow buttons
+    if (WLPosPicker) {
+      // Clicking selected customer controls whether their WL pos is locked
       if (c.id === selectedCustomer.id) {
-        styles = positionChosen ? 'hover:cursor-grab' : 'hover:cursor-grabbing';
+        handleClick = () => WLPosPicker.setLocked(!WLPosPicker.locked);
+      }
+
+      // If WL pos isn't locked, reposition selected customer at index of moused over customer
+      if (!WLPosPicker.locked) {
+        handleMouseEnter = () => WLPosPicker.setIndex(index);
+      }
+
+      // Determine hover cursor style
+      if (c.id === selectedCustomer.id) {
+        styles = WLPosPicker.locked
+          ? 'hover:cursor-grab'
+          : 'hover:cursor-grabbing';
       } else {
         styles = 'hover:cursor-default hover:bg-white';
       }
+    } else {
+      // WL position picker isn't active
+      handleClick = () => setSelectedCustomerId(c.id);
     }
 
     return (
@@ -78,7 +71,7 @@ export default function CustomerList({
   return (
     <div
       className={`flex grow flex-col bg-white ${
-        waitingListPositionControl && selectingWLPositionContainerStyles
+        WLPosPicker && selectingWLPositionContainerStyles
       }`}
     >
       <div className="my-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
