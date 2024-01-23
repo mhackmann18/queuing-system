@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 export default function CustomerList({
   customers,
   selectedCustomer,
-  setSelectedCustomerId,
+  setSelectedCustomer,
   WLPosPicker
 }: CustomerListProps) {
   const [orderedCustomers, setOrderedCustomers] =
@@ -52,7 +52,7 @@ export default function CustomerList({
       }
     } else {
       // WL position picker isn't active
-      handleClick = () => setSelectedCustomerId(c.id);
+      handleClick = () => setSelectedCustomer(c);
     }
 
     return (

@@ -25,9 +25,6 @@ function App() {
     Served: false
   });
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(
-    null
-  );
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
@@ -58,26 +55,27 @@ function App() {
   // Init stand-in dummy api -- TODO: Delete this line
   useEffect(() => DummyApi.init(), []);
 
-  // Set selected customer
+  // Update selectedCustomer when customers updates
   useEffect(() => {
     if (customers && customers.length) {
-      const foundSelectedCustomer = customers.find(
-        (c) => c.id === selectedCustomerId
-      );
+      const foundSelectedCustomer =
+        selectedCustomer && customers.find((c) => c.id === selectedCustomer.id);
 
-      if (foundSelectedCustomer) {
-        setSelectedCustomer(foundSelectedCustomer);
-      } else {
+      if (!foundSelectedCustomer) {
         const servingCustomer = customers.find((c) => c.status === 'Serving');
 
         if (servingCustomer) {
           setSelectedCustomer(servingCustomer);
         } else {
-          setSelectedCustomerId(customers[0].id);
+          setSelectedCustomer(customers[0]);
         }
+      } else {
+        setSelectedCustomer(foundSelectedCustomer);
       }
+    } else {
+      setSelectedCustomer(null);
     }
-  }, [customers, selectedCustomerId]);
+  }, [customers, selectedCustomer]);
 
   // Get customers from api when component mounts
   useEffect(() => {
@@ -88,8 +86,6 @@ function App() {
         statuses: ['Waiting', 'Serving']
       });
       if (!error && data) {
-        const c = data.find((c) => c.status === 'Serving') || data[0];
-        setSelectedCustomerId(c.id);
         setCustomers(data);
       } else {
         // setError(res.error)
@@ -120,6 +116,10 @@ function App() {
       // setError(res.error)
     }
   }, [date, activeFilters]);
+
+  useEffect(() => {
+    loadCustomers();
+  }, [activeFilters, loadCustomers]);
 
   // Set the child of CustomerPanel
   useEffect(updatePanelChildEffect, [
@@ -412,7 +412,7 @@ function App() {
                 : (c) => c.status === 'Waiting'
             )}
             selectedCustomer={selectedCustomer}
-            setSelectedCustomerId={setSelectedCustomerId}
+            setSelectedCustomer={setSelectedCustomer}
             WLPosPicker={customerListWLPosPickerController}
           />
         )}

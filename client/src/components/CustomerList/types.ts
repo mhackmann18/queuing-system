@@ -3,7 +3,7 @@ import { Customer } from 'utils/types';
 export interface CustomerListProps {
   customers: Customer[];
   selectedCustomer: Customer;
-  setSelectedCustomerId: (id: number) => void;
+  setSelectedCustomer: (customer: Customer) => void;
   WLPosPicker: WLPosPicker | null;
 }
 
