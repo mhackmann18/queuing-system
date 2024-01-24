@@ -3,6 +3,12 @@ import { Filter, Department } from 'utils/types';
 
 const currentDepartment: Department = 'Motor Vehicle';
 
+export interface CustomerFilters {
+  date: Date;
+  statuses: Record<Filter, boolean>;
+  department: Department;
+}
+
 export default function useCustomerFilters() {
   const [date, setDate] = useState(new Date());
   const [statuses, setStatuses] = useState<Record<Filter, boolean>>({
@@ -13,7 +19,7 @@ export default function useCustomerFilters() {
   const [department, setDepartment] = useState<Department>(currentDepartment);
 
   const filters = useMemo(
-    () => ({ date, statuses, department }),
+    (): CustomerFilters => ({ date, statuses, department }),
     [date, statuses, department]
   );
 

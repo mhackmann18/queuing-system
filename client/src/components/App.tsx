@@ -1,6 +1,6 @@
 import CustomerPanelWrapper from './CustomerPanel/Wrapper';
 import { Customer, Station } from '../utils/types';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
 import CustomerList from './CustomerList';
@@ -10,14 +10,21 @@ import DummyApi from 'utils/CustomerController/DummyApi';
 import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
-import { Filter } from '../utils/types';
-import { statusFiltersToArr } from 'utils/helpers';
+import useCustomers from 'hooks/useCustomers';
 
 // Stand-in state
 const currentStation: Station = 'MV1';
 
 function App() {
-  const apiController = useRef(new CustomerController(currentStation));
+  const apiController = useMemo(
+    () => new CustomerController(currentStation),
+    []
+  );
+  // Should be null when position picker is inactive
+  const [WLPosPicker, setWLPosPicker] = useState<{
+    index: number;
+    locked: boolean;
+  } | null>(null);
   // Customer filters determine which customers to fetch
   const {
     filters: customerFilters,
@@ -25,18 +32,16 @@ function App() {
     setDepartment,
     setStatuses
   } = useCustomerFilters();
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const { customers, loadUpdatedCustomers } = useCustomers(
+    customerFilters,
+    apiController
+  );
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
   const servingCustomer =
     customers.length && customers.find((c) => c.status === 'Serving');
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
-  // Should be null when position picker is inactive
-  const [WLPosPicker, setWLPosPicker] = useState<{
-    index: number;
-    locked: boolean;
-  } | null>(null);
 
   // Init stand-in dummy api -- TODO: Delete this line
   useEffect(() => DummyApi.init(), []);
@@ -63,40 +68,13 @@ function App() {
     }
   }, [customers, selectedCustomer]);
 
-  const loadCustomers = useCallback(async () => {
-    const statuses = [
-      'Serving' as Filter,
-      ...statusFiltersToArr(customerFilters.statuses)
-    ];
-
-    // Must show waiting customers in this case
-    if (WLPosPicker && !customerFilters.statuses.Waiting) {
-      statuses.push('Waiting');
-    }
-
-    const { error, data } = await apiController.current.get({
-      date: customerFilters.date,
-      department: customerFilters.department,
-      statuses
-    });
-    if (!error && data) {
-      setCustomers(data);
-    } else {
-      // setError(res.error)
-    }
-  }, [customerFilters, WLPosPicker]);
-
-  // Load initial customers
-  useEffect(() => {
-    loadCustomers();
-  }, [loadCustomers]);
-
   // Set the child of CustomerPanel
   useEffect(updatePanelChildEffect, [
     selectedCustomer,
     servingCustomer,
     WLPosPicker,
-    loadCustomers
+    loadUpdatedCustomers,
+    apiController
   ]);
 
   function updatePanelChildEffect() {
@@ -110,11 +88,11 @@ function App() {
           title="Delete Customer"
           message="Are you sure you want to delete this customer?"
           onConfirm={async () => {
-            const { data, error } = await apiController.current.delete(
+            const { data, error } = await apiController.delete(
               selectedCustomer.id
             );
             if (data) {
-              loadCustomers();
+              loadUpdatedCustomers();
             } else {
               // TODO Display error
               console.log(error);
@@ -142,11 +120,11 @@ function App() {
         // TODO display error
         console.log('You are already serving a customer');
       } else {
-        const { data, error } = await apiController.current.callToStation(
+        const { data, error } = await apiController.callToStation(
           selectedCustomer.id
         );
         if (data) {
-          loadCustomers();
+          loadUpdatedCustomers();
         } else {
           // TODO display error
           console.log(error);
@@ -155,12 +133,9 @@ function App() {
     };
 
     const finishServing = async () => {
-      const { data, error } = await apiController.current.update(
-        selectedCustomer.id,
-        {
-          status: 'Served'
-        }
-      );
+      const { data, error } = await apiController.update(selectedCustomer.id, {
+        status: 'Served'
+      });
       if (data) {
         // Show error
         setPanelChild(
@@ -174,11 +149,11 @@ function App() {
             confirmBtnStyles="bg-serving text-white"
             confirmBtnText="Yes"
             onConfirm={async () => {
-              const { data, error } = await apiController.current.callNext();
+              const { data, error } = await apiController.callNext();
 
               if (!error) {
                 // setSelectedCustomerId to "Serving" customer
-                loadCustomers();
+                loadUpdatedCustomers();
 
                 console.log(data);
               } else {
@@ -205,19 +180,16 @@ function App() {
           onCancel={displayPanelActionButtons}
           confirmBtnText="Mark No Show"
           onConfirm={async () => {
-            const { error } = await apiController.current.update(
-              selectedCustomer.id,
-              {
-                status: 'No Show'
-              }
-            );
+            const { error } = await apiController.update(selectedCustomer.id, {
+              status: 'No Show'
+            });
 
             if (error) {
               // Give error indication
               console.log(error);
             } else {
               // Give success indication
-              loadCustomers();
+              loadUpdatedCustomers();
               displayPanelActionButtons();
             }
           }}
@@ -315,17 +287,14 @@ function App() {
           onCancel={() => setWLPosPicker(null)}
           onConfirm={async () => {
             console.log(WLPosPicker.index);
-            const { error } = await apiController.current.update(
-              selectedCustomer.id,
-              {
-                status: 'Waiting',
-                waitingListIndex: WLPosPicker.index
-              }
-            );
+            const { error } = await apiController.update(selectedCustomer.id, {
+              status: 'Waiting',
+              waitingListIndex: WLPosPicker.index
+            });
             if (error) {
               // Show error
             } else {
-              loadCustomers();
+              loadUpdatedCustomers();
               setWLPosPicker(null);
             }
           }}
