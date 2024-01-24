@@ -1,12 +1,5 @@
 import CustomerPanelWrapper from './CustomerPanel/Wrapper';
-import CustomerController from '../utils/CustomerController';
-import {
-  Customer,
-  CustomerStatus,
-  Station,
-  Filter,
-  Department
-} from '../utils/types';
+import { Customer, CustomerStatus, Station } from '../utils/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
@@ -15,23 +8,22 @@ import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import Header from './Header';
-
-// WL = Waiting List
+import useCustomerFilters from 'hooks/useCustomerFilters';
+import CustomerController from 'utils/CustomerController';
 
 // Stand-in state
 const currentStation: Station = 'MV1';
 const currentDepartment = 'Motor Vehicle';
 
 function App() {
-  // Customer filters
-  const [date, setDate] = useState(new Date());
-  const [activeFilters, setActiveFilters] = useState<Record<Filter, boolean>>({
-    Waiting: true,
-    'No Show': false,
-    Served: false
-  });
-  const [department, setDepartment] = useState<Department>(currentDepartment);
-
+  const apiController = useRef(new CustomerController(currentStation));
+  // Customer filters determine which customers to fetch
+  const {
+    filters: customerFilters,
+    setDate,
+    setDepartment,
+    setStatuses
+  } = useCustomerFilters();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
@@ -39,20 +31,11 @@ function App() {
   const servingCustomer =
     customers.length && customers.find((c) => c.status === 'Serving');
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
-  const apiController = useRef(new CustomerController(currentStation));
   // Should be null when position picker is inactive
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;
   } | null>(null);
-
-  // prop for CustomerList to control WLPosPicker
-  const customerListWLPosPickerController = WLPosPicker && {
-    index: WLPosPicker.index,
-    setIndex: (index: number) => setWLPosPicker({ ...WLPosPicker, index }),
-    locked: WLPosPicker.locked,
-    setLocked: (locked: boolean) => setWLPosPicker({ ...WLPosPicker, locked })
-  };
 
   // Init stand-in dummy api -- TODO: Delete this line
   useEffect(() => DummyApi.init(), []);
@@ -99,13 +82,13 @@ function App() {
 
   const loadCustomers = useCallback(async () => {
     const { error, data } = await apiController.current.get({
-      date,
-      department: currentDepartment,
+      date: customerFilters.date,
+      department: customerFilters.department,
       statuses: (() => {
         const statuses: CustomerStatus[] = ['Serving'];
-        Object.entries(activeFilters).forEach(([filter, active]) => {
+        Object.entries(customerFilters.statuses).forEach(([status, active]) => {
           if (active) {
-            const customerStatus = filter as CustomerStatus;
+            const customerStatus = status as CustomerStatus;
             statuses.push(customerStatus);
           }
         });
@@ -117,11 +100,11 @@ function App() {
     } else {
       // setError(res.error)
     }
-  }, [date, activeFilters]);
+  }, [customerFilters]);
 
   useEffect(() => {
     loadCustomers();
-  }, [activeFilters, loadCustomers]);
+  }, [loadCustomers]);
 
   // Set the child of CustomerPanel
   useEffect(updatePanelChildEffect, [
@@ -189,7 +172,9 @@ function App() {
     const finishServing = async () => {
       const { data, error } = await apiController.current.update(
         selectedCustomer.id,
-        { status: 'Served' }
+        {
+          status: 'Served'
+        }
       );
       if (data) {
         // Show error
@@ -237,7 +222,9 @@ function App() {
           onConfirm={async () => {
             const { error } = await apiController.current.update(
               selectedCustomer.id,
-              { status: 'No Show' }
+              {
+                status: 'No Show'
+              }
             );
 
             if (error) {
@@ -372,15 +359,11 @@ function App() {
       )}
       <Header
         signedInStation={currentStation}
-        filters={{
-          date,
-          department,
-          statuses: activeFilters
-        }}
+        filters={customerFilters}
         filterSetters={{
           setDate,
           setDepartment,
-          setStatuses: setActiveFilters
+          setStatuses
         }}
       />
       <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
@@ -391,12 +374,21 @@ function App() {
               !WLPosPicker
                 ? (c) =>
                     c.status === 'Serving' ||
-                    Object.keys(activeFilters).includes(c.status)
+                    Object.keys(customerFilters.statuses).includes(c.status)
                 : (c) => c.status === 'Waiting'
             )}
             selectedCustomer={selectedCustomer}
             setSelectedCustomer={setSelectedCustomer}
-            WLPosPicker={customerListWLPosPickerController}
+            WLPosPicker={
+              WLPosPicker && {
+                index: WLPosPicker.index,
+                setIndex: (index: number) =>
+                  setWLPosPicker({ ...WLPosPicker, index }),
+                locked: WLPosPicker.locked,
+                setLocked: (locked: boolean) =>
+                  setWLPosPicker({ ...WLPosPicker, locked })
+              }
+            }
           />
         )}
         {/* Customer Panel */}
