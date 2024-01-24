@@ -1,9 +1,12 @@
 import CustomerPanelWrapper from './CustomerPanel/Wrapper';
-import DateToggler from './Header/DateToggler';
-import Filters from './Header/Filters';
-import StationIcon from './Header/StationIcon';
 import CustomerController from '../utils/CustomerController';
-import { Customer, CustomerStatus, Station, Filter } from '../utils/types';
+import {
+  Customer,
+  CustomerStatus,
+  Station,
+  Filter,
+  Department
+} from '../utils/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
@@ -11,6 +14,7 @@ import CustomerList from './CustomerList';
 import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
 import DummyApi from 'utils/CustomerController/DummyApi';
+import Header from './Header';
 
 // WL = Waiting List
 
@@ -19,18 +23,21 @@ const currentStation: Station = 'MV1';
 const currentDepartment = 'Motor Vehicle';
 
 function App() {
+  // Customer filters
+  const [date, setDate] = useState(new Date());
   const [activeFilters, setActiveFilters] = useState<Record<Filter, boolean>>({
     Waiting: true,
     'No Show': false,
     Served: false
   });
+  const [department, setDepartment] = useState<Department>(currentDepartment);
+
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
   const servingCustomer =
     customers.length && customers.find((c) => c.status === 'Serving');
-  const [date, setDate] = useState(new Date());
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
   const apiController = useRef(new CustomerController(currentStation));
   // Should be null when position picker is inactive
@@ -45,11 +52,6 @@ function App() {
     setIndex: (index: number) => setWLPosPicker({ ...WLPosPicker, index }),
     locked: WLPosPicker.locked,
     setLocked: (locked: boolean) => setWLPosPicker({ ...WLPosPicker, locked })
-  };
-
-  const toggleFilter = (filter: Filter) => {
-    activeFilters[filter] = !activeFilters[filter];
-    setActiveFilters({ ...activeFilters });
   };
 
   // Init stand-in dummy api -- TODO: Delete this line
@@ -368,38 +370,19 @@ function App() {
       {WLPosPicker && (
         <div className="w-lvh fixed inset-0 h-lvh bg-black opacity-50" />
       )}
-      <header className="h-28">
-        {/* Header Row 1 */}
-        <div className="border-b">
-          <div className="mx-auto flex h-16 max-w-5xl justify-between">
-            <h1 className="mr-4 flex items-center text-2xl font-bold">
-              {currentDepartment} Customers
-            </h1>
-            <div className="flex items-center">
-              {/* Show DateToggler if current page is customers */}
-              <StationIcon
-                onClick={() => {
-                  console.log('station icon clicked');
-                }}
-                station={currentStation}
-              />
-            </div>
-          </div>
-        </div>
-        {/* Header Row 2 */}
-        <div className="border-b shadow-sm">
-          <div className="mx-auto flex max-w-5xl justify-between py-3">
-            <Filters
-              activeFilters={activeFilters}
-              toggleFilter={toggleFilter}
-            />
-            <DateToggler
-              date={date}
-              setDate={(newDate: Date) => setDate(newDate)}
-            />
-          </div>
-        </div>
-      </header>
+      <Header
+        signedInStation={currentStation}
+        filters={{
+          date,
+          department,
+          statuses: activeFilters
+        }}
+        filterSetters={{
+          setDate,
+          setDepartment,
+          setStatuses: setActiveFilters
+        }}
+      />
       <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
         {/* Customer List */}
         {customers.length && selectedCustomer && (

@@ -4,6 +4,8 @@ export type DLStation = 'DL1' | 'DL2';
 
 export type Station = MVStation | DLStation;
 
+export type Department = 'Motor Vehicle' | "Driver's License";
+
 export type CustomerStatus =
   | 'Waiting'
   | 'Serving'
