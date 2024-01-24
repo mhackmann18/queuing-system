@@ -1,5 +1,5 @@
 import CustomerPanelWrapper from './CustomerPanel/Wrapper';
-import { Customer, CustomerStatus, Station } from '../utils/types';
+import { Customer, Station } from '../utils/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
@@ -10,10 +10,11 @@ import DummyApi from 'utils/CustomerController/DummyApi';
 import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
+import { Filter } from '../utils/types';
+import { statusFiltersToArr } from 'utils/helpers';
 
 // Stand-in state
 const currentStation: Station = 'MV1';
-const currentDepartment = 'Motor Vehicle';
 
 function App() {
   const apiController = useRef(new CustomerController(currentStation));
@@ -40,7 +41,7 @@ function App() {
   // Init stand-in dummy api -- TODO: Delete this line
   useEffect(() => DummyApi.init(), []);
 
-  // Update selectedCustomer when customers updates
+  // Update selectedCustomer when customers changes
   useEffect(() => {
     if (customers && customers.length) {
       const foundSelectedCustomer =
@@ -62,46 +63,30 @@ function App() {
     }
   }, [customers, selectedCustomer]);
 
-  // Get customers from api when component mounts
-  useEffect(() => {
-    const loadInitialCustomers = async () => {
-      const { error, data } = await apiController.current.get({
-        date: new Date(),
-        department: currentDepartment,
-        statuses: ['Waiting', 'Serving']
-      });
-      if (!error && data) {
-        setCustomers(data);
-      } else {
-        // setError(res.error)
-      }
-    };
-
-    loadInitialCustomers();
-  }, []);
-
   const loadCustomers = useCallback(async () => {
+    const statuses = [
+      'Serving' as Filter,
+      ...statusFiltersToArr(customerFilters.statuses)
+    ];
+
+    // Must show waiting customers in this case
+    if (WLPosPicker && !customerFilters.statuses.Waiting) {
+      statuses.push('Waiting');
+    }
+
     const { error, data } = await apiController.current.get({
       date: customerFilters.date,
       department: customerFilters.department,
-      statuses: (() => {
-        const statuses: CustomerStatus[] = ['Serving'];
-        Object.entries(customerFilters.statuses).forEach(([status, active]) => {
-          if (active) {
-            const customerStatus = status as CustomerStatus;
-            statuses.push(customerStatus);
-          }
-        });
-        return statuses;
-      })()
+      statuses
     });
     if (!error && data) {
       setCustomers(data);
     } else {
       // setError(res.error)
     }
-  }, [customerFilters]);
+  }, [customerFilters, WLPosPicker]);
 
+  // Load initial customers
   useEffect(() => {
     loadCustomers();
   }, [loadCustomers]);
@@ -366,9 +351,8 @@ function App() {
           setStatuses
         }}
       />
-      <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
-        {/* Customer List */}
-        {customers.length && selectedCustomer && (
+      {customers.length && selectedCustomer ? (
+        <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
           <CustomerList
             customers={customers.filter(
               !WLPosPicker
@@ -390,9 +374,6 @@ function App() {
               }
             }
           />
-        )}
-        {/* Customer Panel */}
-        {selectedCustomer && (
           <div className="ml-4">
             <CustomerPanelWrapper
               customer={selectedCustomer}
@@ -401,8 +382,10 @@ function App() {
               {panelChild}
             </CustomerPanelWrapper>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        'No Customers'
+      )}
     </div>
   );
 }

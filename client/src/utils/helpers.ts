@@ -1,3 +1,5 @@
+import { Filter } from './types';
+
 const get12HourTimeString = (date: Date) => {
   let dateString;
   const minutes = date.getMinutes();
@@ -51,4 +53,15 @@ const getDateString = (date: Date): string => {
   } ${date.getDate()}`;
 };
 
-export { get12HourTimeString, sameDay, getDateString };
+const statusFiltersToArr = (statuses: Record<Filter, boolean>) => {
+  const statusesArr: Filter[] = [];
+  Object.entries(statuses).forEach(([status, active]) => {
+    if (active) {
+      const customerStatus = status as Filter;
+      statusesArr.push(customerStatus);
+    }
+  });
+  return statusesArr;
+};
+
+export { get12HourTimeString, sameDay, getDateString, statusFiltersToArr };
