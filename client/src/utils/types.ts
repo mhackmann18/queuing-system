@@ -13,8 +13,6 @@ export type CustomerStatus =
   | 'No Show'
   | `${Station}`;
 
-export type Filter = 'Waiting' | 'Served' | 'No Show';
-
 export interface Customer {
   id: number; // This should be a string?
   status: CustomerStatus;

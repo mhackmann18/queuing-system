@@ -1,17 +1,17 @@
 import { ManageCustomersHeaderProps } from './types';
 import StationIcon from './StationIcon';
-import Filters from './StatusFilters';
+import StatusFilters from './StatusFilters';
 import DateToggler from './DateToggler';
-import { Filter } from 'utils/types';
+import { CustomerStatus } from 'utils/types';
 
 export default function ManageCustomersHeader({
   signedInStation,
   filters,
   filterSetters
 }: ManageCustomersHeaderProps) {
-  const toggleStatusFilter = (filter: Filter) => {
+  const toggleStatusFilter = (status: CustomerStatus) => {
     const statusFilters = { ...filters.statuses };
-    statusFilters[filter] = !statusFilters[filter];
+    statusFilters[status] = !statusFilters[status];
     filterSetters.setStatuses(statusFilters);
   };
 
@@ -38,7 +38,7 @@ export default function ManageCustomersHeader({
       {/* Header Row 2 */}
       <div className="border-b shadow-sm">
         <div className="mx-auto flex max-w-5xl justify-between py-3">
-          <Filters
+          <StatusFilters
             statusFilters={filters.statuses}
             toggleFilter={toggleStatusFilter}
           />

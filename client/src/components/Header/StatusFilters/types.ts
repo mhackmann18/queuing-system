@@ -1,6 +1,6 @@
-import { Filter } from 'utils/types';
+import { CustomerStatus } from 'utils/types';
 
 export interface StatusFiltersProps {
-  statusFilters: Record<Filter, boolean>;
-  toggleFilter: (filter: Filter) => void;
+  statusFilters: Record<CustomerStatus, boolean>;
+  toggleFilter: (status: CustomerStatus) => void;
 }

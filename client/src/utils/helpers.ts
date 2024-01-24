@@ -1,4 +1,4 @@
-import { Filter } from './types';
+import { CustomerStatus } from './types';
 
 const get12HourTimeString = (date: Date) => {
   let dateString;
@@ -48,16 +48,14 @@ const getDateString = (date: Date): string => {
     return 'Today';
   }
 
-  return `${weekday[date.getDay()]}, ${
-    month[date.getMonth()]
-  } ${date.getDate()}`;
+  return `${weekday[date.getDay()]}, ${month[date.getMonth()]} ${date.getDate()}`;
 };
 
-const statusFiltersToArr = (statuses: Record<Filter, boolean>) => {
-  const statusesArr: Filter[] = [];
+const statusFiltersToArr = (statuses: Record<CustomerStatus, boolean>) => {
+  const statusesArr: CustomerStatus[] = [];
   Object.entries(statuses).forEach(([status, active]) => {
     if (active) {
-      const customerStatus = status as Filter;
+      const customerStatus = status as CustomerStatus;
       statusesArr.push(customerStatus);
     }
   });

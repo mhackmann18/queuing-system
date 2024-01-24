@@ -16,7 +16,6 @@ const currentStation: Station = 'MV1';
 
 function App() {
   const apiController = useMemo(() => new CustomerController(currentStation), []);
-  // Should be null when position picker is inactive
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;
@@ -38,27 +37,26 @@ function App() {
 
   // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
-    if (customers && customers.length) {
-      const foundSelectedCustomer =
-        selectedCustomer && customers.find((c) => c.id === selectedCustomer.id);
-
-      if (!foundSelectedCustomer) {
-        const servingCustomer = customers.find((c) => c.status === 'Serving');
-
-        if (servingCustomer) {
-          setSelectedCustomer(servingCustomer);
-        } else {
-          setSelectedCustomer(customers[0]);
-        }
-      } else {
-        setSelectedCustomer(foundSelectedCustomer);
-      }
-    } else {
+    // If there's no customers, there can be no selected customer.
+    if (!customers || !customers.length) {
       setSelectedCustomer(null);
+      return;
+    }
+
+    // If no selected customer, select one, prefer 'Serving', otherwise pick the first
+    if (!selectedCustomer) {
+      setSelectedCustomer(
+        customers.find((c) => c.status === 'Serving') || customers[0]
+      );
+    } else {
+      // If there is a selected customer, find them. If they no longer exist, set to null.
+      setSelectedCustomer(
+        customers.find((c) => c.id === selectedCustomer.id) || null
+      );
     }
   }, [customers, selectedCustomer]);
 
-  // Set the child of CustomerPanel
+  // Determine content of CustomerPanel
   useEffect(updatePanelChildEffect, [
     selectedCustomer,
     servingCustomer,
@@ -272,7 +270,6 @@ function App() {
           message={'Select where this customer should appear in the waiting list.'}
           onCancel={() => setWLPosPicker(null)}
           onConfirm={async () => {
-            console.log(WLPosPicker.index);
             const { error } = await apiController.update(selectedCustomer.id, {
               status: 'Waiting',
               waitingListIndex: WLPosPicker.index

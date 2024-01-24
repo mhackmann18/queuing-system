@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { statusFiltersToArr } from 'utils/helpers';
-import { Customer, Filter } from 'utils/types';
+import { Customer } from 'utils/types';
 import { CustomerFilters } from './useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
 
@@ -11,7 +11,7 @@ export default function useCustomers(
   const [customers, setCustomers] = useState<Customer[]>([]);
 
   const loadUpdatedCustomers = useCallback(async () => {
-    const statuses = ['Serving' as Filter, ...statusFiltersToArr(filters.statuses)];
+    const statuses = [...statusFiltersToArr(filters.statuses)];
 
     const { error, data } = await apiController.get({
       date: filters.date,
