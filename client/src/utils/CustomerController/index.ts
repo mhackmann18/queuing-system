@@ -10,6 +10,7 @@ export default class CustomerController {
   station: Station;
 
   constructor(station: Station) {
+    DummyApi.init();
     this.station = station;
   }
 
@@ -49,9 +50,7 @@ export default class CustomerController {
 
     const rawCustomers: CustomerRaw[] = JSON.parse(data);
 
-    const sanitizedCustomers = rawCustomers.map((c) =>
-      this.#sanitizeCustomer(c)
-    );
+    const sanitizedCustomers = rawCustomers.map((c) => this.#sanitizeCustomer(c));
 
     return { data: sanitizedCustomers };
   }
@@ -144,8 +143,7 @@ export default class CustomerController {
 
     // TODO: Make PUT request to /api/v1/customers/id
     const { data, error } = await DummyApi.updateCustomer(id, {
-      department:
-        this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
+      department: this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
       status: status === 'Serving' ? this.station : status,
       waitingListIndex,
       addCallTime
@@ -193,8 +191,7 @@ export default class CustomerController {
     // Get customers in the WL
     const res = await this.get({
       date: new Date(),
-      department:
-        this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
+      department: this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License",
       statuses: ['Waiting']
     });
 
@@ -239,14 +236,8 @@ export default class CustomerController {
     const currentDepartment =
       this.station[0] === 'M' ? 'Motor Vehicle' : "Driver's License";
 
-    const {
-      id,
-      motorVehicle,
-      driversLicense,
-      firstName,
-      lastName,
-      checkInTime
-    } = customer;
+    const { id, motorVehicle, driversLicense, firstName, lastName, checkInTime } =
+      customer;
 
     const reasonsForVisit = [];
 

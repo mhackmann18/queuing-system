@@ -6,7 +6,6 @@ import Confirm from './Confirm';
 import CustomerList from './CustomerList';
 import CustomerPanelInfo from './CustomerPanel/Info';
 import { ReactElement } from 'react';
-import DummyApi from 'utils/CustomerController/DummyApi';
 import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
@@ -16,16 +15,12 @@ import useCustomers from 'hooks/useCustomers';
 const currentStation: Station = 'MV1';
 
 function App() {
-  const apiController = useMemo(
-    () => new CustomerController(currentStation),
-    []
-  );
+  const apiController = useMemo(() => new CustomerController(currentStation), []);
   // Should be null when position picker is inactive
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;
   } | null>(null);
-  // Customer filters determine which customers to fetch
   const {
     filters: customerFilters,
     setDate,
@@ -36,17 +31,12 @@ function App() {
     customerFilters,
     apiController
   );
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null
-  );
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const servingCustomer =
     customers.length && customers.find((c) => c.status === 'Serving');
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
 
-  // Init stand-in dummy api -- TODO: Delete this line
-  useEffect(() => DummyApi.init(), []);
-
-  // Update selectedCustomer when customers changes
+  // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
     if (customers && customers.length) {
       const foundSelectedCustomer =
@@ -88,9 +78,7 @@ function App() {
           title="Delete Customer"
           message="Are you sure you want to delete this customer?"
           onConfirm={async () => {
-            const { data, error } = await apiController.delete(
-              selectedCustomer.id
-            );
+            const { data, error } = await apiController.delete(selectedCustomer.id);
             if (data) {
               loadUpdatedCustomers();
             } else {
@@ -281,9 +269,7 @@ function App() {
       setPanelChild(
         <Confirm
           title="Return Customer to Waiting List"
-          message={
-            'Select where this customer should appear in the waiting list.'
-          }
+          message={'Select where this customer should appear in the waiting list.'}
           onCancel={() => setWLPosPicker(null)}
           onConfirm={async () => {
             console.log(WLPosPicker.index);
@@ -323,13 +309,7 @@ function App() {
       {customers.length && selectedCustomer ? (
         <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
           <CustomerList
-            customers={customers.filter(
-              !WLPosPicker
-                ? (c) =>
-                    c.status === 'Serving' ||
-                    Object.keys(customerFilters.statuses).includes(c.status)
-                : (c) => c.status === 'Waiting'
-            )}
+            customers={customers}
             selectedCustomer={selectedCustomer}
             setSelectedCustomer={setSelectedCustomer}
             WLPosPicker={

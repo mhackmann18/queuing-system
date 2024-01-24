@@ -11,10 +11,7 @@ export default function useCustomers(
   const [customers, setCustomers] = useState<Customer[]>([]);
 
   const loadUpdatedCustomers = useCallback(async () => {
-    const statuses = [
-      'Serving' as Filter,
-      ...statusFiltersToArr(filters.statuses)
-    ];
+    const statuses = ['Serving' as Filter, ...statusFiltersToArr(filters.statuses)];
 
     const { error, data } = await apiController.get({
       date: filters.date,

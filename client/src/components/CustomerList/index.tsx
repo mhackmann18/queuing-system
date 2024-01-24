@@ -11,8 +11,7 @@ export default function CustomerList({
   setSelectedCustomer,
   WLPosPicker
 }: CustomerListProps) {
-  const [orderedCustomers, setOrderedCustomers] =
-    useState<Customer[]>(customers);
+  const [orderedCustomers, setOrderedCustomers] = useState<Customer[]>(customers);
 
   // Position the selected customer at the proper WL index when the WL position picker is active
   useEffect(() => {
@@ -44,9 +43,7 @@ export default function CustomerList({
 
       // Determine hover cursor style
       if (c.id === selectedCustomer.id) {
-        styles = WLPosPicker.locked
-          ? 'hover:cursor-grab'
-          : 'hover:cursor-grabbing';
+        styles = WLPosPicker.locked ? 'hover:cursor-grab' : 'hover:cursor-grabbing';
       } else {
         styles = 'hover:cursor-default hover:bg-white';
       }
