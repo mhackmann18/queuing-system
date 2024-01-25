@@ -22,10 +22,7 @@ interface CRaw {
   };
 }
 
-export type CustomerRaw = RequireAtLeastOne<
-  CRaw,
-  'motorVehicle' | 'driversLicense'
->;
+export type CustomerRaw = RequireAtLeastOne<CRaw, 'motorVehicle' | 'driversLicense'>;
 
 // There should only be an error when the data is null.
 // Similarly, the data should only be null when there's an error.

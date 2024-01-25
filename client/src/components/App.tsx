@@ -10,6 +10,7 @@ import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
 import useCustomers from 'hooks/useCustomers';
+import Error from './Error';
 
 // Stand-in state
 const currentStation: Station = 'MV1';
@@ -34,6 +35,7 @@ function App() {
   const servingCustomer =
     customers.length && customers.find((c) => c.status === 'Serving');
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
+  const [error, setError] = useState<string>('');
 
   // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
@@ -76,12 +78,11 @@ function App() {
           title="Delete Customer"
           message="Are you sure you want to delete this customer?"
           onConfirm={async () => {
-            const { data, error } = await apiController.delete(selectedCustomer.id);
-            if (data) {
+            const res = await apiController.delete(selectedCustomer.id);
+            if (res.data) {
               loadUpdatedCustomers();
             } else {
-              // TODO Display error
-              console.log(error);
+              setError(res.error);
             }
             displayPanelActionButtons();
           }}
@@ -103,26 +104,22 @@ function App() {
     const callToStation = async () => {
       // Can't serve two customers at once
       if (servingCustomer) {
-        // TODO display error
-        console.log('You are already serving a customer');
+        setError('You are already serving a customer.');
       } else {
-        const { data, error } = await apiController.callToStation(
-          selectedCustomer.id
-        );
-        if (data) {
+        const res = await apiController.callToStation(selectedCustomer.id);
+        if (res.data) {
           loadUpdatedCustomers();
         } else {
-          // TODO display error
-          console.log(error);
+          setError(res.error);
         }
       }
     };
 
     const finishServing = async () => {
-      const { data, error } = await apiController.update(selectedCustomer.id, {
+      const res = await apiController.update(selectedCustomer.id, {
         status: 'Served'
       });
-      if (data) {
+      if (res.data) {
         // Show error
         setPanelChild(
           <Confirm
@@ -135,24 +132,23 @@ function App() {
             confirmBtnStyles="bg-serving text-white"
             confirmBtnText="Yes"
             onConfirm={async () => {
-              const { data, error } = await apiController.callNext();
+              const resp = await apiController.callNext();
 
-              if (!error) {
+              if (!resp.error) {
                 // setSelectedCustomerId to "Serving" customer
                 loadUpdatedCustomers();
 
-                console.log(data);
+                console.log(resp.data);
               } else {
                 // display error
-                console.log(error);
+                setError(resp.error);
                 displayPanelActionButtons();
               }
             }}
           />
         );
       } else {
-        // TODO show error
-        console.log(error);
+        setError(res.error);
       }
     };
 
@@ -166,13 +162,13 @@ function App() {
           onCancel={displayPanelActionButtons}
           confirmBtnText="Mark No Show"
           onConfirm={async () => {
-            const { error } = await apiController.update(selectedCustomer.id, {
+            const res = await apiController.update(selectedCustomer.id, {
               status: 'No Show'
             });
 
-            if (error) {
+            if (res.error) {
               // Give error indication
-              console.log(error);
+              setError(res.error);
             } else {
               // Give success indication
               loadUpdatedCustomers();
@@ -270,12 +266,12 @@ function App() {
           message={'Select where this customer should appear in the waiting list.'}
           onCancel={() => setWLPosPicker(null)}
           onConfirm={async () => {
-            const { error } = await apiController.update(selectedCustomer.id, {
+            const res = await apiController.update(selectedCustomer.id, {
               status: 'Waiting',
               waitingListIndex: WLPosPicker.index
             });
-            if (error) {
-              // Show error
+            if (res.error) {
+              setError(res.error);
             } else {
               loadUpdatedCustomers();
               setWLPosPicker(null);
@@ -290,7 +286,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen bg-white">
+    <div className="text-eerie_black relative h-screen bg-white">
       {WLPosPicker && (
         <div className="w-lvh fixed inset-0 h-lvh bg-black opacity-50" />
       )}
@@ -331,6 +327,11 @@ function App() {
         </div>
       ) : (
         'No Customers'
+      )}
+      {error && (
+        <div className="absolute bottom-10 right-10 ">
+          <Error error={error} close={() => setError('')} />
+        </div>
       )}
     </div>
   );
