@@ -31,10 +31,7 @@ export default function ManageCustomersHeader({
       {/* Header Row 2 */}
       <div className="border-b shadow-sm">
         <div className="mx-auto flex max-w-5xl justify-between py-3">
-          <StatusFilters
-            statusFilters={filters.statuses}
-            setStatusFilters={filterSetters.setStatuses}
-          />
+          <StatusFilters filters={filters} setStatuses={filterSetters.setStatuses} />
           <DateToggler
             date={filters.date}
             setDate={(newDate: Date) => filterSetters.setDate(newDate)}

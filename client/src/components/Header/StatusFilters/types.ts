@@ -1,6 +1,6 @@
-import { StatusFilters } from 'utils/types';
+import { CustomerFilters, StatusFilters } from 'utils/types';
 
-export interface StatusFiltersProps {
-  statusFilters: StatusFilters;
-  setStatusFilters: (statuses: StatusFilters) => void;
+export interface StatusFilterButtonsProps {
+  filters: CustomerFilters;
+  setStatuses: (statuses: StatusFilters) => void;
 }

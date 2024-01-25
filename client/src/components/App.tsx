@@ -93,7 +93,7 @@ function App() {
     // Save current status filters and replace with relevant filters for WL pos picker
     if (WLPosPicker && !savedStatusFilters) {
       setSavedStatusFilters({ ...customerFilters.statuses });
-      setStatuses({ Waiting: true });
+      setStatuses({ Waiting: true, Serving: true });
     }
   }, [
     customerFilters.date,
@@ -136,8 +136,6 @@ function App() {
         index: 0,
         locked: false
       });
-      setSavedStatusFilters({ ...customerFilters.statuses });
-      setStatuses({ Waiting: true, Serving: true });
     };
 
     const callToStation = async () => {

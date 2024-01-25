@@ -13,6 +13,12 @@ export type CustomerStatus =
   | 'No Show'
   | `${Station}`;
 
+export interface CustomerFilters {
+  date: Date;
+  statuses: StatusFilters;
+  department: Department;
+}
+
 export interface Customer {
   id: number; // This should be a string?
   status: CustomerStatus;
