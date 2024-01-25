@@ -9,7 +9,8 @@ export default function StatusFilters({
   statusFilters,
   setStatusFilters
 }: StatusFiltersProps) {
-  const buttonStatusNames: CustomerStatus[] = ['Waiting', 'No Show', 'Served'];
+  const buttonStatusNames: CustomerStatus[] = ['Waiting', 'Served', 'No Show'];
+
   const otherStationsBtnActive =
     department === 'Motor Vehicle'
       ? statusFilters.MV1 ||

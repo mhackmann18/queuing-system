@@ -11,6 +11,7 @@ import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
 import useCustomers from 'hooks/useCustomers';
 import Error from './Error';
+import { sameDay } from 'utils/helpers';
 
 // Stand-in state
 const currentStation: Station = 'MV1';
@@ -20,8 +21,10 @@ function App() {
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;
-    savedStatusFilters: StatusFilters;
   } | null>(null);
+  const [savedStatusFilters, setSavedStatusFilters] = useState<StatusFilters | null>(
+    null
+  );
   const {
     filters: customerFilters,
     setDate,
@@ -70,6 +73,36 @@ function App() {
     setStatuses
   ]);
 
+  // Save old status filters so that when customer returns to main view, their old filters are active
+  useEffect(() => {
+    // If there are saved status filters, and no special conditions apply (previous date, or
+    // WL pos picker active) replace the current ones with the saved, and clear clear the saved
+    if (
+      savedStatusFilters &&
+      sameDay(customerFilters.date, new Date()) &&
+      !WLPosPicker
+    ) {
+      setSavedStatusFilters(null);
+      setStatuses({ ...savedStatusFilters });
+    }
+    // Save current status filters and replace with relevant filters for previous date customers
+    if (!sameDay(customerFilters.date, new Date()) && !savedStatusFilters) {
+      setSavedStatusFilters({ ...customerFilters.statuses });
+      setStatuses({ Waiting: true, 'No Show': true });
+    }
+    // Save current status filters and replace with relevant filters for WL pos picker
+    if (WLPosPicker && !savedStatusFilters) {
+      setSavedStatusFilters({ ...customerFilters.statuses });
+      setStatuses({ Waiting: true });
+    }
+  }, [
+    customerFilters.date,
+    customerFilters.statuses,
+    setStatuses,
+    savedStatusFilters,
+    WLPosPicker
+  ]);
+
   function updatePanelChildEffect() {
     if (!selectedCustomer) {
       return;
@@ -101,9 +134,9 @@ function App() {
       // Switches panel to WL position picker
       setWLPosPicker({
         index: 0,
-        locked: false,
-        savedStatusFilters: { ...customerFilters.statuses }
+        locked: false
       });
+      setSavedStatusFilters({ ...customerFilters.statuses });
       setStatuses({ Waiting: true, Serving: true });
     };
 
@@ -264,10 +297,7 @@ function App() {
         <Confirm
           title="Return Customer to Waiting List"
           message={'Select where this customer should appear in the waiting list.'}
-          onCancel={() => {
-            setStatuses({ ...WLPosPicker.savedStatusFilters });
-            setWLPosPicker(null);
-          }}
+          onCancel={() => setWLPosPicker(null)}
           onConfirm={async () => {
             const res = await apiController.update(selectedCustomer.id, {
               status: 'Waiting',
@@ -277,7 +307,6 @@ function App() {
               setError(res.error);
             } else {
               loadUpdatedCustomers();
-              setStatuses({ ...WLPosPicker.savedStatusFilters });
               setWLPosPicker(null);
             }
           }}
@@ -330,7 +359,9 @@ function App() {
           </div>
         </div>
       ) : (
-        'No Customers'
+        <div className="text-french_gray_2 flex h-[calc(100%-8rem)] items-center justify-center">
+          No Customers
+        </div>
       )}
       {error && (
         <div className="absolute bottom-10 right-10 ">
