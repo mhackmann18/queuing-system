@@ -1,4 +1,7 @@
-import { CustomerStatus, StatusFilters } from './types';
+import { CustomerStatus, Department, Station, StatusFilters } from './types';
+
+const getDeptFromStation = (station: Station): Department =>
+  station[0] === 'M' ? 'Motor Vehicle' : "Driver's License";
 
 const get12HourTimeString = (date: Date) => {
   let dateString;
@@ -62,4 +65,10 @@ const statusFiltersToArr = (statuses: StatusFilters) => {
   return statusesArr;
 };
 
-export { get12HourTimeString, sameDay, getDateString, statusFiltersToArr };
+export {
+  get12HourTimeString,
+  sameDay,
+  getDateString,
+  statusFiltersToArr,
+  getDeptFromStation
+};

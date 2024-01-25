@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { statusFiltersToArr } from 'utils/helpers';
-import { Customer } from 'utils/types';
-import { CustomerFilters } from './useCustomerFilters';
+import { Customer, CustomerFilters } from 'utils/types';
 import CustomerController from 'utils/CustomerController';
 
 export default function useCustomers(
