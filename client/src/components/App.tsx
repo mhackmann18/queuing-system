@@ -113,11 +113,10 @@ function App() {
         setError('You are already serving a customer.');
       } else {
         const res = await apiController.callToStation(selectedCustomer.id);
-        if (res.data) {
-          loadUpdatedCustomers();
-        }
         if (res.error) {
           setError(res.error);
+        } else {
+          loadUpdatedCustomers();
         }
       }
     };
@@ -126,8 +125,9 @@ function App() {
       const res = await apiController.update(selectedCustomer.id, {
         status: 'Served'
       });
-      if (res.data) {
-        // Show error
+      if (res.error) {
+        setError(res.error);
+      } else {
         setPanelChild(
           <Confirm
             title={'Call Next Customer?'}
@@ -142,20 +142,14 @@ function App() {
               const resp = await apiController.callNext();
 
               if (!resp.error) {
-                // setSelectedCustomerId to "Serving" customer
                 loadUpdatedCustomers();
-
-                console.log(resp.data);
               } else {
-                // display error
                 setError(resp.error);
                 displayPanelActionButtons();
               }
             }}
           />
         );
-      } else if (res.error) {
-        setError(res.error);
       }
     };
 
@@ -174,10 +168,9 @@ function App() {
             });
 
             if (res.error) {
-              // Give error indication
               setError(res.error);
             } else {
-              // Give success indication
+              // TODO: Give success indication
               loadUpdatedCustomers();
               displayPanelActionButtons();
             }

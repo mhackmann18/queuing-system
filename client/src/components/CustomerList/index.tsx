@@ -3,8 +3,6 @@ import { Customer } from 'utils/types';
 import { CustomerListProps } from './types';
 import { useEffect, useState } from 'react';
 
-// TODO: Implement drag and drop position picker
-
 export default function CustomerList({
   customers,
   selectedCustomer,
@@ -16,7 +14,7 @@ export default function CustomerList({
   // Position the selected customer at the proper WL index when the WL position picker is active
   useEffect(() => {
     if (WLPosPicker) {
-      const waitingList = [...customers];
+      const waitingList = customers.filter((c) => c.status === 'Waiting');
       waitingList.splice(WLPosPicker.index, 0, selectedCustomer);
       setOrderedCustomers(waitingList);
     } else {
@@ -48,7 +46,7 @@ export default function CustomerList({
         styles = 'hover:cursor-default hover:bg-white';
       }
     } else {
-      // WL position picker isn't active
+      // Default behavior
       handleClick = () => setSelectedCustomer(c);
     }
 
