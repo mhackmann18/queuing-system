@@ -1,5 +1,5 @@
 import CustomerPanelWrapper from './CustomerPanel/Wrapper';
-import { Customer, Station } from '../utils/types';
+import { Customer, Station, StatusFilters } from '../utils/types';
 import { useEffect, useState, useMemo } from 'react';
 import CustomerPanelActionButton from './CustomerPanel/ActionButton';
 import Confirm from './Confirm';
@@ -20,6 +20,7 @@ function App() {
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;
+    savedStatusFilters: StatusFilters;
   } | null>(null);
   const {
     filters: customerFilters,
@@ -64,7 +65,9 @@ function App() {
     servingCustomer,
     WLPosPicker,
     loadUpdatedCustomers,
-    apiController
+    apiController,
+    customerFilters.statuses,
+    setStatuses
   ]);
 
   function updatePanelChildEffect() {
@@ -81,7 +84,8 @@ function App() {
             const res = await apiController.delete(selectedCustomer.id);
             if (res.data) {
               loadUpdatedCustomers();
-            } else {
+            }
+            if (res.error) {
               setError(res.error);
             }
             displayPanelActionButtons();
@@ -97,8 +101,10 @@ function App() {
       // Switches panel to WL position picker
       setWLPosPicker({
         index: 0,
-        locked: false
+        locked: false,
+        savedStatusFilters: { ...customerFilters.statuses }
       });
+      setStatuses({ Waiting: true, Serving: true });
     };
 
     const callToStation = async () => {
@@ -109,7 +115,8 @@ function App() {
         const res = await apiController.callToStation(selectedCustomer.id);
         if (res.data) {
           loadUpdatedCustomers();
-        } else {
+        }
+        if (res.error) {
           setError(res.error);
         }
       }
@@ -147,7 +154,7 @@ function App() {
             }}
           />
         );
-      } else {
+      } else if (res.error) {
         setError(res.error);
       }
     };
@@ -264,7 +271,10 @@ function App() {
         <Confirm
           title="Return Customer to Waiting List"
           message={'Select where this customer should appear in the waiting list.'}
-          onCancel={() => setWLPosPicker(null)}
+          onCancel={() => {
+            setStatuses({ ...WLPosPicker.savedStatusFilters });
+            setWLPosPicker(null);
+          }}
           onConfirm={async () => {
             const res = await apiController.update(selectedCustomer.id, {
               status: 'Waiting',
@@ -274,6 +284,7 @@ function App() {
               setError(res.error);
             } else {
               loadUpdatedCustomers();
+              setStatuses({ ...WLPosPicker.savedStatusFilters });
               setWLPosPicker(null);
             }
           }}

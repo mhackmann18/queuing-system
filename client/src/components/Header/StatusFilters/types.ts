@@ -1,6 +1,6 @@
-import { CustomerStatus } from 'utils/types';
+import { StatusFilters } from 'utils/types';
 
 export interface StatusFiltersProps {
-  statusFilters: Record<CustomerStatus, boolean>;
-  setStatusFilters: (statuses: Record<CustomerStatus, boolean>) => void;
+  statusFilters: StatusFilters;
+  setStatusFilters: (statuses: StatusFilters) => void;
 }

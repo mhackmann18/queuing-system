@@ -1,9 +1,9 @@
-import { Station, Department, CustomerStatus } from 'utils/types';
+import { Station, Department, StatusFilters } from 'utils/types';
 
 interface Filters {
   date: Date;
   department: Department;
-  statuses: Record<CustomerStatus, boolean>;
+  statuses: StatusFilters;
 }
 
 export interface ManageCustomersHeaderProps {
@@ -12,6 +12,6 @@ export interface ManageCustomersHeaderProps {
   filterSetters: {
     setDate: (date: Date) => void;
     setDepartment: (department: Department) => void;
-    setStatuses: (statusFilters: Record<CustomerStatus, boolean>) => void;
+    setStatuses: (statusFilters: StatusFilters) => void;
   };
 }

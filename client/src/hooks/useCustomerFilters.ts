@@ -1,27 +1,19 @@
 import { useMemo, useState } from 'react';
-import { CustomerStatus, Department } from 'utils/types';
+import { Department, StatusFilters } from 'utils/types';
 
 const currentDepartment: Department = 'Motor Vehicle';
 
 export interface CustomerFilters {
   date: Date;
-  statuses: Record<CustomerStatus, boolean>;
+  statuses: StatusFilters;
   department: Department;
 }
 
 export default function useCustomerFilters() {
   const [date, setDate] = useState(new Date());
-  const [statuses, setStatuses] = useState<Record<CustomerStatus, boolean>>({
+  const [statuses, setStatuses] = useState<StatusFilters>({
     Serving: true,
-    Waiting: true,
-    'No Show': false,
-    Served: false,
-    MV1: false,
-    MV2: false,
-    MV3: false,
-    MV4: false,
-    DL1: false,
-    DL2: false
+    Waiting: true
   });
   const [department, setDepartment] = useState<Department>(currentDepartment);
 

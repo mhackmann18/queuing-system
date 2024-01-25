@@ -22,6 +22,8 @@ export interface Customer {
   reasonsForVisit: string[];
 }
 
+export type StatusFilters = Partial<Record<CustomerStatus, boolean>>;
+
 // https://stackoverflow.com/questions/40510611/typescript-interface-require-one-of-two-properties-to-exist
 export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
   T,
