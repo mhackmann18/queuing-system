@@ -12,10 +12,10 @@ export interface CustomerFilters {
 export default function useCustomerFilters() {
   const [date, setDate] = useState(new Date());
   const [statuses, setStatuses] = useState<Record<CustomerStatus, boolean>>({
+    Serving: true,
     Waiting: true,
     'No Show': false,
     Served: false,
-    Serving: true,
     MV1: false,
     MV2: false,
     MV3: false,
