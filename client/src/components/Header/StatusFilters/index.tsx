@@ -4,9 +4,9 @@ import { StatusFilterButtonsProps } from './types';
 import { sameDay } from 'utils/helpers';
 import { CustomerStatus } from 'utils/types';
 
-const signedInStation = 'MV1';
-const signedInDept =
-  signedInStation[0] === 'M' ? 'Motor Vehicle' : "Driver's License";
+// const signedInStation = 'MV1';
+// const signedInDept =
+//   signedInStation[0] === 'M' ? 'Motor Vehicle' : "Driver's License";
 
 export default function StatusFilterButtons({
   filters,
@@ -18,7 +18,7 @@ export default function StatusFilterButtons({
     const toggleStatus = (status: CustomerStatus) =>
       setStatuses({ ...filters.statuses, [status]: !filters.statuses[status] });
     const handleOtherStationsClick = () => {
-      if (signedInDept === 'Motor Vehicle') {
+      if (filters.department === 'Motor Vehicle') {
         setStatuses({
           ...filters.statuses,
           MV1: !MV1,
@@ -71,7 +71,7 @@ export default function StatusFilterButtons({
     }
 
     return config;
-  }, [filters.date, filters.statuses, setStatuses]);
+  }, [filters, setStatuses]);
 
   return (
     <div>

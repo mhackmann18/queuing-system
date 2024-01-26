@@ -72,11 +72,7 @@ function getRandomNumber(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-function generateRandomDates(
-  startDate: Date,
-  endDate: Date,
-  numberOfDates: number
-) {
+function generateRandomDates(startDate: Date, endDate: Date, numberOfDates: number) {
   const randomDates = [];
 
   for (let i = 0; i < numberOfDates; i++) {
@@ -118,12 +114,7 @@ export default class DummyApi {
       getFinalCheckInTime(),
       100
     );
-    const mvRemainingStations: MVCustomerRawStatus[] = [
-      'MV1',
-      'MV2',
-      'MV3',
-      'MV4'
-    ];
+    const mvRemainingStations: MVCustomerRawStatus[] = ['MV1', 'MV2', 'MV3', 'MV4'];
     const dlRemainingStations: DLCustomerRawStatus[] = ['DL1', 'DL2'];
 
     for (let i = 0; i < 100; i++) {
@@ -232,8 +223,7 @@ export default class DummyApi {
           // Get customers from all departments
           if (statuses) {
             if (
-              (c.driversLicense &&
-                statuses.includes(c.driversLicense.status)) ||
+              (c.driversLicense && statuses.includes(c.driversLicense.status)) ||
               (c.motorVehicle && statuses.includes(c.motorVehicle.status))
             ) {
               result.push(c);
@@ -444,14 +434,12 @@ export function getSortedCustomers(customers: CustomerRaw[]) {
 
   // Sort served customers by check in time
   servedCustomers.sort(
-    (a, b) =>
-      new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime()
+    (a, b) => new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime()
   );
 
   // Sort waiting customers by check in time
   waitingCustomers.sort(
-    (a, b) =>
-      new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime()
+    (a, b) => new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime()
   );
 
   return [...servedCustomers, ...servingCustomers, ...waitingCustomers];

@@ -11,13 +11,14 @@ import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
 import useCustomers from 'hooks/useCustomers';
 import Error from './Error';
-import { sameDay } from 'utils/helpers';
+import { getDeptFromStation, sameDay } from 'utils/helpers';
 
 // Stand-in state
-const currentStation: Station = 'MV1';
+const signedInStation: Station = 'MV1';
+const signedInDept = getDeptFromStation(signedInStation);
 
 function App() {
-  const apiController = useMemo(() => new CustomerController(currentStation), []);
+  const apiController = useMemo(() => new CustomerController(signedInStation), []);
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;
@@ -40,7 +41,6 @@ function App() {
     customers.length && customers.find((c) => c.status === 'Serving');
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
   const [error, setError] = useState<string>('');
-
   // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
     // If there's no customers, there can be no selected customer.
@@ -70,6 +70,7 @@ function App() {
     loadUpdatedCustomers,
     apiController,
     customerFilters.statuses,
+    customerFilters.department,
     setStatuses
   ]);
 
@@ -213,6 +214,11 @@ function App() {
     const getAvailableActions = (
       customer: Customer
     ): Record<string, () => Promise<void>>[] => {
+      // If the customers don't belong to the signed in dept, no actions can be taken
+      if (signedInDept !== customerFilters.department) {
+        return [];
+      }
+
       let actions: Record<string, () => Promise<void>>[] = [];
       const { status, callTimes } = customer;
 
@@ -282,8 +288,12 @@ function App() {
 
         setPanelChild(
           <div>
-            <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
-            <div className="mb-4">{renderActionBtns()}</div>
+            {customerFilters.department === signedInDept && (
+              <>
+                <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
+                <div className="mb-4">{renderActionBtns()}</div>
+              </>
+            )}
             <CustomerPanelInfo customer={selectedCustomer} />
           </div>
         );
@@ -322,7 +332,7 @@ function App() {
         <div className="w-lvh fixed inset-0 h-lvh bg-black opacity-50" />
       )}
       <Header
-        signedInStation={currentStation}
+        signedInStation={signedInStation}
         filters={customerFilters}
         filterSetters={{
           setDate,
