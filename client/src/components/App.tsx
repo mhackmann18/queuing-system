@@ -41,6 +41,7 @@ function App() {
     customers.length && customers.find((c) => c.status === 'Serving');
   const [panelChild, setPanelChild] = useState<ReactElement | null>(null);
   const [error, setError] = useState<string>('');
+
   // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
     // If there's no customers, there can be no selected customer.
@@ -113,7 +114,7 @@ function App() {
       setPanelChild(
         <Confirm
           title="Delete Customer"
-          message="Are you sure you want to delete this customer?"
+          message="Are you sure you want to delete this customer? This action cannot be undone."
           onConfirm={async () => {
             const res = await apiController.delete(selectedCustomer.id);
             if (res.data) {
