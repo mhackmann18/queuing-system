@@ -1,10 +1,11 @@
 import { CustomerStatus } from 'utils/types';
 import { CustomerPanelWrapperProps } from './types';
+import ActionView from '../ActionView';
 
 export default function CustomerPanelWrapper({
-  customer: { name, status },
-  children,
-  containerStyles = ''
+  customer,
+  containerStyles = '',
+  actionConfig
 }: CustomerPanelWrapperProps) {
   const statusStyles: Record<CustomerStatus, string> = {
     Served: 'text-served border-served',
@@ -15,9 +16,11 @@ export default function CustomerPanelWrapper({
     MV2: 'text-mv2 border-mv2',
     MV3: 'text-mv3 border-mv3',
     MV4: 'text-mv4 border-mv4',
-    DL1: 'text-dl1 border-mv5',
-    DL2: 'text-dl2 border-mv6'
+    DL1: 'text-dl1 border-dl1',
+    DL2: 'text-dl2 border-dl2'
   };
+
+  const { name, status } = customer;
 
   return (
     <div
@@ -32,7 +35,9 @@ export default function CustomerPanelWrapper({
           {status}
         </span>
       </div>
-      {children}
+      {actionConfig ? (
+        <ActionView customer={customer} actionConfig={actionConfig} />
+      ) : null}
     </div>
   );
 }

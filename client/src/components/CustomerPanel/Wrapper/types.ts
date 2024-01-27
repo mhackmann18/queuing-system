@@ -1,8 +1,8 @@
-import { ReactElement } from 'react';
 import { Customer } from 'utils/types';
+import { ActionViewConfigProp } from '../ActionView';
 
 export interface CustomerPanelWrapperProps {
   customer: Customer;
-  children: ReactElement | null;
   containerStyles?: string;
+  actionConfig: ActionViewConfigProp | null;
 }
