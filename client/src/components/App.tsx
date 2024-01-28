@@ -76,7 +76,7 @@ function App() {
     // Save current status filters and replace with relevant filters for previous date customers
     if (!sameDay(customerFilters.date, new Date()) && !savedStatusFilters) {
       setSavedStatusFilters({ ...customerFilters.statuses });
-      setStatuses({ Waiting: true, 'No Show': true });
+      setStatuses({ Served: true, 'No Show': true });
     }
     // Save current status filters and replace with relevant filters for WL pos picker
     if (WLPosPicker && !savedStatusFilters) {
@@ -111,7 +111,7 @@ function App() {
         returnToWaitingList: {
           onClick: () => setWLPosPicker({ index: 0, locked: false }),
           onCancel: () => setWLPosPicker(null),
-          onConfirm: async () => {
+          onConfirm: async ({ onSuccess }) => {
             const res = await apiController.update(selectedCustomer.id, {
               status: 'Waiting',
               waitingListIndex: WLPosPicker!.index
@@ -119,6 +119,7 @@ function App() {
             if (res.error) {
               setError(res.error);
             } else {
+              onSuccess();
               loadUpdatedCustomers();
               setWLPosPicker(null);
             }

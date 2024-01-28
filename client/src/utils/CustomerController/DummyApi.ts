@@ -105,7 +105,67 @@ function getCallTimes(checkInTime: Date, status: CustomerRawStatus): Date[] {
   return callTimes;
 }
 
+function getDayBackCheckInTime(x: number) {
+  const currentDate = getOpeningTime();
+  currentDate.setDate(currentDate.getDate() - x);
+  return currentDate;
+}
+
+function getDayBackFinalCheckInTime(dayBack: number) {
+  const finalCheckInTime = getDayBackCheckInTime(dayBack);
+  finalCheckInTime.setHours(18); // Office closes at 6 PM
+
+  finalCheckInTime.setMinutes(finalCheckInTime.getMinutes() - 20);
+  // Final customer checks in 20 minutes before closing
+
+  return finalCheckInTime;
+}
+
 export default class DummyApi {
+  static #getOldCustomers(dayBack: number) {
+    const numCustomers = 40;
+    const customers: CustomerRaw[] = [];
+    const checkInTimes = generateEvenlySpacedDates(
+      getDayBackCheckInTime(dayBack),
+      getDayBackFinalCheckInTime(dayBack),
+      numCustomers
+    );
+    let i = 0;
+    for (i; i < numCustomers / 2; i++) {
+      const id = dayBack * 100 + i + 1;
+
+      const checkInTime = checkInTimes[i];
+
+      customers.push({
+        id,
+        checkInTime: checkInTime.toISOString(),
+        firstName: `FirstName${id}`,
+        lastName: `LastName${id}`,
+        motorVehicle: {
+          status: 'Served',
+          callTimes: getCallTimes(checkInTime, 'Served').map((t) => t.toISOString())
+        }
+      });
+    }
+    for (i; i < numCustomers; i++) {
+      const id = dayBack * 100 + i + 1;
+
+      const checkInTime = checkInTimes[i];
+
+      customers.push({
+        id,
+        checkInTime: checkInTime.toISOString(),
+        firstName: `FirstName${id}`,
+        lastName: `LastName${id}`,
+        driversLicense: {
+          status: 'Served',
+          callTimes: getCallTimes(checkInTime, 'Served').map((t) => t.toISOString())
+        }
+      });
+    }
+    return customers;
+  }
+
   // Place an array of 100 customers into local storage
   static init() {
     const customers: CustomerRaw[] = [];
@@ -178,6 +238,8 @@ export default class DummyApi {
         }
       });
     }
+    customers.push(...DummyApi.#getOldCustomers(2));
+    customers.push(...DummyApi.#getOldCustomers(1));
 
     localStorage.setItem('customers', JSON.stringify(customers));
   }
