@@ -26,6 +26,7 @@ export interface Customer {
   checkInTime: Date;
   callTimes: Date[];
   reasonsForVisit: string[];
+  atOtherDept?: Department;
 }
 
 export type StatusFilters = Partial<Record<CustomerStatus, boolean>>;

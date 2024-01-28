@@ -1,4 +1,4 @@
-import { Customer } from 'utils/types';
+import { Customer, Department } from 'utils/types';
 
 export interface ActionViewConfigProp {
   delete: {
@@ -46,4 +46,5 @@ export interface ActionViewConfigProp {
 export interface ActionViewProps {
   customer: Customer;
   actionConfig: ActionViewConfigProp;
+  currentDept: Department;
 }

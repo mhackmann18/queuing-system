@@ -1,4 +1,4 @@
-import CustomerPanelWrapper from './CustomerPanel/Wrapper';
+import CustomerPanel from './CustomerPanel';
 import { Customer, Station, StatusFilters } from '../utils/types';
 import { useEffect, useState, useMemo } from 'react';
 import CustomerList from './CustomerList';
@@ -125,6 +125,8 @@ function App() {
           onClick: async () => {
             if (customers.find((c) => c.status === 'Serving')) {
               setError('You are already serving a customer.');
+            } else if (selectedCustomer.atOtherDept) {
+              setError('Customer is being served at another department.');
             } else {
               const res = await apiController.callToStation(selectedCustomer.id);
               if (res.error) {
@@ -198,10 +200,11 @@ function App() {
             }
           />
           <div className="ml-4">
-            <CustomerPanelWrapper
+            <CustomerPanel
               customer={selectedCustomer}
               containerStyles={WLPosPicker ? 'z-10' : ''}
               actionConfig={panelComponentActionBtnHandlers}
+              currentDept={customerFilters.department}
             />
           </div>
         </div>

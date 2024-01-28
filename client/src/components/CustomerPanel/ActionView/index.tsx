@@ -1,13 +1,19 @@
 import { useState, ReactElement, useEffect, useCallback } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
-import CustomerPanelInfo from '../Info';
 import Confirm from 'components/Confirm';
-import { Customer } from 'utils/types';
+import { Customer, Department } from 'utils/types';
 import { ActionViewProps } from './types';
+import CustomerPanelInfo from '../Info';
 
 type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
 
-export default function ActionView({ customer, actionConfig }: ActionViewProps) {
+const signedInDept: Department = 'Motor Vehicle';
+
+export default function ActionView({
+  customer,
+  actionConfig,
+  currentDept
+}: ActionViewProps) {
   const [mode, setMode] = useState<ActionViewMode>('default');
   const [component, setComponent] = useState<ReactElement | null>(null);
 
@@ -181,10 +187,30 @@ export default function ActionView({ customer, actionConfig }: ActionViewProps) 
             );
           });
 
+        let actionComponent: ReactElement = (
+          <p className="text-french_gray_1-500 mb-4">Unavailable</p>
+        );
+
+        if (currentDept !== signedInDept) {
+          actionComponent = (
+            <p className="text-french_gray_1-500 mb-4">
+              Unavailable to {signedInDept} desks.
+            </p>
+          );
+        } else if (customer.atOtherDept) {
+          actionComponent = (
+            <p className="text-french_gray_1-500 mb-4">
+              Unavailable while customer is at a {customer.atOtherDept} desk.
+            </p>
+          );
+        } else {
+          actionComponent = <div className="mb-4">{renderActionBtns()}</div>;
+        }
+
         setComponent(
           <div>
             <h3 className="text-eerie_black mt-2 font-semibold">Actions</h3>
-            <div className="mb-4">{renderActionBtns()}</div>
+            {actionComponent}
             <CustomerPanelInfo customer={customer} />
           </div>
         );
@@ -196,7 +222,8 @@ export default function ActionView({ customer, actionConfig }: ActionViewProps) 
     actionConfig.delete,
     actionConfig.returnToWaitingList,
     getAvailableActions,
-    customer
+    customer,
+    currentDept
   ]);
 
   return component;

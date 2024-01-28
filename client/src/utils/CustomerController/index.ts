@@ -290,31 +290,29 @@ export default class CustomerController {
     let sanitizedStatus: CustomerStatus =
       department === 'Motor Vehicle' ? motorVehicle!.status : driversLicense!.status;
 
+    let atOtherDept: Department | undefined;
+
     if (department === 'Motor Vehicle') {
-      const { status } = motorVehicle!;
+      sanitizedStatus = motorVehicle!.status;
 
       if (
-        status === 'Waiting' &&
+        motorVehicle!.status === 'Waiting' &&
         driversLicense &&
         ['DL1', 'DL2'].includes(driversLicense.status)
       ) {
-        sanitizedStatus = driversLicense.status;
-      } else {
-        sanitizedStatus = status;
+        atOtherDept = "Driver's License";
       }
     }
 
     if (department === "Driver's License") {
-      const { status } = driversLicense!;
+      sanitizedStatus = driversLicense!.status;
 
       if (
-        status === 'Waiting' &&
+        driversLicense!.status === 'Waiting' &&
         motorVehicle &&
         ['MV1', 'MV2', 'MV3', 'MV4'].includes(motorVehicle.status)
       ) {
-        sanitizedStatus = motorVehicle.status;
-      } else {
-        sanitizedStatus = status;
+        atOtherDept = 'Motor Vehicle';
       }
     }
 
@@ -324,7 +322,8 @@ export default class CustomerController {
       status: sanitizedStatus,
       checkInTime: new Date(checkInTime),
       callTimes,
-      reasonsForVisit
+      reasonsForVisit,
+      atOtherDept
     };
   }
 }
