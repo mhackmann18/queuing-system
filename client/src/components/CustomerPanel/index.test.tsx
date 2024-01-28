@@ -1,8 +1,42 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { get12HourTimeString } from 'utils/helpers';
 import CustomerPanel from '.';
-import { Customer, CustomerAction } from 'utils/types';
+import { Customer } from 'utils/types';
+import { ActionViewConfigProp } from './ActionView/types';
+import UserContext from 'components/UserContext';
+import { User } from 'components/UserContext/types';
+import userEvent from '@testing-library/user-event';
+
+const mockUser: User = {
+  id: 1,
+  station: 'MV1'
+};
+
+const mockActionConfig: ActionViewConfigProp = {
+  delete: {
+    onCancel: () => null,
+    onClick: () => null,
+    onConfirm: () => null
+  },
+  returnToWaitingList: {
+    onCancel: () => null,
+    onClick: () => null,
+    onConfirm: () => null,
+    confirmBtnDisabled: false
+  },
+  markNoShow: {
+    onCancel: () => null,
+    onClick: () => null,
+    onConfirm: () => null
+  },
+  callToStation: {
+    onClick: () => null
+  },
+  finishServing: {
+    onClick: () => null
+  }
+};
 
 const mockCustomer: Customer = {
   id: 1,
@@ -17,30 +51,32 @@ const mockCustomer: Customer = {
   ]
 };
 
-const mockCustomerActions: CustomerAction[] = [
-  {
-    title: 'Finish Serving',
-    fn: () => null
-  }
-];
-
 test('displays customer information', () => {
   render(
-    <CustomerPanel
-      customer={mockCustomer}
-      customerActions={mockCustomerActions}
-    />
+    <UserContext.Provider value={mockUser}>
+      <CustomerPanel
+        customer={mockCustomer}
+        actionConfig={mockActionConfig}
+        currentDept="Motor Vehicle"
+      />
+    </UserContext.Provider>
   );
 
+  // Name
   expect(screen.getByText(mockCustomer.name)).toBeInTheDocument();
+  // Status
+  expect(screen.getByText(mockCustomer.status)).toBeInTheDocument();
+  // Check in time
   expect(
-    screen.getByText(get12HourTimeString(mockCustomer.checkInTime))
+    screen.getByText(new RegExp(get12HourTimeString(mockCustomer.checkInTime)))
   ).toBeInTheDocument();
+  // Call times
   mockCustomer.callTimes.forEach((time) =>
     expect(
       screen.getByText(new RegExp(get12HourTimeString(time)))
     ).toBeInTheDocument()
   );
+  // Reasons for visit
   mockCustomer.reasonsForVisit.forEach((r) => {
     expect(screen.getByText(new RegExp(r))).toBeInTheDocument();
   });
@@ -68,25 +104,115 @@ test.todo(
 
 test.todo("displays error when 'Call to Station' api request returns error");
 
-describe("when status is 'Serving'", () => {
-  it.todo(
-    "displays 'Finish Serving', 'Mark No Show', 'Return to Waiting List', and 'Delete' buttons"
-  );
+describe("when 'Delete' button is clicked", () => {
+  it('displays confirmation message and buttons', async () => {
+    render(
+      <UserContext.Provider value={mockUser}>
+        <CustomerPanel
+          customer={mockCustomer}
+          actionConfig={mockActionConfig}
+          currentDept="Motor Vehicle"
+        />
+      </UserContext.Provider>
+    );
 
-  describe("when 'Finish Serving' button is clicked", () => {
-    it.todo('makes api request');
+    userEvent.click(screen.getByRole('button', { name: /delete/i }));
 
-    it.todo('when api returns error, should display error');
+    expect(await screen.findByText(/confirm deletion/i)).toBeVisible();
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeVisible();
+    expect(screen.getByRole('button', { name: /delete/i })).toBeVisible();
+  });
+});
 
-    it.todo("when api returns success, should change status to 'Served'");
+describe("when 'Mark No Show' button is clicked", () => {
+  mockCustomer.status = 'Waiting';
+
+  it('displays confirmation message', async () => {
+    render(
+      <UserContext.Provider value={mockUser}>
+        <CustomerPanel
+          customer={mockCustomer}
+          actionConfig={mockActionConfig}
+          currentDept="Motor Vehicle"
+        />
+      </UserContext.Provider>
+    );
+
+    userEvent.click(screen.getByRole('button', { name: /mark no show/i }));
+
+    expect(await screen.findByText(/mark customer as a no show\?/i)).toBeVisible();
   });
 
-  describe("when 'Mark No Show' button is clicked", () => {
-    it.todo('makes api request');
+  it("displays confirmation message, when 'Cancel' button is clicked, hides confirmation message", async () => {
+    render(
+      <UserContext.Provider value={mockUser}>
+        <CustomerPanel
+          customer={mockCustomer}
+          actionConfig={mockActionConfig}
+          currentDept="Motor Vehicle"
+        />
+      </UserContext.Provider>
+    );
 
-    it.todo('when api returns error, should display error');
+    userEvent.click(screen.getByRole('button', { name: /mark no show/i }));
 
-    it.todo("when api returns success, should change status to 'No Show'");
+    expect(await screen.findByText(/mark customer as a no show\?/i)).toBeVisible();
+
+    userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+
+    waitFor(() =>
+      expect(screen.queryByText(/mark customer as a no show\?/i)).toBeNull()
+    );
+  });
+
+  it("displays confirmation message, when 'Mark No Show' confirmation button is clicked, hides confirmation message", async () => {
+    render(
+      <UserContext.Provider value={mockUser}>
+        <CustomerPanel
+          customer={mockCustomer}
+          actionConfig={mockActionConfig}
+          currentDept="Motor Vehicle"
+        />
+      </UserContext.Provider>
+    );
+
+    userEvent.click(screen.getByRole('button', { name: /mark no show/i }));
+
+    expect(await screen.findByText(/mark customer as a no show\?/i)).toBeVisible();
+
+    userEvent.click(screen.getByRole('button', { name: /mark no show/i }));
+
+    waitFor(() =>
+      expect(screen.queryByText(/mark customer as a no show\?/i)).toBeNull()
+    );
+  });
+});
+
+// Serving
+describe("when customer status is 'Serving'", () => {
+  mockCustomer.status = 'Serving';
+
+  it("displays 'Finish Serving', 'Mark No Show', 'Return to Waiting List', and 'Delete' buttons", () => {
+    render(
+      <UserContext.Provider value={mockUser}>
+        <CustomerPanel
+          customer={mockCustomer}
+          actionConfig={mockActionConfig}
+          currentDept="Motor Vehicle"
+        />
+      </UserContext.Provider>
+    );
+
+    expect(
+      screen.getByRole('button', { name: /finish serving/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /mark no show/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /return to waiting list/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
   });
 
   describe("when 'Return to Waiting List' button is clicked", () => {
@@ -94,9 +220,7 @@ describe("when status is 'Serving'", () => {
 
     describe('when position picker is displayed', () => {
       describe('when clicking a position', () => {
-        it('makes api request', () => {
-          expect(screen.getByText('DFDSFSDF')).toBeInTheDocument();
-        });
+        it.todo('makes api request');
 
         it.todo('when api returns error, should display error');
 

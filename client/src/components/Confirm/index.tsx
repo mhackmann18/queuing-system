@@ -22,7 +22,7 @@ export default function Confirm({
   return (
     <div>
       <h3 className="text-eerie_black mt-2 font-semibold">{title}</h3>
-      <h4 className="text-french_gray_2-500 mt-2 font-medium">{message}</h4>
+      <p className="text-french_gray_2-500 mt-2 font-medium">{message}</p>
       <div className="mt-8 flex justify-end">
         <button
           onClick={onCancel}

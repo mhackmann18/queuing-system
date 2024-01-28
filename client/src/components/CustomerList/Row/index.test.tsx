@@ -42,11 +42,7 @@ test('displays customer information', () => {
 
 test('applies outline style when selected', () => {
   render(
-    <CustomerRow
-      customer={mockCustomer}
-      onClick={mockOnClick}
-      selected={true}
-    />
+    <CustomerRow customer={mockCustomer} onClick={mockOnClick} selected={true} />
   );
 
   expect(screen.getByRole('button')).toHaveClass('outline');

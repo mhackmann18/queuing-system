@@ -208,7 +208,6 @@ function App() {
             <div className="ml-4">
               <CustomerPanel
                 customer={selectedCustomer}
-                containerStyles={WLPosPicker ? 'z-10' : ''}
                 actionConfig={panelComponentActionBtnHandlers}
                 currentDept={customerFilters.department}
               />

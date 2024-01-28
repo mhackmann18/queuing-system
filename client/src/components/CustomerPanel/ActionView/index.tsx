@@ -113,7 +113,7 @@ export default function ActionView({
 
         setComponent(
           <Confirm
-            title="Delete this Customer?"
+            title="Confirm Deletion"
             message={
               'Are you sure you want to delete this customer? This action cannot be undone'
             }

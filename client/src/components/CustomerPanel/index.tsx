@@ -4,7 +4,6 @@ import ActionView from './ActionView';
 
 export default function CustomerPanel({
   customer,
-  containerStyles = '',
   actionConfig,
   currentDept
 }: CustomerPanelProps) {
@@ -25,7 +24,9 @@ export default function CustomerPanel({
 
   return (
     <div
-      className={`border-french_gray_1 relative w-80 rounded-lg border bg-white px-8 py-4 shadow-md ${containerStyles}`}
+      className={
+        'border-french_gray_1 relative z-10 w-80 rounded-lg border bg-white px-8 py-4 shadow-md'
+      }
     >
       <p className="text-french_gray_1-500">Selected</p>
       <div className="mb-4 flex items-start justify-between border-b pb-1.5">
