@@ -14,7 +14,7 @@ export default function CustomerPanelInfo({
       <p className="">{get12HourTimeString(checkInTime)}</p>
 
       <h4 className="text-french_gray_1-500 mt-2 text-sm font-medium">
-        Times Called
+        Time{callTimes.length > 1 ? 's' : ''} Called
       </h4>
       <ul>
         {callTimes.length ? (

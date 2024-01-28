@@ -136,14 +136,16 @@ export default class DummyApi {
 
       const checkInTime = checkInTimes[i];
 
+      const status = Math.random() < 0.8 ? 'Served' : 'No Show';
+
       customers.push({
         id,
         checkInTime: checkInTime.toISOString(),
         firstName: `FirstName${id}`,
         lastName: `LastName${id}`,
         motorVehicle: {
-          status: 'Served',
-          callTimes: getCallTimes(checkInTime, 'Served').map((t) => t.toISOString())
+          status,
+          callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
         }
       });
     }
@@ -152,14 +154,16 @@ export default class DummyApi {
 
       const checkInTime = checkInTimes[i];
 
+      const status = Math.random() < 0.8 ? 'Served' : 'No Show';
+
       customers.push({
         id,
         checkInTime: checkInTime.toISOString(),
         firstName: `FirstName${id}`,
         lastName: `LastName${id}`,
         driversLicense: {
-          status: 'Served',
-          callTimes: getCallTimes(checkInTime, 'Served').map((t) => t.toISOString())
+          status: status,
+          callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
         }
       });
     }

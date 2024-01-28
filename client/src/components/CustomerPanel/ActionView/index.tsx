@@ -5,7 +5,7 @@ import { Customer } from 'utils/types';
 import { ActionViewProps } from './types';
 import CustomerPanelInfo from '../Info';
 import UserContext from 'components/UserContext';
-import { getDeptFromStation } from 'utils/helpers';
+import { getDeptFromStation, sameDay } from 'utils/helpers';
 
 type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
 
@@ -88,6 +88,11 @@ export default function ActionView({
             }
           ];
           break;
+      }
+
+      // The only available action for customers from previous days is to delete them
+      if (!sameDay(customer.checkInTime, new Date())) {
+        actions = [{ Delete: handleDeleteBtnClick }];
       }
 
       return actions;
