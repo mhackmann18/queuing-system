@@ -1,13 +1,13 @@
-import { useState, ReactElement, useEffect, useCallback } from 'react';
+import { useState, ReactElement, useEffect, useCallback, useContext } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
 import Confirm from 'components/Confirm';
-import { Customer, Department } from 'utils/types';
+import { Customer } from 'utils/types';
 import { ActionViewProps } from './types';
 import CustomerPanelInfo from '../Info';
+import UserContext from 'components/UserContext';
+import { getDeptFromStation } from 'utils/helpers';
 
 type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
-
-const signedInDept: Department = 'Motor Vehicle';
 
 export default function ActionView({
   customer,
@@ -16,6 +16,7 @@ export default function ActionView({
 }: ActionViewProps) {
   const [mode, setMode] = useState<ActionViewMode>('default');
   const [component, setComponent] = useState<ReactElement | null>(null);
+  const user = useContext(UserContext);
 
   const getAvailableActions = useCallback(
     (customer: Customer): Record<string, () => void>[] => {
@@ -191,10 +192,16 @@ export default function ActionView({
           <p className="text-french_gray_1-500 mb-4">Unavailable</p>
         );
 
-        if (currentDept !== signedInDept) {
+        if (user!.station === 'none') {
           actionComponent = (
             <p className="text-french_gray_1-500 mb-4">
-              Unavailable to {signedInDept} desks.
+              Sign in to a station to use actions.
+            </p>
+          );
+        } else if (currentDept !== getDeptFromStation(user!.station)) {
+          actionComponent = (
+            <p className="text-french_gray_1-500 mb-4">
+              Unavailable to {getDeptFromStation(user!.station)} desks.
             </p>
           );
         } else if (customer.atOtherDept) {
@@ -223,7 +230,8 @@ export default function ActionView({
     actionConfig.returnToWaitingList,
     getAvailableActions,
     customer,
-    currentDept
+    currentDept,
+    user
   ]);
 
   return component;

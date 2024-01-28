@@ -9,11 +9,15 @@ import useCustomers from 'hooks/useCustomers';
 import Error from './Error';
 import { sameDay } from 'utils/helpers';
 import { ActionViewConfigProp } from './CustomerPanel/ActionView/types';
+import UserContext from './UserContext';
 
 // Stand-in state
 const signedInStation: Station = 'MV1';
 
 function App() {
+  // Context
+  const [user] = useState({ id: 1, station: signedInStation });
+
   // State
   const apiController = useMemo(() => new CustomerController(signedInStation), []);
   const [WLPosPicker, setWLPosPicker] = useState<{
@@ -171,54 +175,55 @@ function App() {
   );
 
   return (
-    <div className="text-eerie_black relative h-screen bg-white">
-      {WLPosPicker && <div className="fixed inset-0 bg-black opacity-50" />}
-      <Header
-        signedInStation={signedInStation}
-        filters={customerFilters}
-        filterSetters={{
-          setDate,
-          setDepartment,
-          setStatuses
-        }}
-      />
-      {customers.length && selectedCustomer ? (
-        <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
-          <CustomerList
-            customers={customers}
-            selectedCustomer={selectedCustomer}
-            setSelectedCustomer={setSelectedCustomer}
-            WLPosPicker={
-              WLPosPicker && {
-                index: WLPosPicker.index,
-                setIndex: (index: number) =>
-                  setWLPosPicker({ ...WLPosPicker, index }),
-                locked: WLPosPicker.locked,
-                setLocked: (locked: boolean) =>
-                  setWLPosPicker({ ...WLPosPicker, locked })
+    <UserContext.Provider value={user}>
+      <div className="text-eerie_black relative h-screen bg-white">
+        {WLPosPicker && <div className="fixed inset-0 bg-black opacity-50" />}
+        <Header
+          filters={customerFilters}
+          filterSetters={{
+            setDate,
+            setDepartment,
+            setStatuses
+          }}
+        />
+        {customers.length && selectedCustomer ? (
+          <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
+            <CustomerList
+              customers={customers}
+              selectedCustomer={selectedCustomer}
+              setSelectedCustomer={setSelectedCustomer}
+              WLPosPicker={
+                WLPosPicker && {
+                  index: WLPosPicker.index,
+                  setIndex: (index: number) =>
+                    setWLPosPicker({ ...WLPosPicker, index }),
+                  locked: WLPosPicker.locked,
+                  setLocked: (locked: boolean) =>
+                    setWLPosPicker({ ...WLPosPicker, locked })
+                }
               }
-            }
-          />
-          <div className="ml-4">
-            <CustomerPanel
-              customer={selectedCustomer}
-              containerStyles={WLPosPicker ? 'z-10' : ''}
-              actionConfig={panelComponentActionBtnHandlers}
-              currentDept={customerFilters.department}
             />
+            <div className="ml-4">
+              <CustomerPanel
+                customer={selectedCustomer}
+                containerStyles={WLPosPicker ? 'z-10' : ''}
+                actionConfig={panelComponentActionBtnHandlers}
+                currentDept={customerFilters.department}
+              />
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="text-french_gray_2 flex h-[calc(100%-8rem)] items-center justify-center">
-          No Customers
-        </div>
-      )}
-      {error && (
-        <div className="absolute bottom-10 right-10 ">
-          <Error error={error} close={() => setError('')} />
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="text-french_gray_2 flex h-[calc(100%-8rem)] items-center justify-center">
+            No Customers
+          </div>
+        )}
+        {error && (
+          <div className="absolute bottom-10 right-10 ">
+            <Error error={error} close={() => setError('')} />
+          </div>
+        )}
+      </div>
+    </UserContext.Provider>
   );
 }
 

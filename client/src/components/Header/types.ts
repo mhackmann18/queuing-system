@@ -1,4 +1,4 @@
-import { Station, Department, StatusFilters } from 'utils/types';
+import { Department, StatusFilters } from 'utils/types';
 
 interface Filters {
   date: Date;
@@ -7,7 +7,6 @@ interface Filters {
 }
 
 export interface ManageCustomersHeaderProps {
-  signedInStation: Station | 'none';
   filters: Filters;
   filterSetters: {
     setDate: (date: Date) => void;

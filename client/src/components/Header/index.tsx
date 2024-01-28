@@ -3,12 +3,15 @@ import StationIcon from './StationIcon';
 import StatusFilters from './StatusFilters';
 import DateToggler from './DateToggler';
 import { FaChevronDown } from 'react-icons/fa';
+import { useContext } from 'react';
+import UserContext from 'components/UserContext';
 
 export default function ManageCustomersHeader({
-  signedInStation,
   filters,
   filterSetters
 }: ManageCustomersHeaderProps) {
+  const user = useContext(UserContext);
+
   const handleChangeDeptBtnClick = () => {
     filterSetters.setDepartment(
       filters.department === 'Motor Vehicle' ? "Driver's License" : 'Motor Vehicle'
@@ -32,12 +35,12 @@ export default function ManageCustomersHeader({
             </button>
           </div>
           <div className="flex items-center">
-            {signedInStation !== 'none' && ( // TODO: determine behavior on 'none'
+            {user!.station !== 'none' && ( // TODO: determine behavior on 'none'
               <StationIcon
                 onClick={() => {
                   console.log('station icon clicked');
                 }}
-                station={signedInStation}
+                station={user!.station}
               />
             )}
           </div>

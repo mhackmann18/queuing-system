@@ -4,10 +4,6 @@ import { StatusFilterButtonsProps } from './types';
 import { sameDay } from 'utils/helpers';
 import { CustomerStatus } from 'utils/types';
 
-// const signedInStation = 'MV1';
-// const signedInDept =
-//   signedInStation[0] === 'M' ? 'Motor Vehicle' : "Driver's License";
-
 export default function StatusFilterButtons({
   filters,
   setStatuses
