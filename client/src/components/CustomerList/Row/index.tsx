@@ -53,13 +53,11 @@ export default function CustomerListRow({
           {status}
         </span>
         {/* Customer Name */}
-        <span className="inline-block w-52">{name}</span>
+        <span className="inline-block w-72">{name}</span>
       </div>
       <div>
         {/* Check In Time */}
-        <span className="inline-block w-32">
-          {get12HourTimeString(checkInTime)}
-        </span>
+        <span className="inline-block w-32">{get12HourTimeString(checkInTime)}</span>
         {/* Time Called */}
         <span className="inline-block w-20">
           {callTimes.length ? get12HourTimeString(callTimes[0]) : ''}

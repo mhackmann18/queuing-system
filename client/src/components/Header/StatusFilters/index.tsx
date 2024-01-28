@@ -60,14 +60,14 @@ export default function StatusFilterButtons({
     if (!sameDay(filters.date, new Date())) {
       config = [
         {
-          name: 'Served',
-          onClick: () => toggleStatus('Served'),
-          active: !!Served
-        },
-        {
           name: 'No Show',
           onClick: () => toggleStatus('No Show'),
           active: !!filters.statuses['No Show']
+        },
+        {
+          name: 'Served',
+          onClick: () => toggleStatus('Served'),
+          active: !!Served
         }
       ];
     } else {
