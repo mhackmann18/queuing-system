@@ -86,82 +86,86 @@ function App() {
     WLPosPicker
   ]);
 
-  const actionBtnHandlers: ActionViewConfigProp | null = selectedCustomer && {
-    delete: {
-      onClick: () => null,
-      onCancel: () => null,
-      onConfirm: async ({ onSuccess }) => {
-        const res = await apiController.delete(selectedCustomer.id);
+  const actionBtnHandlers: ActionViewConfigProp | null = useMemo(
+    () =>
+      selectedCustomer && {
+        delete: {
+          onClick: () => null,
+          onCancel: () => null,
+          onConfirm: async ({ onSuccess }) => {
+            const res = await apiController.delete(selectedCustomer.id);
 
-        if (res.error) {
-          setError(res.error);
-        } else {
-          onSuccess();
-          loadUpdatedCustomers();
-        }
-      }
-    },
-    returnToWaitingList: {
-      onClick: () => setWLPosPicker({ index: 0, locked: false }),
-      onCancel: () => setWLPosPicker(null),
-      onConfirm: async () => {
-        const res = await apiController.update(selectedCustomer.id, {
-          status: 'Waiting',
-          waitingListIndex: WLPosPicker.index
-        });
-        if (res.error) {
-          setError(res.error);
-        } else {
-          loadUpdatedCustomers();
-          setWLPosPicker(null);
-        }
-      },
-      confirmBtnDisabled: !WLPosPicker
-    },
-    callToStation: {
-      onClick: async () => {
-        if (customers.find((c) => c.status === 'Serving')) {
-          setError('You are already serving a customer.');
-        } else {
-          const res = await apiController.callToStation(selectedCustomer.id);
-          if (res.error) {
-            setError(res.error);
-          } else {
-            loadUpdatedCustomers();
+            if (res.error) {
+              setError(res.error);
+            } else {
+              onSuccess();
+              loadUpdatedCustomers();
+            }
+          }
+        },
+        returnToWaitingList: {
+          onClick: () => setWLPosPicker({ index: 0, locked: false }),
+          onCancel: () => setWLPosPicker(null),
+          onConfirm: async () => {
+            const res = await apiController.update(selectedCustomer.id, {
+              status: 'Waiting',
+              waitingListIndex: WLPosPicker.index
+            });
+            if (res.error) {
+              setError(res.error);
+            } else {
+              loadUpdatedCustomers();
+              setWLPosPicker(null);
+            }
+          },
+          confirmBtnDisabled: !WLPosPicker
+        },
+        callToStation: {
+          onClick: async () => {
+            if (customers.find((c) => c.status === 'Serving')) {
+              setError('You are already serving a customer.');
+            } else {
+              const res = await apiController.callToStation(selectedCustomer.id);
+              if (res.error) {
+                setError(res.error);
+              } else {
+                loadUpdatedCustomers();
+              }
+            }
+          }
+        },
+        finishServing: {
+          onClick: async () => {
+            const res = await apiController.update(selectedCustomer.id, {
+              status: 'Served'
+            });
+            if (res.error) {
+              setError(res.error);
+            } else {
+              loadUpdatedCustomers();
+            }
+          }
+        },
+        markNoShow: {
+          onClick: () => null,
+          onCancel: () => null,
+          onConfirm: async ({ onSuccess }) => {
+            const res = await apiController.update(selectedCustomer.id, {
+              status: 'No Show'
+            });
+
+            if (res.error) {
+              setError(res.error);
+            } else {
+              // TODO: Give success indication
+              loadUpdatedCustomers();
+              onSuccess();
+            }
           }
         }
-      }
-    },
-    finishServing: {
-      onClick: async () => {
-        const res = await apiController.update(selectedCustomer.id, {
-          status: 'Served'
-        });
-        if (res.error) {
-          setError(res.error);
-        } else {
-          loadUpdatedCustomers();
-        }
-      }
-    },
-    markNoShow: {
-      onClick: () => null,
-      onCancel: () => null,
-      onConfirm: async ({ onSuccess }) => {
-        const res = await apiController.update(selectedCustomer.id, {
-          status: 'No Show'
-        });
-
-        if (res.error) {
-          setError(res.error);
-        } else {
-          // TODO: Give success indication
-          loadUpdatedCustomers();
-          onSuccess();
-        }
-      }
-    }
-  };
+      },
+    [WLPosPicker, apiController, selectedCustomer, customers, loadUpdatedCustomers]
+  );
 
   return (
     <div className="text-eerie_black relative h-screen bg-white">

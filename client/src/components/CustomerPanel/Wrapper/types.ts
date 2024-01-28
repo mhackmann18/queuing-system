@@ -1,5 +1,5 @@
 import { Customer } from 'utils/types';
-import { ActionViewConfigProp } from '../ActionView';
+import { ActionViewConfigProp } from '../ActionView/types';
 
 export interface CustomerPanelWrapperProps {
   customer: Customer;
