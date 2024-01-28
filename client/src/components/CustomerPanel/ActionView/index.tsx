@@ -93,6 +93,7 @@ export default function ActionView({ customer, actionConfig }: ActionViewProps) 
     setMode('default');
   }, [customer.id]);
 
+  // Determine component
   useEffect(() => {
     switch (mode) {
       case 'delete': {
@@ -114,6 +115,8 @@ export default function ActionView({ customer, actionConfig }: ActionViewProps) 
                 onFailure: () => null
               })
             }
+            confirmBtnText="Delete"
+            confirmBtnStyles="text-white bg-red-500"
           />
         );
         break;

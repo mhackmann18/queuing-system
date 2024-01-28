@@ -14,6 +14,7 @@ import { ActionViewConfigProp } from './CustomerPanel/ActionView/types';
 const signedInStation: Station = 'MV1';
 
 function App() {
+  // State
   const apiController = useMemo(() => new CustomerController(signedInStation), []);
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
@@ -86,7 +87,7 @@ function App() {
     WLPosPicker
   ]);
 
-  const actionBtnHandlers: ActionViewConfigProp | null = useMemo(
+  const panelComponentActionBtnHandlers: ActionViewConfigProp | null = useMemo(
     () =>
       selectedCustomer && {
         delete: {
@@ -109,7 +110,7 @@ function App() {
           onConfirm: async () => {
             const res = await apiController.update(selectedCustomer.id, {
               status: 'Waiting',
-              waitingListIndex: WLPosPicker.index
+              waitingListIndex: WLPosPicker!.index
             });
             if (res.error) {
               setError(res.error);
@@ -118,7 +119,7 @@ function App() {
               setWLPosPicker(null);
             }
           },
-          confirmBtnDisabled: !WLPosPicker
+          confirmBtnDisabled: !WLPosPicker?.locked
         },
         callToStation: {
           onClick: async () => {
@@ -200,7 +201,7 @@ function App() {
             <CustomerPanelWrapper
               customer={selectedCustomer}
               containerStyles={WLPosPicker ? 'z-10' : ''}
-              actionConfig={actionBtnHandlers}
+              actionConfig={panelComponentActionBtnHandlers}
             />
           </div>
         </div>
