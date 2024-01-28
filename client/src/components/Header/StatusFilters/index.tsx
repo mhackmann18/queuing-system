@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import FilterButton from 'components/Header/StatusFilters/FilterButton';
 import { StatusFilterButtonsProps } from './types';
 import { sameDay } from 'utils/helpers';
@@ -8,9 +8,38 @@ export default function StatusFilterButtons({
   filters,
   setStatuses
 }: StatusFilterButtonsProps) {
+  const {
+    statuses: { Waiting, Served, MV1, MV2, MV3, MV4, DL1, DL2 },
+    department
+  } = filters;
+
+  // Keep the status filters in sync with the current dept
+  useEffect(() => {
+    if (MV1 && department !== 'Motor Vehicle') {
+      setStatuses({
+        ...filters.statuses,
+        MV1: !MV1,
+        MV2: !MV2,
+        MV3: !MV3,
+        MV4: !MV4,
+        DL1: true,
+        DL2: true
+      });
+    } else if (DL1 && department !== "Driver's License") {
+      setStatuses({
+        ...filters.statuses,
+        MV1: true,
+        MV2: true,
+        MV3: true,
+        MV4: true,
+        DL1: !DL1,
+        DL2: !DL2
+      });
+    }
+  }, [DL1, DL2, MV1, MV2, MV3, MV4, department, filters.statuses, setStatuses]);
+
   const buttonsConfig = useMemo(() => {
     let config;
-    const { Waiting, Served, MV1, MV2, MV3, MV4, DL1, DL2 } = filters.statuses;
     const toggleStatus = (status: CustomerStatus) =>
       setStatuses({ ...filters.statuses, [status]: !filters.statuses[status] });
     const handleOtherStationsClick = () => {
