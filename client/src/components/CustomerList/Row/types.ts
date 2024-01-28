@@ -7,4 +7,5 @@ export interface CustomerListRowProps {
   onClick?: ReactEventHandler;
   onMouseEnter?: ReactEventHandler;
   styles?: string;
+  isPastDate: boolean;
 }

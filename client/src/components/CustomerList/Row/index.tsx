@@ -1,9 +1,10 @@
-import { get12HourTimeString } from 'utils/helpers';
+import { get12HourTimeString, formatTimePassed } from 'utils/helpers';
 import { CustomerListRowProps } from './types';
 
 export default function CustomerListRow({
   customer,
   selected = false,
+  isPastDate,
   onClick,
   onMouseEnter,
   styles = ''
@@ -55,14 +56,25 @@ export default function CustomerListRow({
         {/* Customer Name */}
         <span className="inline-block w-72">{name}</span>
       </div>
-      <div>
-        {/* Check In Time */}
-        <span className="inline-block w-32">{get12HourTimeString(checkInTime)}</span>
-        {/* Time Called */}
-        <span className="inline-block w-20">
-          {callTimes.length ? get12HourTimeString(callTimes[0]) : ''}
-        </span>
-      </div>
+      {isPastDate ? (
+        <div>
+          <span className="inline-block w-24">
+            {formatTimePassed(checkInTime, callTimes[callTimes.length - 1])}
+            {/* {callTimes.length ? get12HourTimeString(callTimes[0]) : ''} */}
+          </span>
+        </div>
+      ) : (
+        <div>
+          {/* Check In Time */}
+          <span className="inline-block w-32">
+            {get12HourTimeString(checkInTime)}
+          </span>
+          {/* Time Called */}
+          <span className="inline-block w-20">
+            {callTimes.length ? get12HourTimeString(callTimes[0]) : ''}
+          </span>
+        </div>
+      )}
     </button>
   );
 }

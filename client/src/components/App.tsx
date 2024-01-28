@@ -193,6 +193,7 @@ function App() {
               customers={customers}
               selectedCustomer={selectedCustomer}
               setSelectedCustomer={setSelectedCustomer}
+              isPastDate={!sameDay(customerFilters.date, new Date())}
               WLPosPicker={
                 WLPosPicker && {
                   index: WLPosPicker.index,

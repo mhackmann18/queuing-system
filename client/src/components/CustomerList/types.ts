@@ -5,6 +5,7 @@ export interface CustomerListProps {
   selectedCustomer: Customer;
   setSelectedCustomer: (customer: Customer) => void;
   WLPosPicker: WLPosPicker | null;
+  isPastDate: boolean;
 }
 
 export interface WLPosPicker {

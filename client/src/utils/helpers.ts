@@ -1,5 +1,28 @@
 import { CustomerStatus, Department, Station, StatusFilters } from './types';
 
+const formatTimePassed = (startDate: Date, endDate: Date): string => {
+  const diffInMilliseconds = Math.abs(+endDate - +startDate);
+  const minutes = Math.floor(diffInMilliseconds / (1000 * 60));
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  const timeParts: string[] = [];
+
+  if (days > 0) {
+    timeParts.push(`${days} day${days > 1 ? 's' : ''}`);
+  }
+
+  if (hours % 24 > 0) {
+    timeParts.push(`${hours % 24} hr${hours % 24 > 1 ? 's' : ''}`);
+  }
+
+  if (minutes % 60 > 0) {
+    timeParts.push(`${minutes % 60} min`);
+  }
+
+  return timeParts.length > 0 ? timeParts.join(' ') : '0 min';
+};
+
 const getDeptFromStation = (station: Station): Department =>
   station[0] === 'M' ? 'Motor Vehicle' : "Driver's License";
 
@@ -70,5 +93,6 @@ export {
   sameDay,
   getDateString,
   statusFiltersToArr,
-  getDeptFromStation
+  getDeptFromStation,
+  formatTimePassed
 };

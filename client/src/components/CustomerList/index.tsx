@@ -7,7 +7,8 @@ export default function CustomerList({
   customers,
   selectedCustomer,
   setSelectedCustomer,
-  WLPosPicker
+  WLPosPicker,
+  isPastDate
 }: CustomerListProps) {
   const [orderedCustomers, setOrderedCustomers] = useState<Customer[]>(customers);
 
@@ -58,6 +59,7 @@ export default function CustomerList({
           onClick={handleClick}
           onMouseEnter={handleMouseEnter}
           styles={styles}
+          isPastDate={isPastDate}
         />
       </li>
     );
@@ -74,10 +76,16 @@ export default function CustomerList({
           <span className="inline-block w-20">Status</span>
           <span className="inline-block w-52 pl-1">Customer Name</span>
         </div>
-        <div>
-          <span className="inline-block w-32">Check In Time</span>
-          <span className="inline-block w-24">Time Called</span>
-        </div>
+        {isPastDate ? (
+          <div>
+            <span className="inline-block w-28">Wait Time</span>
+          </div>
+        ) : (
+          <div>
+            <span className="inline-block w-32">Check In Time</span>
+            <span className="inline-block w-24">Time Called</span>
+          </div>
+        )}
       </div>
       <ul className={`grow overflow-y-scroll border p-2`}>
         {orderedCustomers.map(mapCustomersToListItem)}
