@@ -379,7 +379,7 @@ export default class DummyApi {
           addCallTime.toISOString()
         );
       }
-      if (waitingListIndex) {
+      if (waitingListIndex || waitingListIndex === 0) {
         const customerToUpdate = rawCustomers[indexOfCustomerToUpdate];
 
         // Find the index in customers to place the updated customer at
@@ -472,6 +472,7 @@ function findIndexOfWaitingListIndex(
     }
   }
 
+  // Edge case for placing customer at end of wl
   if (currentWaitingListIndex + 1 === waitingListIndex) {
     return indexOfLastWaitingCustomer + 1;
   }

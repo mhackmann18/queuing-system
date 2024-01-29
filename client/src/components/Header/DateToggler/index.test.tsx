@@ -8,15 +8,24 @@ const pastDate = new Date('01/21/2000');
 const currentDate = new Date();
 
 const mockSetDateFn = jest.fn();
+const mockSetErrFn = jest.fn();
 
 test('displays date correctly', () => {
-  render(<DateToggler date={pastDate} setDate={mockSetDateFn} />);
+  render(
+    <DateToggler date={pastDate} setDate={mockSetDateFn} setError={mockSetErrFn} />
+  );
 
   expect(screen.getByText(getDateString(pastDate))).toBeInTheDocument();
 });
 
 test("disables Next Date button and applies style when date is equal to today's date", () => {
-  render(<DateToggler date={currentDate} setDate={mockSetDateFn} />);
+  render(
+    <DateToggler
+      date={currentDate}
+      setDate={mockSetDateFn}
+      setError={mockSetErrFn}
+    />
+  );
 
   expect(screen.getByRole('button', { name: 'Next Date' })).toBeDisabled();
   expect(screen.getByRole('button', { name: 'Next Date' })).toHaveClass(
@@ -25,14 +34,22 @@ test("disables Next Date button and applies style when date is equal to today's 
 });
 
 test("displays date as 'Today' when date is equal to today's date", () => {
-  render(<DateToggler date={currentDate} setDate={mockSetDateFn} />);
+  render(
+    <DateToggler
+      date={currentDate}
+      setDate={mockSetDateFn}
+      setError={mockSetErrFn}
+    />
+  );
 
   expect(screen.getByText('Today')).toBeInTheDocument();
 });
 
 test('calls setDate with day - 1 when Previous Date button is clicked', async () => {
   const date = new Date();
-  render(<DateToggler date={date} setDate={mockSetDateFn} />);
+  render(
+    <DateToggler date={date} setDate={mockSetDateFn} setError={mockSetErrFn} />
+  );
 
   userEvent.click(screen.getByRole('button', { name: 'Previous Date' }));
 
@@ -44,7 +61,9 @@ test('calls setDate with day - 1 when Previous Date button is clicked', async ()
 
 test('calls setDate with day + 1 when Next Date button is clicked', () => {
   const date = new Date();
-  render(<DateToggler date={date} setDate={mockSetDateFn} />);
+  render(
+    <DateToggler date={date} setDate={mockSetDateFn} setError={mockSetErrFn} />
+  );
 
   userEvent.click(screen.getByRole('button', { name: 'Next Date' }));
 
