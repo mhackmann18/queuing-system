@@ -47,7 +47,7 @@ export default function ManageCustomersHeader({
               />
             )}
           </div>
-          {stationMenuActive.value && <StationMenu />}
+          {stationMenuActive.value && <StationMenu setError={setError} />}
         </div>
       </div>
       {/* Header Row 2 */}

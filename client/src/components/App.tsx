@@ -186,7 +186,7 @@ function App() {
   return (
     <UserContext.Provider value={user}>
       <div className="text-eerie_black relative h-screen bg-white">
-        {WLPosPicker && <div className="fixed inset-0 bg-black opacity-50" />}
+        {WLPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
         <Header
           filters={customerFilters}
           filterSetters={{
@@ -232,7 +232,7 @@ function App() {
           </div>
         )}
         {error && (
-          <div className="absolute bottom-10 right-10 ">
+          <div className="absolute bottom-10 right-10">
             <Error error={error} close={() => setError('')} />
           </div>
         )}

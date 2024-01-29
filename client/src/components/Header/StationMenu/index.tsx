@@ -1,9 +1,11 @@
 import { getDeptFromStation } from 'utils/helpers';
 import UserContext from 'components/UserContext';
-import { useContext } from 'react';
+import { useContext, useRef } from 'react';
 import { Station } from 'utils/types';
+import { StationMenuProps } from './types';
 
-export default function StationMenu() {
+export default function StationMenu({ setError }: StationMenuProps) {
+  const elementRef = useRef<HTMLDivElement>(null);
   const user = useContext(UserContext);
 
   const menuStylesByStation: Record<Station | 'none', string> = {
@@ -17,7 +19,10 @@ export default function StationMenu() {
   };
 
   return (
-    <div className="border-slate_gray absolute right-0 top-14 z-20 overflow-hidden rounded-md border bg-white shadow-md">
+    <div
+      ref={elementRef}
+      className="border-slate_gray absolute right-0 top-14 z-20 overflow-hidden rounded-md border bg-white shadow-md"
+    >
       <div
         className={`bg-mv1 p-3 font-medium text-white ${
           menuStylesByStation[user!.station]
@@ -28,10 +33,18 @@ export default function StationMenu() {
         </h4>
       </div>
       <div className="p-2">
-        <button className="hover:bg-platinum-800 block w-full rounded-md p-3 text-left text-sm font-medium">
+        <button
+          onClick={() => setError('Not yet implemented.')}
+          type="button"
+          className="hover:bg-platinum-800 block w-full rounded-md p-3 text-left text-sm font-medium"
+        >
           Sign out
         </button>
-        <button className="hover:bg-platinum-800 block w-full rounded-md p-3 text-left text-sm font-medium">
+        <button
+          onClick={() => setError('Not yet implemented.')}
+          type="button"
+          className="hover:bg-platinum-800 block w-full rounded-md p-3 text-left text-sm font-medium"
+        >
           Switch Stations
         </button>
       </div>
