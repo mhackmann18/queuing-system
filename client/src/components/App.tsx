@@ -38,6 +38,7 @@ function App() {
   );
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<string>('');
+  const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
 
   // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
@@ -113,7 +114,10 @@ function App() {
           }
         },
         returnToWaitingList: {
-          onClick: () => setWLPosPicker({ index: 0, locked: false }),
+          onClick: () => {
+            setWLPosPicker({ index: 0, locked: false });
+            setStationMenuActive(false);
+          },
           onCancel: () => setWLPosPicker(null),
           onConfirm: async ({ onSuccess }) => {
             const res = await apiController.update(selectedCustomer.id, {
@@ -191,6 +195,10 @@ function App() {
             setStatuses
           }}
           setError={setError}
+          stationMenuActive={{
+            value: stationMenuActive,
+            setValue: setStationMenuActive
+          }}
         />
         {customers.length && selectedCustomer ? (
           <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">

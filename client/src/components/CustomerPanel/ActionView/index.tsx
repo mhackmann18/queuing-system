@@ -216,7 +216,7 @@ export default function ActionView({
         } else if (currentDept !== getDeptFromStation(user!.station)) {
           actionComponent = (
             <p className="text-french_gray_1-500 mb-4">
-              Unavailable to {getDeptFromStation(user!.station)} desks.
+              Unavailable to {getDeptFromStation(user!.station)} stations.
             </p>
           );
         } else if (customer.atOtherDept) {

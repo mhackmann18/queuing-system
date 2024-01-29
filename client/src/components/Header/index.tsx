@@ -5,11 +5,13 @@ import DateToggler from './DateToggler';
 import { FaChevronDown } from 'react-icons/fa';
 import { useContext } from 'react';
 import UserContext from 'components/UserContext';
+import StationMenu from './StationMenu';
 
 export default function ManageCustomersHeader({
   filters,
   filterSetters,
-  setError
+  setError,
+  stationMenuActive
 }: ManageCustomersHeaderProps) {
   const user = useContext(UserContext);
 
@@ -23,7 +25,7 @@ export default function ManageCustomersHeader({
     <header className="h-28">
       {/* Header Row 1 */}
       <div className="border-b">
-        <div className="mx-auto flex h-16 max-w-5xl justify-between">
+        <div className="relative mx-auto flex h-16 max-w-5xl justify-between">
           <div className="flex items-center">
             <h1 className="mr-4 inline-block w-80 items-center text-2xl font-bold">
               {filters.department} Customers
@@ -39,14 +41,13 @@ export default function ManageCustomersHeader({
             {user!.station !== 'none' && ( // TODO: determine behavior on 'none'
               <StationIcon
                 onClick={() => {
-                  setError(
-                    "This feature hasn't been added yet. Clicking this icon will open a menu that has a 'logout' and 'switch station' button."
-                  );
+                  stationMenuActive.setValue(!stationMenuActive.value);
                 }}
                 station={user!.station}
               />
             )}
           </div>
+          {stationMenuActive.value && <StationMenu />}
         </div>
       </div>
       {/* Header Row 2 */}
