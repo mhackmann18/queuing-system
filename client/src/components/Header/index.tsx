@@ -24,7 +24,7 @@ export default function ManageCustomersHeader({
       <div className="border-b">
         <div className="mx-auto flex h-16 max-w-5xl justify-between">
           <div className="flex items-center">
-            <h1 className="mr-4 inline-block  items-center text-2xl font-bold">
+            <h1 className="mr-4 inline-block w-80 items-center text-2xl font-bold">
               {filters.department} Customers
             </h1>
             <button
