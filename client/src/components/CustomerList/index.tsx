@@ -26,7 +26,7 @@ export default function CustomerList({
   const mapCustomersToListItem = (c: Customer, index: number) => {
     let handleClick;
     let handleMouseEnter;
-    let styles = '';
+    let styles = 'group';
 
     // If WL position picker is active, applies appropriate behaviors to the CustomerRow buttons
     if (WLPosPicker) {
@@ -42,9 +42,11 @@ export default function CustomerList({
 
       // Determine hover cursor style
       if (c.id === selectedCustomer.id) {
-        styles = WLPosPicker.locked ? 'hover:cursor-grab' : 'hover:cursor-grabbing';
+        styles = WLPosPicker.locked
+          ? 'hover:cursor-grab'
+          : 'hover:cursor-grabbing shadow-md';
       } else {
-        styles = 'hover:cursor-default hover:bg-white';
+        styles = 'hover:cursor-default no-underline';
       }
     } else {
       // Default behavior
@@ -52,7 +54,7 @@ export default function CustomerList({
     }
 
     return (
-      <li className="mb-1" key={c.id}>
+      <li className="border-french_gray_1 border-b border-r" key={c.id}>
         <CustomerRow
           customer={c}
           selected={c.id === selectedCustomer.id}
@@ -87,7 +89,7 @@ export default function CustomerList({
           </div>
         )}
       </div>
-      <ul className={`grow overflow-y-scroll border p-2`}>
+      <ul className={`border-french_gray_1 grow overflow-y-scroll border`}>
         {orderedCustomers.map(mapCustomersToListItem)}
       </ul>
     </div>

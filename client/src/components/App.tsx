@@ -1,5 +1,5 @@
 import CustomerPanel from './CustomerPanel';
-import { Customer, Station, StatusFilters } from '../utils/types';
+import { Customer, StatusFilters } from '../utils/types';
 import { useEffect, useState, useMemo } from 'react';
 import CustomerList from './CustomerList';
 import Header from './Header';
@@ -10,16 +10,15 @@ import Error from './Error';
 import { sameDay } from 'utils/helpers';
 import { ActionViewConfigProp } from './CustomerPanel/ActionView/types';
 import UserContext from './UserContext';
-
-// Stand-in state
-const signedInStation: Station = 'MV1';
+import { User } from './UserContext/types';
 
 function App() {
-  // Context
-  const [user] = useState({ id: 1, station: signedInStation });
-
   // State
-  const apiController = useMemo(() => new CustomerController(signedInStation), []);
+  const [user] = useState<User>({ id: 1, station: 'MV1' });
+  const apiController = useMemo(
+    () => new CustomerController(user.station),
+    [user.station]
+  );
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;

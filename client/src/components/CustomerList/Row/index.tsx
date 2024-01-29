@@ -12,21 +12,21 @@ export default function CustomerListRow({
   const { status, name, checkInTime, callTimes } = customer;
 
   const containerStyles = {
-    Waiting: `border-waiting outline-waiting`,
-    Serving: 'border-serving outline-serving',
-    Served: 'border-served outline-served',
-    'No Show': 'border-no_show outline-no_show',
-    MV1: 'border-mv1 outline-mv1',
-    MV2: 'border-mv2 outline-mv2',
-    MV3: 'border-mv3 outline-mv3',
-    MV4: 'border-mv4 outline-mv4',
-    DL1: 'border-dl1 outline-dl1',
-    DL2: 'border-dl2 outline-dl2'
+    Waiting: `border-waiting`,
+    Serving: 'bg-green-50 border-serving',
+    Served: 'border-served',
+    'No Show': 'border-no_show',
+    MV1: 'border-mv1',
+    MV2: 'border-mv2',
+    MV3: 'border-mv3',
+    MV4: 'border-mv4',
+    DL1: 'border-dl1',
+    DL2: 'border-dl2'
   };
 
   const statusTextStyles = {
     Waiting: 'text-waiting',
-    Serving: 'text-serving',
+    Serving: 'text-serving font-semibold',
     Served: 'text-served',
     'No Show': 'text-no_show',
     MV1: 'text-mv1',
@@ -41,9 +41,9 @@ export default function CustomerListRow({
     <button
       type="button"
       onClick={onClick}
-      className={`hover:bg-seasalt flex w-full justify-between rounded-lg border-2 p-2 text-left hover:cursor-pointer ${
+      className={`flex w-full justify-between p-3 text-left ${
         containerStyles[status]
-      } ${selected ? 'bg-seasalt outline' : 'bg-transparent'} ${styles}`}
+      } ${selected ? 'bg-seasalt-500 border-l-4' : ''} ${styles}`}
       {...{ onMouseEnter }}
     >
       <div>
@@ -54,7 +54,9 @@ export default function CustomerListRow({
           {status}
         </span>
         {/* Customer Name */}
-        <span className="inline-block w-72">{name}</span>
+        <span className="inline-block w-72 underline-offset-2 group-hover:underline">
+          {name}
+        </span>
       </div>
       {isPastDate ? (
         <div>

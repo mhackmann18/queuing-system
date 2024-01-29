@@ -115,7 +115,7 @@ export default function ActionView({
           <Confirm
             title="Confirm Deletion"
             message={
-              'Are you sure you want to delete this customer? This action cannot be undone'
+              'Are you sure you want to delete this customer? This action cannot be undone.'
             }
             onCancel={() => {
               onCancel();

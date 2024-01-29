@@ -82,27 +82,9 @@ test('displays customer information', () => {
   });
 });
 
-// ALL STATUSES
-
-test.todo(
-  "renders confirmation messages and buttons when 'Delete' button is clicked"
-);
-
-test.todo(
-  "CustomerController.deleteOne runs when 'Delete' confirmation button is clicked"
-);
-
 // WAITING
 
 test.todo("displays 'Delete' and 'Call Customer' buttons");
-
-test.todo("makes api update request when 'Call to Station' button is clicked");
-
-test.todo(
-  "changes status to 'Serving' after 'Call to Station' is clicked and api request returns data"
-);
-
-test.todo("displays error when 'Call to Station' api request returns error");
 
 describe("when 'Delete' button is clicked", () => {
   it('displays confirmation message and buttons', async () => {

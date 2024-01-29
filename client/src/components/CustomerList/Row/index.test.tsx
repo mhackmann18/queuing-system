@@ -40,14 +40,6 @@ test('displays customer information', () => {
   ).toBeInTheDocument();
 });
 
-test('applies outline style when selected', () => {
-  render(
-    <CustomerRow customer={mockCustomer} onClick={mockOnClick} selected={true} />
-  );
-
-  expect(screen.getByRole('button')).toHaveClass('outline');
-});
-
 describe.each([
   ['Waiting' as CustomerStatus],
   ['Serving' as CustomerStatus],

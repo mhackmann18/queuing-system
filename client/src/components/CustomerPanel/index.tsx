@@ -20,8 +20,6 @@ export default function CustomerPanel({
     DL2: 'text-dl2 border-dl2'
   };
 
-  const { name, status } = customer;
-
   return (
     <div
       className={
@@ -30,11 +28,13 @@ export default function CustomerPanel({
     >
       <p className="text-french_gray_1-500">Selected</p>
       <div className="mb-4 flex items-start justify-between border-b pb-1.5">
-        <h2 className="max-w-36 text-xl font-bold">{name}</h2>
+        <h2 className="mb-1 max-w-36 text-xl font-bold">{customer.name}</h2>
         <span
-          className={`mt-1 rounded-md border-2 px-1 py-0.5 text-xs font-semibold ${statusStyles[status]}`}
+          className={`rounded-md border-2 px-1 py-0.5 text-xs font-semibold ${
+            statusStyles[customer.status]
+          }`}
         >
-          {status}
+          {customer.status}
         </span>
       </div>
       {actionConfig && (
