@@ -80,14 +80,19 @@ function App() {
     // Save current status filters and replace with relevant filters for WL pos picker
     if (WLPosPicker && !savedStatusFilters) {
       setSavedStatusFilters({ ...customerFilters.statuses });
-      setStatuses({ Waiting: true, Serving: true });
+      if (selectedCustomer?.status === 'Serving') {
+        setStatuses({ Waiting: true, Serving: true });
+      } else if (selectedCustomer!.status === 'No Show') {
+        setStatuses({ 'No Show': true, Waiting: true });
+      }
     }
   }, [
     customerFilters.date,
     customerFilters.statuses,
     setStatuses,
     savedStatusFilters,
-    WLPosPicker
+    WLPosPicker,
+    selectedCustomer
   ]);
 
   const panelComponentActionBtnHandlers: ActionViewConfigProp | null = useMemo(
