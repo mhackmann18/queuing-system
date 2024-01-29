@@ -1,5 +1,10 @@
 export type MVStation = 'MV1' | 'MV2' | 'MV3' | 'MV4';
 
+export const stationsByDept = {
+  'Motor Vehicle': ['MV1', 'MV2', 'MV3', 'MV4'],
+  "Driver's License": ['DL1', 'DL2']
+};
+
 export type DLStation = 'DL1' | 'DL2';
 
 export type Station = MVStation | DLStation;

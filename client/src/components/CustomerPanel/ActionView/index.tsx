@@ -6,6 +6,7 @@ import { ActionViewProps } from './types';
 import CustomerPanelInfo from '../Info';
 import UserContext from 'components/UserContext';
 import { getDeptFromStation, sameDay } from 'utils/helpers';
+import { stationsByDept } from 'utils/types';
 
 type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
 
@@ -201,6 +202,15 @@ export default function ActionView({
           actionComponent = (
             <p className="text-french_gray_1-500 mb-4">
               Sign in to a station to use actions.
+            </p>
+          );
+        } // If customer is at another station within the user's dept, no actions are available
+        else if (
+          stationsByDept[getDeptFromStation(user!.station)].includes(customer.status)
+        ) {
+          actionComponent = (
+            <p className="text-french_gray_1-500 mb-4">
+              Unavailable while customer is at another station.
             </p>
           );
         } else if (currentDept !== getDeptFromStation(user!.station)) {
