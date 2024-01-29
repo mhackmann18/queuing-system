@@ -13,4 +13,5 @@ export interface ManageCustomersHeaderProps {
     setDepartment: (department: Department) => void;
     setStatuses: (statusFilters: StatusFilters) => void;
   };
+  setError: (error: string) => void;
 }

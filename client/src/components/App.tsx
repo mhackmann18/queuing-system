@@ -190,6 +190,7 @@ function App() {
             setDepartment,
             setStatuses
           }}
+          setError={setError}
         />
         {customers.length && selectedCustomer ? (
           <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
@@ -219,7 +220,7 @@ function App() {
           </div>
         ) : (
           <div className="text-french_gray_2 flex h-[calc(100%-8rem)] items-center justify-center">
-            No Customers
+            No Customers to Show
           </div>
         )}
         {error && (

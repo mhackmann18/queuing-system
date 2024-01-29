@@ -8,7 +8,8 @@ import UserContext from 'components/UserContext';
 
 export default function ManageCustomersHeader({
   filters,
-  filterSetters
+  filterSetters,
+  setError
 }: ManageCustomersHeaderProps) {
   const user = useContext(UserContext);
 
@@ -38,7 +39,9 @@ export default function ManageCustomersHeader({
             {user!.station !== 'none' && ( // TODO: determine behavior on 'none'
               <StationIcon
                 onClick={() => {
-                  console.log('station icon clicked');
+                  setError(
+                    "This feature hasn't been added yet. Clicking this icon will open a menu that has a 'logout' and 'switch station' button."
+                  );
                 }}
                 station={user!.station}
               />
@@ -53,6 +56,7 @@ export default function ManageCustomersHeader({
           <DateToggler
             date={filters.date}
             setDate={(newDate: Date) => filterSetters.setDate(newDate)}
+            setError={setError}
           />
         </div>
       </div>

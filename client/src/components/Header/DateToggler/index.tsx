@@ -3,7 +3,7 @@ import { MdCalendarToday } from 'react-icons/md';
 import { getDateString, sameDay } from 'utils/helpers';
 import { DateTogglerProps } from './types';
 
-export default function DateToggler({ date, setDate }: DateTogglerProps) {
+export default function DateToggler({ date, setDate, setError }: DateTogglerProps) {
   return (
     <div className="text-outer_space flex align-middle">
       {/* Previous Date */}
@@ -41,7 +41,14 @@ export default function DateToggler({ date, setDate }: DateTogglerProps) {
         <FaChevronRight />
       </button>
       {/* TODO */}
-      <button className="text-outer_space ml-4" disabled={true}>
+      <button
+        className="text-outer_space ml-4"
+        onClick={() =>
+          setError(
+            "This feature hasn't been added yet. Will open a calendar where clicking a date will show customers for that date"
+          )
+        }
+      >
         <MdCalendarToday size={22} />
       </button>
     </div>
