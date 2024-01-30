@@ -97,4 +97,4 @@ export default function CustomerList({
 }
 
 export const selectingWLPositionContainerStyles =
-  'z-10 rounded-lg outline outline-french_gray_1';
+  'z-10 rounded-lg border border-french_gray_1';

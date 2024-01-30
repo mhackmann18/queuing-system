@@ -1,4 +1,5 @@
 import { StationIconProps } from './types';
+import './styles.css';
 
 export default function StationIcon({
   onClick,
@@ -18,10 +19,8 @@ export default function StationIcon({
   return (
     <button
       className={`${stylesByStation[station]} ${
-        menuActive
-          ? 'outline-platinum outline outline-4'
-          : 'hover:outline-antiflash_white hover:outline hover:outline-4'
-      } h-10 w-10 rounded-full border-0 text-sm font-semibold text-white`}
+        menuActive ? 'si-outline-dark' : 'si-outline-light'
+      } relative h-10 w-10 rounded-full text-sm font-semibold text-white`}
       type="button"
       onClick={onClick}
       ref={forwardRef}

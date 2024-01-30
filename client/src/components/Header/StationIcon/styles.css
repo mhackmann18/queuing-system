@@ -1,0 +1,24 @@
+/** These classes are to fix the issues with the outline not following the border radius in 
+* some browsers */
+
+.si-outline-light:hover::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  bottom: -4px;
+  left: -4px;
+  border: 4px solid #e9ecef;
+  border-radius: 50%;
+}
+
+.si-outline-dark::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  bottom: -5px;
+  left: -5px;
+  border: 5px solid #dee2e6;
+  border-radius: 50%;
+}
