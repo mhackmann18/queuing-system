@@ -10,7 +10,7 @@ import Error from './Error';
 import { sameDay } from 'utils/helpers';
 import { ActionViewConfigProp } from './CustomerPanel/ActionView/types';
 import UserContext from './UserContext';
-import { User } from './UserContext/types';
+import { User } from '../utils/types';
 
 function App() {
   // State

@@ -39,7 +39,7 @@ export default function ManageCustomersHeader({
             </button>
           </div>
           <div className="flex items-center">
-            {user!.station !== 'none' && ( // TODO: determine behavior on 'none'
+            {user.station && ( // TODO: determine behavior of no station
               <StationIcon
                 onClick={() => stationMenuActive.setValue(!stationMenuActive.value)}
                 station={user!.station}

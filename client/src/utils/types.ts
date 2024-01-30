@@ -5,6 +5,11 @@ export const stationsByDept = {
   "Driver's License": ['DL1', 'DL2']
 };
 
+export interface User {
+  id: number;
+  station?: Station;
+}
+
 export type DLStation = 'DL1' | 'DL2';
 
 export type Station = MVStation | DLStation;

@@ -198,7 +198,7 @@ export default function ActionView({
           <p className="text-french_gray_1-500 mb-4">Unavailable</p>
         );
 
-        if (user!.station === 'none') {
+        if (!user.station) {
           actionComponent = (
             <p className="text-french_gray_1-500 mb-4">
               Sign in to a station to use actions.

@@ -2,19 +2,22 @@ import { Customer, CustomerStatus, Department, Station } from 'utils/types';
 import {
   CustomerRaw,
   CustomerControllerManyResult,
-  CustomerControllerSingleResult
+  CustomerControllerSingleResult,
+  CustomerRawStatus
 } from './types';
 import DummyApi from './DummyApi';
 import { getDeptFromStation } from 'utils/helpers';
 
 export default class CustomerController {
-  station: Station;
-  department: Department;
+  station?: Station;
+  department?: Department;
 
-  constructor(station: Station) {
+  constructor(station?: Station) {
     DummyApi.init();
-    this.station = station;
-    this.department = getDeptFromStation(station);
+    if (station) {
+      this.station = station;
+      this.department = getDeptFromStation(station);
+    }
   }
 
   /******************/
@@ -36,13 +39,21 @@ export default class CustomerController {
   }): Promise<CustomerControllerManyResult> {
     const { date, department, statuses } = filters;
 
+    let sanitizedStatuses: CustomerRawStatus[] | undefined;
+
+    // 'Serving' status is only valid on the client and must be translated to the current station
+    if (!this.station) {
+      sanitizedStatuses = statuses as CustomerRawStatus[];
+    } else {
+      sanitizedStatuses =
+        statuses && statuses.map((s) => (s === 'Serving' ? this.station! : s));
+    }
+
     // TODO: Make POST request /api/v1/customers
     const response = await DummyApi.getCustomers({
       date,
       department,
-      statuses:
-        // The 'Serving' status only exists on the client
-        statuses && statuses.map((s) => (s === 'Serving' ? this.station : s))
+      statuses: sanitizedStatuses
     });
 
     const { data, error } = response;
@@ -151,6 +162,15 @@ export default class CustomerController {
     const { status, waitingListIndex, addCallTime } = updatedProperties;
 
     // Error checks
+
+    if (!this.station) {
+      return {
+        data: null,
+        error:
+          'PUT requests to /api/v1/customers/id are only available to signed in stations'
+      };
+    }
+
     if (!Object.keys(updatedProperties).length) {
       return {
         data: null,
@@ -181,7 +201,10 @@ export default class CustomerController {
     // Updated customer data
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
-    const updatedCustomer = this.#sanitizeCustomer(rawCustomer, this.department);
+    const updatedCustomer = this.#sanitizeCustomer(
+      rawCustomer,
+      getDeptFromStation(this.station)
+    );
 
     if (!updatedCustomer) {
       return {
@@ -221,6 +244,14 @@ export default class CustomerController {
   }
 
   async callNext(): Promise<CustomerControllerSingleResult> {
+    if (!this.station) {
+      return {
+        data: null,
+        error:
+          'PUT requests to /api/v1/customers/id are only available to signed in stations'
+      };
+    }
+
     // Get customers in the WL
     const res = await this.get({
       date: new Date(),

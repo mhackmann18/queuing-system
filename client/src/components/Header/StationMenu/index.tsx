@@ -53,11 +53,13 @@ export default function StationMenu({
     >
       <div
         className={`bg-mv1 p-3 font-medium text-white ${
-          menuStylesByStation[user!.station]
+          user.station ? menuStylesByStation[user.station] : 'bg-slate_gray'
         }`}
       >
         <h4>
-          {getDeptFromStation(user!.station)} Station {user!.station[2]}
+          {user.station
+            ? `${getDeptFromStation(user.station)} Station ${user.station[2]}`
+            : 'No Station Selected'}
         </h4>
       </div>
       <div className="p-2">
