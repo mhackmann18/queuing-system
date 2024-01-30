@@ -1,6 +1,10 @@
 import { StationIconProps } from './types';
 
-export default function StationIcon({ onClick, station }: StationIconProps) {
+export default function StationIcon({
+  onClick,
+  station,
+  forwardRef
+}: StationIconProps) {
   const styles = {
     MV1: 'bg-mv1',
     MV2: 'bg-mv2',
@@ -15,6 +19,7 @@ export default function StationIcon({ onClick, station }: StationIconProps) {
       className={`${styles[station]} h-11 w-11 rounded-full border-0 text-sm font-semibold text-white`}
       type="button"
       onClick={onClick}
+      ref={forwardRef}
     >
       {station}
     </button>

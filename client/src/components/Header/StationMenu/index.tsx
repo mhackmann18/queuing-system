@@ -1,10 +1,15 @@
+import { useEffect, useRef, useContext } from 'react';
 import { getDeptFromStation } from 'utils/helpers';
 import UserContext from 'components/UserContext';
-import { useContext, useRef } from 'react';
 import { Station } from 'utils/types';
 import { StationMenuProps } from './types';
 
-export default function StationMenu({ setError }: StationMenuProps) {
+export default function StationMenu({
+  setError,
+  active,
+  setActive,
+  buttonRef
+}: StationMenuProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const user = useContext(UserContext);
 
@@ -18,10 +23,33 @@ export default function StationMenu({ setError }: StationMenuProps) {
     none: 'bg-white'
   };
 
+  // Close menu when clicking outside of menu
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        active &&
+        elementRef.current &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node) &&
+        !elementRef.current.contains(event.target as Node)
+      ) {
+        setActive(!active);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [active, setActive, buttonRef]);
+
   return (
     <div
       ref={elementRef}
-      className="border-slate_gray absolute right-0 top-14 z-20 overflow-hidden rounded-md border bg-white shadow-md"
+      className={`border-slate_gray absolute right-0 top-14 z-20 overflow-hidden rounded-md border bg-white shadow-md ${
+        active ? 'block' : 'hidden'
+      }`}
     >
       <div
         className={`bg-mv1 p-3 font-medium text-white ${
