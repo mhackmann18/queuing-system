@@ -8,14 +8,14 @@ const mockOnClick = jest.fn();
 
 test('displays station name', () => {
   const station = 'MV1';
-  render(<StationIcon station={station} onClick={mockOnClick} />);
+  render(<StationIcon menuActive={false} station={station} onClick={mockOnClick} />);
 
   expect(screen.getByText(station)).toBeInTheDocument();
 });
 
 test('calls onClick when clicked', async () => {
   const station = 'DL2';
-  render(<StationIcon station={station} onClick={mockOnClick} />);
+  render(<StationIcon menuActive={false} station={station} onClick={mockOnClick} />);
 
   userEvent.click(screen.getByRole('button', { name: station }));
 
@@ -31,10 +31,10 @@ describe.each([
   ['DL2' as Station]
 ])('applies corresponding style for', (station) => {
   test(`${station} station`, () => {
-    render(<StationIcon station={station} onClick={mockOnClick} />);
-
-    expect(screen.getByRole('button')).toHaveClass(
-      `bg-${station.toLowerCase()}`
+    render(
+      <StationIcon menuActive={false} station={station} onClick={mockOnClick} />
     );
+
+    expect(screen.getByRole('button')).toHaveClass(`bg-${station.toLowerCase()}`);
   });
 });
