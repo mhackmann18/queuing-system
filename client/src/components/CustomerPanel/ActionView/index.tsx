@@ -129,7 +129,7 @@ export default function ActionView({
               })
             }
             confirmBtnText="Delete"
-            confirmBtnStyles="text-white bg-red-500"
+            confirmBtnStyles="text-white bg-red-500 hover:bg-red-600"
           />
         );
         break;

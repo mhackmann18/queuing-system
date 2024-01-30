@@ -10,7 +10,11 @@ export default function Error({ error, close }: ErrorProps) {
           <MdError size={26} />
         </span>
         <span className="mx-3">{error}</span>
-        <button type="button" onClick={() => close()}>
+        <button
+          type="button"
+          className="hover:bg-antiflash_white hover:rounded-full"
+          onClick={() => close()}
+        >
           <IoCloseOutline size={22} />
         </button>
       </div>

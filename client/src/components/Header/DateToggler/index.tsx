@@ -13,7 +13,7 @@ export default function DateToggler({ date, setDate, setError }: DateTogglerProp
           setDate(new Date(date));
         }}
         aria-label="Previous Date"
-        className="text-outer_space"
+        className="text-outer_space hover:text-slate_gray"
         type="button"
       >
         <FaChevronLeft />
@@ -34,7 +34,9 @@ export default function DateToggler({ date, setDate, setError }: DateTogglerProp
         aria-label="Next Date"
         disabled={!!sameDay(date, new Date())}
         className={`${
-          sameDay(date, new Date()) ? 'text-french_gray_1' : 'text-outer_space'
+          sameDay(date, new Date())
+            ? 'text-french_gray_1'
+            : 'text-outer_space hover:text-slate_gray'
         }`}
         type="button"
       >
@@ -42,7 +44,7 @@ export default function DateToggler({ date, setDate, setError }: DateTogglerProp
       </button>
       {/* TODO */}
       <button
-        className="text-outer_space ml-4"
+        className="text-outer_space hover:text-slate_gray ml-4"
         onClick={() =>
           setError(
             "This feature hasn't been added yet. Will open a calendar where clicking a date will show customers for that date"

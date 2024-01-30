@@ -33,7 +33,7 @@ export default function ManageCustomersHeader({
             </h1>
             <button
               onClick={handleChangeDeptBtnClick}
-              className="border-french_gray_1 mt-1 rounded-sm border"
+              className="border-french_gray_1 hover:text-slate_gray mt-1 rounded-sm border"
             >
               <FaChevronDown size={14} />
             </button>
@@ -44,6 +44,7 @@ export default function ManageCustomersHeader({
                 onClick={() => stationMenuActive.setValue(!stationMenuActive.value)}
                 station={user!.station}
                 forwardRef={stationIconBtnRef}
+                menuActive={stationMenuActive.value}
               />
             )}
           </div>
