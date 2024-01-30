@@ -1,5 +1,9 @@
 import { CustomerStatus, Department, Station, StatusFilters } from './types';
 
+const sortDatesDescending = (dates: Date[]): Date[] => {
+  return dates.slice().sort((a, b) => b.getTime() - a.getTime());
+};
+
 const formatTimePassed = (startDate: Date, endDate: Date): string => {
   const diffInMilliseconds = Math.abs(+endDate - +startDate);
   const minutes = Math.floor(diffInMilliseconds / (1000 * 60));
@@ -94,5 +98,6 @@ export {
   getDateString,
   statusFiltersToArr,
   getDeptFromStation,
-  formatTimePassed
+  formatTimePassed,
+  sortDatesDescending
 };

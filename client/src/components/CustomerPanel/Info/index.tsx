@@ -1,5 +1,5 @@
 import { Customer } from 'utils/types';
-import { get12HourTimeString } from 'utils/helpers';
+import { get12HourTimeString, sortDatesDescending } from 'utils/helpers';
 
 export default function CustomerPanelInfo({
   customer: { checkInTime, callTimes, reasonsForVisit }
@@ -18,10 +18,8 @@ export default function CustomerPanelInfo({
       </h4>
       <ul>
         {callTimes.length ? (
-          callTimes.map((c) => (
-            <li className="" key={c.toUTCString()}>
-              {get12HourTimeString(c)}
-            </li>
+          sortDatesDescending(callTimes).map((t) => (
+            <li key={t.toUTCString()}>{get12HourTimeString(t)}</li>
           ))
         ) : (
           <li className="text-french_gray_1-500 text-sm font-medium">--</li>

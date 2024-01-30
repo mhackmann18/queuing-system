@@ -218,7 +218,7 @@ function App() {
                 }
               }
             />
-            <div className="ml-4">
+            <div className={`ml-4`}>
               <CustomerPanel
                 customer={selectedCustomer}
                 actionConfig={panelComponentActionBtnHandlers}
@@ -232,7 +232,7 @@ function App() {
           </div>
         )}
         {error && (
-          <div className="absolute bottom-10 right-10">
+          <div className={`${!WLPosPicker && 'z-20'} absolute bottom-10 right-10`}>
             <Error error={error} close={() => setError('')} />
           </div>
         )}
