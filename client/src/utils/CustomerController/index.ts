@@ -92,7 +92,11 @@ export default class CustomerController {
 
     const rawCustomer = JSON.parse(data);
 
-    const selectedCustomer = this.#sanitizeCustomer(rawCustomer, this.department);
+    // TODO remove fallback dept
+    const selectedCustomer = this.#sanitizeCustomer(
+      rawCustomer,
+      this.department || 'Motor Vehicle'
+    );
 
     if (!selectedCustomer) {
       return {
@@ -129,7 +133,11 @@ export default class CustomerController {
     // Deleted customer data
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
-    const result = this.#sanitizeCustomer(rawCustomer, this.department);
+    // TODO remove fallback dept
+    const result = this.#sanitizeCustomer(
+      rawCustomer,
+      this.department || 'Motor Vehicle'
+    );
 
     if (!result) {
       return {
