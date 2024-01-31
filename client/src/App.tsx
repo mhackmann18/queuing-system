@@ -10,31 +10,22 @@ import Error from './components/Error';
 import { sameDay } from 'utils/helpers';
 import { ActionViewConfigProp } from './components/CustomerPanel/ActionView/types';
 import { UserContext } from 'components/UserContextProvider/context';
+import { WaitingListPositionPickerState } from './utils/types';
 
 function App() {
   // Application state
   const user = useContext(UserContext);
   const apiController = useMemo(() => new CustomerController(user.station), [user]);
-  const [WLPosPicker, setWLPosPicker] = useState<{
-    index: number;
-    locked: boolean;
-  } | null>(null);
+  const [wlPosPicker, setWlPosPicker] =
+    useState<WaitingListPositionPickerState>(null);
   const [savedStatusFilters, setSavedStatusFilters] = useState<StatusFilters | null>(
     null
-  );
-  const {
-    filters: customerFilters,
-    setDate,
-    setDepartment,
-    setStatuses
-  } = useCustomerFilters();
-  const { customers, loadUpdatedCustomers } = useCustomers(
-    customerFilters,
-    apiController
   );
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<string>('');
   const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
+  const { filters, ...filterUtils } = useCustomerFilters();
+  const { customers, loadUpdatedCustomers } = useCustomers(filters, apiController);
 
   // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
@@ -61,34 +52,31 @@ function App() {
   useEffect(() => {
     // If there are saved status filters, and no special conditions apply (previous date, or
     // WL pos picker active) replace the current ones with the saved, and clear clear the saved
-    if (
-      savedStatusFilters &&
-      sameDay(customerFilters.date, new Date()) &&
-      !WLPosPicker
-    ) {
+    if (savedStatusFilters && sameDay(filters.date, new Date()) && !wlPosPicker) {
       setSavedStatusFilters(null);
-      setStatuses({ ...savedStatusFilters });
+      filterUtils.setStatuses({ ...savedStatusFilters });
     }
     // Save current status filters and replace with relevant filters for previous date customers
-    if (!sameDay(customerFilters.date, new Date()) && !savedStatusFilters) {
-      setSavedStatusFilters({ ...customerFilters.statuses });
-      setStatuses({ Served: true, 'No Show': true });
+    if (!sameDay(filters.date, new Date()) && !savedStatusFilters) {
+      setSavedStatusFilters({ ...filters.statuses });
+      filterUtils.setStatuses({ Served: true, 'No Show': true });
     }
     // Save current status filters and replace with relevant filters for WL pos picker
-    if (WLPosPicker && !savedStatusFilters) {
-      setSavedStatusFilters({ ...customerFilters.statuses });
+    if (wlPosPicker && !savedStatusFilters) {
+      setSavedStatusFilters({ ...filters.statuses });
       if (selectedCustomer?.status === 'Serving') {
-        setStatuses({ Waiting: true, Serving: true });
+        filterUtils.setStatuses({ Waiting: true, Serving: true });
       } else if (selectedCustomer!.status === 'No Show') {
-        setStatuses({ 'No Show': true, Waiting: true });
+        filterUtils.setStatuses({ 'No Show': true, Waiting: true });
       }
     }
   }, [
-    customerFilters.date,
-    customerFilters.statuses,
-    setStatuses,
+    filters.date,
+    filters.statuses,
+    filterUtils.setStatuses,
+    filterUtils,
     savedStatusFilters,
-    WLPosPicker,
+    wlPosPicker,
     selectedCustomer
   ]);
 
@@ -111,24 +99,24 @@ function App() {
         },
         returnToWaitingList: {
           onClick: () => {
-            setWLPosPicker({ index: 0, locked: false });
+            setWlPosPicker({ index: 0, locked: false });
             setStationMenuActive(false);
           },
-          onCancel: () => setWLPosPicker(null),
+          onCancel: () => setWlPosPicker(null),
           onConfirm: async ({ onSuccess }) => {
             const res = await apiController.update(selectedCustomer.id, {
               status: 'Waiting',
-              waitingListIndex: WLPosPicker!.index
+              waitingListIndex: wlPosPicker!.index
             });
             if (res.error) {
               setError(res.error);
             } else {
               onSuccess();
               loadUpdatedCustomers();
-              setWLPosPicker(null);
+              setWlPosPicker(null);
             }
           },
-          confirmBtnDisabled: !WLPosPicker?.locked
+          confirmBtnDisabled: !wlPosPicker?.locked
         },
         callToStation: {
           onClick: async () => {
@@ -176,19 +164,15 @@ function App() {
           }
         }
       },
-    [WLPosPicker, apiController, selectedCustomer, customers, loadUpdatedCustomers]
+    [wlPosPicker, apiController, selectedCustomer, customers, loadUpdatedCustomers]
   );
 
   return (
     <div className="text-eerie_black relative h-screen bg-white">
-      {WLPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
+      {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
       <Header
-        filters={customerFilters}
-        filterSetters={{
-          setDate,
-          setDepartment,
-          setStatuses
-        }}
+        filters={filters}
+        filterSetters={filterUtils}
         setError={setError}
         stationMenuActive={{
           value: stationMenuActive,
@@ -201,15 +185,15 @@ function App() {
             customers={customers}
             selectedCustomer={selectedCustomer}
             setSelectedCustomer={setSelectedCustomer}
-            isPastDate={!sameDay(customerFilters.date, new Date())}
-            WLPosPicker={
-              WLPosPicker && {
-                index: WLPosPicker.index,
+            isPastDate={!sameDay(filters.date, new Date())}
+            wlPosPicker={
+              wlPosPicker && {
+                index: wlPosPicker.index,
                 setIndex: (index: number) =>
-                  setWLPosPicker({ ...WLPosPicker, index }),
-                locked: WLPosPicker.locked,
+                  setWlPosPicker({ ...wlPosPicker, index }),
+                locked: wlPosPicker.locked,
                 setLocked: (locked: boolean) =>
-                  setWLPosPicker({ ...WLPosPicker, locked })
+                  setWlPosPicker({ ...wlPosPicker, locked })
               }
             }
           />
@@ -217,7 +201,7 @@ function App() {
             <CustomerPanel
               customer={selectedCustomer}
               actionConfig={panelComponentActionBtnHandlers}
-              currentDept={customerFilters.department}
+              currentDept={filters.department}
             />
           </div>
         </div>
@@ -227,7 +211,7 @@ function App() {
         </div>
       )}
       {error && (
-        <div className={`${!WLPosPicker && 'z-20'} absolute bottom-10 right-10`}>
+        <div className={`${!wlPosPicker && 'z-20'} absolute bottom-10 right-10`}>
           <Error error={error} close={() => setError('')} />
         </div>
       )}

@@ -4,11 +4,11 @@ export interface CustomerListProps {
   customers: Customer[];
   selectedCustomer: Customer;
   setSelectedCustomer: (customer: Customer) => void;
-  WLPosPicker: WLPosPicker | null;
+  wlPosPicker: WaitingListPositionPicker | null;
   isPastDate: boolean;
 }
 
-export interface WLPosPicker {
+export interface WaitingListPositionPicker {
   index: number;
   setIndex: (index: number) => void;
   locked: boolean;

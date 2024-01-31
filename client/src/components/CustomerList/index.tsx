@@ -7,21 +7,21 @@ export default function CustomerList({
   customers,
   selectedCustomer,
   setSelectedCustomer,
-  WLPosPicker,
+  wlPosPicker,
   isPastDate
 }: CustomerListProps) {
   const [orderedCustomers, setOrderedCustomers] = useState<Customer[]>(customers);
 
   // Position the selected customer at the proper WL index when the WL position picker is active
   useEffect(() => {
-    if (WLPosPicker) {
+    if (wlPosPicker) {
       const waitingList = customers.filter((c) => c.status === 'Waiting');
-      waitingList.splice(WLPosPicker.index, 0, selectedCustomer);
+      waitingList.splice(wlPosPicker.index, 0, selectedCustomer);
       setOrderedCustomers(waitingList);
     } else {
       setOrderedCustomers(customers);
     }
-  }, [WLPosPicker, customers, selectedCustomer]);
+  }, [wlPosPicker, customers, selectedCustomer]);
 
   const mapCustomersToListItem = (c: Customer, index: number) => {
     let handleClick;
@@ -29,20 +29,20 @@ export default function CustomerList({
     let styles = 'group';
 
     // If WL position picker is active, applies appropriate behaviors to the CustomerRow buttons
-    if (WLPosPicker) {
+    if (wlPosPicker) {
       // Clicking selected customer controls whether their WL pos is locked
       if (c.id === selectedCustomer.id) {
-        handleClick = () => WLPosPicker.setLocked(!WLPosPicker.locked);
+        handleClick = () => wlPosPicker.setLocked(!wlPosPicker.locked);
       }
 
       // If WL pos isn't locked, reposition selected customer at index of moused over customer
-      if (!WLPosPicker.locked) {
-        handleMouseEnter = () => WLPosPicker.setIndex(index);
+      if (!wlPosPicker.locked) {
+        handleMouseEnter = () => wlPosPicker.setIndex(index);
       }
 
       // Determine hover cursor style
       if (c.id === selectedCustomer.id) {
-        styles = WLPosPicker.locked
+        styles = wlPosPicker.locked
           ? 'hover:cursor-grab'
           : 'hover:cursor-grabbing shadow-md';
       } else {
@@ -70,7 +70,7 @@ export default function CustomerList({
   return (
     <div
       className={`flex grow flex-col bg-white ${
-        WLPosPicker && selectingWLPositionContainerStyles
+        wlPosPicker && selectingWLPositionContainerStyles
       }`}
     >
       <div className="my-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
