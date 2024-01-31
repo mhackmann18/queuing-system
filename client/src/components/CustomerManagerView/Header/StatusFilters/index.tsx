@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import FilterButton from 'components/Header/StatusFilters/FilterButton';
+import FilterButton from 'components/CustomerManagerView/Header/StatusFilters/FilterButton';
 import { StatusFilterButtonsProps } from './types';
 import { sameDay } from 'utils/helpers';
 import { CustomerStatus } from 'utils/types';

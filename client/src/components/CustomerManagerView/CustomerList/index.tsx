@@ -1,4 +1,4 @@
-import CustomerRow from 'components/CustomerList/Row';
+import CustomerRow from 'components/CustomerManagerView/CustomerList/Row';
 import { Customer } from 'utils/types';
 import { CustomerListProps } from './types';
 import { useEffect, useState } from 'react';

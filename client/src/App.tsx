@@ -1,14 +1,14 @@
-import CustomerPanel from './components/CustomerPanel';
+import CustomerPanel from './components/CustomerManagerView/CustomerPanel';
 import { Customer, StatusFilters } from './utils/types';
 import { useEffect, useState, useMemo, useContext } from 'react';
-import CustomerList from './components/CustomerList';
-import Header from './components/Header';
+import CustomerList from './components/CustomerManagerView/CustomerList';
+import Header from './components/CustomerManagerView/Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
 import useCustomers from 'hooks/useCustomers';
 import Error from './components/Error';
 import { sameDay } from 'utils/helpers';
-import { ActionViewConfigProp } from './components/CustomerPanel/ActionView/types';
+import { ActionViewConfigProp } from './components/CustomerManagerView/CustomerPanel/ActionView/types';
 import { UserContext } from 'components/UserContextProvider/context';
 import { WaitingListPositionPickerState } from './utils/types';
 
