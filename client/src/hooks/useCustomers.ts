@@ -1,18 +1,21 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useContext, useMemo } from 'react';
 import { statusFiltersToArr } from 'utils/helpers';
 import { Customer, CustomerFilters } from 'utils/types';
 import CustomerController from 'utils/CustomerController';
+import { UserContext } from 'components/UserContextProvider/context';
 
-export default function useCustomers(
-  filters: CustomerFilters,
-  apiController: CustomerController
-) {
+export default function useCustomers(filters: CustomerFilters) {
+  const user = useContext(UserContext);
+  const controller = useMemo(
+    () => new CustomerController(user.station),
+    [user.station]
+  );
   const [customers, setCustomers] = useState<Customer[]>([]);
 
-  const loadUpdatedCustomers = useCallback(async () => {
+  const fetchCustomers = useCallback(async () => {
     const statuses = [...statusFiltersToArr(filters.statuses)];
 
-    const { error, data } = await apiController.get({
+    const { error, data } = await controller.get({
       date: filters.date,
       department: filters.department,
       statuses
@@ -22,12 +25,12 @@ export default function useCustomers(
     } else {
       // setError(res.error)
     }
-  }, [filters, apiController]);
+  }, [filters, controller]);
 
   // Load new customers when filters change
   useEffect(() => {
-    loadUpdatedCustomers();
-  }, [loadUpdatedCustomers]);
+    fetchCustomers();
+  }, [fetchCustomers]);
 
-  return { customers, loadUpdatedCustomers };
+  return { customers, fetchCustomers, controller };
 }
