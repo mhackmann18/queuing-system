@@ -1,6 +1,6 @@
 import { useEffect, useRef, useContext } from 'react';
 import { getDeptFromStation } from 'utils/helpers';
-import UserContext from 'components/UserContext';
+import { UserContext } from 'components/UserContextProvider/context';
 import { Station } from 'utils/types';
 import { StationMenuProps } from './types';
 

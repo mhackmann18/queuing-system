@@ -4,7 +4,7 @@ import { get12HourTimeString } from 'utils/helpers';
 import CustomerPanel from '.';
 import { Customer } from 'utils/types';
 import { ActionViewConfigProp } from './ActionView/types';
-import UserContext from 'components/UserContext';
+import { UserContext } from 'components/UserContextProvider/context';
 import { User } from 'utils/types';
 import userEvent from '@testing-library/user-event';
 

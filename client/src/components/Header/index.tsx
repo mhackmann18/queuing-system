@@ -4,7 +4,7 @@ import StatusFilters from './StatusFilters';
 import DateToggler from './DateToggler';
 import { FaChevronDown } from 'react-icons/fa';
 import { useContext, useRef } from 'react';
-import UserContext from 'components/UserContext';
+import { UserContext } from 'components/UserContextProvider/context';
 import StationMenu from './StationMenu';
 
 export default function ManageCustomersHeader({

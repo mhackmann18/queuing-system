@@ -1,24 +1,20 @@
-import CustomerPanel from './CustomerPanel';
-import { Customer, StatusFilters } from '../utils/types';
-import { useEffect, useState, useMemo } from 'react';
-import CustomerList from './CustomerList';
-import Header from './Header';
+import CustomerPanel from './components/CustomerPanel';
+import { Customer, StatusFilters } from './utils/types';
+import { useEffect, useState, useMemo, useContext } from 'react';
+import CustomerList from './components/CustomerList';
+import Header from './components/Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import CustomerController from 'utils/CustomerController';
 import useCustomers from 'hooks/useCustomers';
-import Error from './Error';
+import Error from './components/Error';
 import { sameDay } from 'utils/helpers';
-import { ActionViewConfigProp } from './CustomerPanel/ActionView/types';
-import UserContext from './UserContext';
-import { User } from '../utils/types';
+import { ActionViewConfigProp } from './components/CustomerPanel/ActionView/types';
+import { UserContext } from 'components/UserContextProvider/context';
 
 function App() {
-  // State
-  const [user] = useState<User>({ id: 1, station: 'MV1' });
-  const apiController = useMemo(
-    () => new CustomerController(user.station),
-    [user.station]
-  );
+  // Application state
+  const user = useContext(UserContext);
+  const apiController = useMemo(() => new CustomerController(user.station), [user]);
   const [WLPosPicker, setWLPosPicker] = useState<{
     index: number;
     locked: boolean;
@@ -184,60 +180,58 @@ function App() {
   );
 
   return (
-    <UserContext.Provider value={user}>
-      <div className="text-eerie_black relative h-screen bg-white">
-        {WLPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
-        <Header
-          filters={customerFilters}
-          filterSetters={{
-            setDate,
-            setDepartment,
-            setStatuses
-          }}
-          setError={setError}
-          stationMenuActive={{
-            value: stationMenuActive,
-            setValue: setStationMenuActive
-          }}
-        />
-        {customers.length && selectedCustomer ? (
-          <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
-            <CustomerList
-              customers={customers}
-              selectedCustomer={selectedCustomer}
-              setSelectedCustomer={setSelectedCustomer}
-              isPastDate={!sameDay(customerFilters.date, new Date())}
-              WLPosPicker={
-                WLPosPicker && {
-                  index: WLPosPicker.index,
-                  setIndex: (index: number) =>
-                    setWLPosPicker({ ...WLPosPicker, index }),
-                  locked: WLPosPicker.locked,
-                  setLocked: (locked: boolean) =>
-                    setWLPosPicker({ ...WLPosPicker, locked })
-                }
+    <div className="text-eerie_black relative h-screen bg-white">
+      {WLPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
+      <Header
+        filters={customerFilters}
+        filterSetters={{
+          setDate,
+          setDepartment,
+          setStatuses
+        }}
+        setError={setError}
+        stationMenuActive={{
+          value: stationMenuActive,
+          setValue: setStationMenuActive
+        }}
+      />
+      {customers.length && selectedCustomer ? (
+        <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
+          <CustomerList
+            customers={customers}
+            selectedCustomer={selectedCustomer}
+            setSelectedCustomer={setSelectedCustomer}
+            isPastDate={!sameDay(customerFilters.date, new Date())}
+            WLPosPicker={
+              WLPosPicker && {
+                index: WLPosPicker.index,
+                setIndex: (index: number) =>
+                  setWLPosPicker({ ...WLPosPicker, index }),
+                locked: WLPosPicker.locked,
+                setLocked: (locked: boolean) =>
+                  setWLPosPicker({ ...WLPosPicker, locked })
               }
+            }
+          />
+          <div className={`ml-4`}>
+            <CustomerPanel
+              customer={selectedCustomer}
+              actionConfig={panelComponentActionBtnHandlers}
+              currentDept={customerFilters.department}
             />
-            <div className={`ml-4`}>
-              <CustomerPanel
-                customer={selectedCustomer}
-                actionConfig={panelComponentActionBtnHandlers}
-                currentDept={customerFilters.department}
-              />
-            </div>
           </div>
-        ) : (
-          <div className="text-french_gray_2 flex h-[calc(100%-8rem)] items-center justify-center">
-            No Customers to Show
-          </div>
-        )}
-        {error && (
-          <div className={`${!WLPosPicker && 'z-20'} absolute bottom-10 right-10`}>
-            <Error error={error} close={() => setError('')} />
-          </div>
-        )}
-      </div>
-    </UserContext.Provider>
+        </div>
+      ) : (
+        <div className="text-french_gray_2 flex h-[calc(100%-8rem)] items-center justify-center">
+          No Customers to Show
+        </div>
+      )}
+      {error && (
+        <div className={`${!WLPosPicker && 'z-20'} absolute bottom-10 right-10`}>
+          <Error error={error} close={() => setError('')} />
+        </div>
+      )}
+    </div>
   );
 }
 

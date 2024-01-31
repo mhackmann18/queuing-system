@@ -4,7 +4,7 @@ import Confirm from 'components/Confirm';
 import { Customer } from 'utils/types';
 import { ActionViewProps } from './types';
 import CustomerPanelInfo from '../Info';
-import UserContext from 'components/UserContext';
+import { UserContext } from 'components/UserContextProvider/context';
 import { getDeptFromStation, sameDay } from 'utils/helpers';
 import { stationsByDept } from 'utils/types';
 
