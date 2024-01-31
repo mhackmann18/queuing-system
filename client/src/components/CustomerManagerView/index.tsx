@@ -9,6 +9,7 @@ import Error from 'components/Error';
 import { sameDay } from 'utils/helpers';
 import { ActionViewConfigProp } from 'components/CustomerManagerView/CustomerPanel/ActionView/types';
 import { WaitingListPositionPickerState } from 'utils/types';
+import ActionView from './CustomerPanel/ActionView';
 
 export default function CustomerManagerView() {
   // Application state
@@ -188,11 +189,13 @@ export default function CustomerManagerView() {
             }
           />
           <div className={`ml-4`}>
-            <CustomerPanel
-              customer={selectedCustomer}
-              actionConfig={panelComponentActionBtnHandlers}
-              currentDept={filters.department}
-            />
+            <CustomerPanel customer={selectedCustomer}>
+              <ActionView
+                customer={selectedCustomer}
+                actionConfig={panelComponentActionBtnHandlers}
+                currentDept={filters.department}
+              />
+            </CustomerPanel>
           </div>
         </div>
       ) : (

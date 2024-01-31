@@ -43,6 +43,8 @@ export interface ActionViewConfigProp {
   };
 }
 
+export type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
+
 export interface ActionViewProps {
   customer: Customer;
   actionConfig: ActionViewConfigProp;

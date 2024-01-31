@@ -1,19 +1,16 @@
-import { ReactEventHandler } from 'react';
+import { ManageCustomerActionButtonProps } from './types';
 
-export default function CustomerPanelActionButton({
-  text,
+export default function ManageCustomerActionButton({
+  name,
   onClick
-}: {
-  text: string;
-  onClick: ReactEventHandler;
-}) {
+}: ManageCustomerActionButtonProps) {
   return (
     <button
       onClick={onClick}
       className="bg-french_gray_1-700 text-onyx hover:bg-french_gray_1 mt-2 block w-full 
 rounded-md p-3 text-left text-sm font-semibold"
     >
-      {text}
+      {name}
     </button>
   );
 }

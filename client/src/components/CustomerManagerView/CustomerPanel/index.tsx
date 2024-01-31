@@ -1,12 +1,7 @@
 import { CustomerStatus } from 'utils/types';
 import { CustomerPanelProps } from './types';
-import ActionView from './ActionView';
 
-export default function CustomerPanel({
-  customer,
-  actionConfig,
-  currentDept
-}: CustomerPanelProps) {
+export default function CustomerPanel({ customer, children }: CustomerPanelProps) {
   const statusStyles: Record<CustomerStatus, string> = {
     Served: 'text-served border-served',
     'No Show': 'text-no_show border-no_show',
@@ -37,13 +32,7 @@ export default function CustomerPanel({
           {customer.status}
         </span>
       </div>
-      {actionConfig && (
-        <ActionView
-          customer={customer}
-          actionConfig={actionConfig}
-          currentDept={currentDept}
-        />
-      )}
+      {children}
     </div>
   );
 }

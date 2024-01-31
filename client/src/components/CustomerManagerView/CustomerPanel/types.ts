@@ -1,8 +1,7 @@
-import { Customer, Department } from 'utils/types';
-import { ActionViewConfigProp } from './ActionView/types';
+import { Customer } from 'utils/types';
+import { ReactNode } from 'react';
 
 export interface CustomerPanelProps {
   customer: Customer;
-  actionConfig: ActionViewConfigProp | null;
-  currentDept: Department;
+  children: ReactNode;
 }
