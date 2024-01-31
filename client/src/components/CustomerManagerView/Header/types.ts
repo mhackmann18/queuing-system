@@ -14,8 +14,4 @@ export interface ManageCustomersHeaderProps {
     setStatuses: (statusFilters: StatusFilters) => void;
   };
   setError: (error: string) => void;
-  stationMenuActive: {
-    value: boolean;
-    setValue: (val: boolean) => void;
-  };
 }

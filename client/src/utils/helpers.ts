@@ -1,4 +1,42 @@
-import { CustomerStatus, Department, Station, StatusFilters } from './types';
+import {
+  CustomerStatus,
+  Department,
+  Station,
+  StatusFilters,
+  Customer,
+  ManageCustomerAction
+} from './types';
+
+const getAvailableActions = (customer: Customer): ManageCustomerAction[] => {
+  let actions: ManageCustomerAction[] = [];
+
+  switch (customer.status) {
+    case 'Waiting':
+      actions = ['Call to Station', 'Mark No Show', 'Delete'];
+      break;
+    case 'Serving':
+      actions = [
+        'Finish Serving',
+        'Mark No Show',
+        'Return to Waiting List',
+        'Delete'
+      ];
+      break;
+    case 'Served':
+      actions = ['Delete'];
+      break;
+    case 'No Show':
+      actions = ['Return to Waiting List', 'Delete'];
+      break;
+  }
+
+  // Regardless of status, the only available action for customers from previous days is to delete them
+  if (!sameDay(customer.checkInTime, new Date())) {
+    actions = ['Delete'];
+  }
+
+  return actions;
+};
 
 const sortDatesDescending = (dates: Date[]): Date[] => {
   return dates.slice().sort((a, b) => b.getTime() - a.getTime());
@@ -99,5 +137,6 @@ export {
   statusFiltersToArr,
   getDeptFromStation,
   formatTimePassed,
-  sortDatesDescending
+  sortDatesDescending,
+  getAvailableActions
 };

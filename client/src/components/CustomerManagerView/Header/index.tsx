@@ -3,18 +3,18 @@ import StationIcon from './StationIcon';
 import StatusFilters from './StatusFilters';
 import DateToggler from './DateToggler';
 import { FaChevronDown } from 'react-icons/fa';
-import { useContext, useRef } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { UserContext } from 'components/UserContextProvider/context';
 import StationMenu from './StationMenu';
 
 export default function ManageCustomersHeader({
   filters,
   filterSetters,
-  setError,
-  stationMenuActive
+  setError
 }: ManageCustomersHeaderProps) {
   const user = useContext(UserContext);
   const stationIconBtnRef = useRef<HTMLButtonElement>(null);
+  const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
 
   const handleChangeDeptBtnClick = () => {
     filterSetters.setDepartment(
@@ -41,19 +41,19 @@ export default function ManageCustomersHeader({
           <div className="flex items-center">
             {user.station && ( // TODO: determine behavior of no station
               <StationIcon
-                onClick={() => stationMenuActive.setValue(!stationMenuActive.value)}
+                onClick={() => setStationMenuActive(!stationMenuActive)}
                 station={user!.station}
                 forwardRef={stationIconBtnRef}
-                menuActive={stationMenuActive.value}
+                menuActive={stationMenuActive}
               />
             )}
           </div>
-          {stationMenuActive.value && (
+          {stationMenuActive && (
             <StationMenu
               buttonRef={stationIconBtnRef}
               setError={setError}
-              active={stationMenuActive.value}
-              setActive={stationMenuActive.setValue}
+              active={stationMenuActive}
+              setActive={setStationMenuActive}
             />
           )}
         </div>

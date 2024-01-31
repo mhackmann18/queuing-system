@@ -19,7 +19,6 @@ export default function CustomerManagerView() {
   );
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<string>('');
-  const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
   const { filters, ...filterUtils } = useCustomerFilters();
   const { customers, fetchCustomers, controller } = useCustomers(filters);
 
@@ -39,7 +38,9 @@ export default function CustomerManagerView() {
     } else {
       // If there is a selected customer, find them. If they no longer exist, set to null.
       setSelectedCustomer(
-        customers.find((c) => c.id === selectedCustomer.id) || null
+        customers.find((c) => c.id === selectedCustomer.id) ||
+          customers.find((c) => c.status === 'Serving') ||
+          customers[0]
       );
     }
   }, [customers, selectedCustomer]);
@@ -49,8 +50,8 @@ export default function CustomerManagerView() {
     // If there are saved status filters, and no special conditions apply (previous date, or
     // WL pos picker active) replace the current ones with the saved, and clear clear the saved
     if (savedStatusFilters && sameDay(filters.date, new Date()) && !wlPosPicker) {
-      setSavedStatusFilters(null);
       filterUtils.setStatuses({ ...savedStatusFilters });
+      setSavedStatusFilters(null);
     }
     // Save current status filters and replace with relevant filters for previous date customers
     if (!sameDay(filters.date, new Date()) && !savedStatusFilters) {
@@ -60,7 +61,7 @@ export default function CustomerManagerView() {
     // Save current status filters and replace with relevant filters for WL pos picker
     if (wlPosPicker && !savedStatusFilters) {
       setSavedStatusFilters({ ...filters.statuses });
-      if (selectedCustomer?.status === 'Serving') {
+      if (selectedCustomer!.status === 'Serving') {
         filterUtils.setStatuses({ Waiting: true, Serving: true });
       } else if (selectedCustomer!.status === 'No Show') {
         filterUtils.setStatuses({ 'No Show': true, Waiting: true });
@@ -96,7 +97,6 @@ export default function CustomerManagerView() {
         returnToWaitingList: {
           onClick: () => {
             setWlPosPicker({ index: 0, locked: false });
-            setStationMenuActive(false);
           },
           onCancel: () => setWlPosPicker(null),
           onConfirm: async ({ onSuccess }) => {
@@ -166,15 +166,9 @@ export default function CustomerManagerView() {
   return (
     <>
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
-      <Header
-        filters={filters}
-        filterSetters={filterUtils}
-        setError={setError}
-        stationMenuActive={{
-          value: stationMenuActive,
-          setValue: setStationMenuActive
-        }}
-      />
+
+      <Header filters={filters} filterSetters={filterUtils} setError={setError} />
+
       {customers.length && selectedCustomer ? (
         <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
           <CustomerList

@@ -5,6 +5,13 @@ export const stationsByDept = {
   "Driver's License": ['DL1', 'DL2']
 };
 
+export type ManageCustomerAction =
+  | 'Finish Serving'
+  | 'Mark No Show'
+  | 'Call to Station'
+  | 'Delete'
+  | 'Return to Waiting List';
+
 export interface User {
   id: number;
   station?: Station;

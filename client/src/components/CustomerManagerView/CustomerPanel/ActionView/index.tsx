@@ -1,11 +1,10 @@
-import { useState, ReactElement, useEffect, useCallback, useContext } from 'react';
+import { useState, ReactElement, useEffect, useContext, useMemo } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
 import Confirm from 'components/Confirm';
-import { Customer } from 'utils/types';
 import { ActionViewProps } from './types';
 import CustomerPanelInfo from '../Info';
 import { UserContext } from 'components/UserContextProvider/context';
-import { getDeptFromStation, sameDay } from 'utils/helpers';
+import { getDeptFromStation, getAvailableActions } from 'utils/helpers';
 import { stationsByDept } from 'utils/types';
 
 type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
@@ -19,86 +18,52 @@ export default function ActionView({
   const [component, setComponent] = useState<ReactElement | null>(null);
   const user = useContext(UserContext);
 
-  const getAvailableActions = useCallback(
-    (customer: Customer): Record<string, () => void>[] => {
-      let actions: Record<string, () => void>[] = [];
+  const actions = useMemo(
+    () =>
+      getAvailableActions(customer).map((action) => {
+        let actionFn = () => undefined;
 
-      const handleDeleteBtnClick = () => {
-        actionConfig.delete.onClick();
-        setMode('delete');
-      };
+        switch (action) {
+          case 'Finish Serving':
+            actionFn = () => {
+              actionConfig.finishServing.onClick();
+            };
+            break;
+          case 'Mark No Show':
+            actionFn = () => {
+              actionConfig.markNoShow.onClick();
+              setMode('mark_no_show');
+            };
+            break;
+          case 'Call to Station':
+            actionFn = () => {
+              actionConfig.callToStation.onClick();
+            };
+            break;
+          case 'Delete':
+            actionFn = () => {
+              actionConfig.delete.onClick();
+              setMode('delete');
+            };
+            break;
+          case 'Return to Waiting List':
+            actionFn = () => {
+              actionConfig.returnToWaitingList.onClick();
+              setMode('rtwl');
+            };
+            break;
+        }
 
-      const handleRtwlBtnClick = () => {
-        actionConfig.returnToWaitingList.onClick();
-        setMode('rtwl');
-      };
-
-      const handleCallToStationBtnClick = () => {
-        actionConfig.callToStation.onClick();
-      };
-
-      const handleFinishServingBtnClick = () => {
-        actionConfig.finishServing.onClick();
-      };
-
-      const handleMarkNoShowBtnClick = () => {
-        actionConfig.markNoShow.onClick();
-        setMode('mark_no_show');
-      };
-
-      switch (customer.status) {
-        case 'Waiting':
-          actions.push({
-            'Call to Station': handleCallToStationBtnClick
-          });
-          if (customer.callTimes.length) {
-            actions.push({ 'Mark No Show': handleMarkNoShowBtnClick });
-          }
-          actions.push({ Delete: handleDeleteBtnClick });
-          break;
-        case 'Serving':
-          actions = [
-            {
-              'Finish Serving': handleFinishServingBtnClick
-            },
-            {
-              'Mark No Show': handleMarkNoShowBtnClick
-            },
-            {
-              'Return to Waiting List': handleRtwlBtnClick
-            },
-            {
-              Delete: handleDeleteBtnClick
-            }
-          ];
-          break;
-        case 'Served':
-          actions = [
-            {
-              Delete: handleDeleteBtnClick
-            }
-          ];
-          break;
-        case 'No Show':
-          actions = [
-            {
-              'Return to Waiting List': handleRtwlBtnClick
-            },
-            {
-              Delete: handleDeleteBtnClick
-            }
-          ];
-          break;
-      }
-
-      // The only available action for customers from previous days is to delete them
-      if (!sameDay(customer.checkInTime, new Date())) {
-        actions = [{ Delete: handleDeleteBtnClick }];
-      }
-
-      return actions;
-    },
-    [actionConfig]
+        return { actionName: action, actionFn };
+      }),
+    [
+      actionConfig.callToStation,
+      actionConfig.delete,
+      actionConfig.finishServing,
+      actionConfig.markNoShow,
+      actionConfig.returnToWaitingList,
+      customer
+    ]
   );
 
   // Reset view when customer changes
@@ -183,13 +148,12 @@ export default function ActionView({
       }
       case 'default': {
         const renderActionBtns = () =>
-          getAvailableActions(customer).map((action) => {
-            const [actionName, actionFn] = Object.entries(action)[0];
+          actions.map(({ actionName, actionFn }) => {
             return (
               <CustomerPanelActionButton
                 key={actionName}
                 text={actionName}
-                onClick={() => actionFn()}
+                onClick={actionFn}
               />
             );
           });
@@ -243,7 +207,7 @@ export default function ActionView({
     actionConfig.markNoShow,
     actionConfig.delete,
     actionConfig.returnToWaitingList,
-    getAvailableActions,
+    actions,
     customer,
     currentDept,
     user
