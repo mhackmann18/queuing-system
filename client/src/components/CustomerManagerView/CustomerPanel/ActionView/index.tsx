@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
 import Confirm from 'components/Confirm';
-import { ActionViewProps, ActionViewMode } from './types';
-import CustomerPanelInfo from '../Info';
+import { ActionViewProps } from './types';
 import { UserContext } from 'components/UserContextProvider/context';
 import { getDeptFromStation, getAvailableActions } from 'utils/helpers';
 import { stationsByDept } from 'utils/types';
+import { CustomerPanelContext } from '../context';
 
 export default function ActionView({
   customer,
   actionConfig,
   currentDept
 }: ActionViewProps) {
-  const [mode, setMode] = useState<ActionViewMode>('default');
+  const { state, setState } = useContext(CustomerPanelContext);
   const user = useContext(UserContext);
 
   const actionBtnConfig = useMemo(
@@ -29,7 +29,7 @@ export default function ActionView({
           case 'Mark No Show':
             onClick = () => {
               actionConfig.markNoShow.onClick();
-              setMode('mark_no_show');
+              setState('mark_no_show');
             };
             break;
           case 'Call to Station':
@@ -40,13 +40,13 @@ export default function ActionView({
           case 'Delete':
             onClick = () => {
               actionConfig.delete.onClick();
-              setMode('delete');
+              setState('delete');
             };
             break;
           case 'Return to Waiting List':
             onClick = () => {
               actionConfig.returnToWaitingList.onClick();
-              setMode('rtwl');
+              setState('rtwl');
             };
             break;
         }
@@ -59,17 +59,13 @@ export default function ActionView({
       actionConfig.finishServing,
       actionConfig.markNoShow,
       actionConfig.returnToWaitingList,
+      setState,
       customer
     ]
   );
 
-  // Reset view when customer changes
-  useEffect(() => {
-    setMode('default');
-  }, [customer.id]);
-
   // Determine rendered component
-  switch (mode) {
+  switch (state) {
     case 'delete': {
       const { onCancel, onConfirm } = actionConfig.delete;
 
@@ -81,11 +77,11 @@ export default function ActionView({
           }
           onCancel={() => {
             onCancel();
-            setMode('default');
+            setState('default');
           }}
           onConfirm={() =>
             onConfirm({
-              onSuccess: () => setMode('default'),
+              onSuccess: () => setState('default'),
               onFailure: () => null
             })
           }
@@ -104,11 +100,11 @@ export default function ActionView({
           message={'Select where this customer should appear in the waiting list.'}
           onCancel={() => {
             onCancel();
-            setMode('default');
+            setState('default');
           }}
           onConfirm={() =>
             onConfirm({
-              onSuccess: () => setMode('default'),
+              onSuccess: () => setState('default'),
               onFailure: () => null
             })
           }
@@ -127,12 +123,12 @@ export default function ActionView({
           }
           onCancel={() => {
             onCancel();
-            setMode('default');
+            setState('default');
           }}
           confirmBtnText="Mark No Show"
           onConfirm={() =>
             onConfirm({
-              onSuccess: () => setMode('default'),
+              onSuccess: () => setState('default'),
               onFailure: () => null
             })
           }
@@ -173,7 +169,6 @@ export default function ActionView({
               ))}
             </div>
           )}
-          <CustomerPanelInfo customer={customer} />
         </div>
       );
     }

@@ -5,3 +5,5 @@ export interface CustomerPanelProps {
   customer: Customer;
   children: ReactNode;
 }
+
+export type CustomerPanelState = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
