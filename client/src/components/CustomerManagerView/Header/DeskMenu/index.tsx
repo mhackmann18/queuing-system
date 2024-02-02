@@ -1,13 +1,13 @@
 import { useEffect, useRef, useContext } from 'react';
 import { UserContext } from 'components/UserContextProvider/context';
-import { StationMenuProps } from './types';
+import { DeskMenuProps } from './types';
 
-export default function StationMenu({
+export default function DeskMenu({
   setError,
   active,
   setActive,
   buttonRef
-}: StationMenuProps) {
+}: DeskMenuProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const user = useContext(UserContext);
 
@@ -69,7 +69,7 @@ export default function StationMenu({
           type="button"
           className="hover:bg-platinum-800 block w-full rounded-md p-3 text-left text-sm font-medium"
         >
-          Switch Stations
+          Switch Desks
         </button>
       </div>
     </div>

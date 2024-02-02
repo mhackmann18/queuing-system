@@ -29,7 +29,7 @@ export default class CustomerController {
     const { date, division, statuses } = filters;
 
     const sanitizedStatuses: CustomerRawStatus[] = [];
-    console.log(statuses);
+
     if (statuses) {
       if (statuses.includes('Other Desks')) {
         const numDesks = await UserController.getNumDesks({ officeId, division });

@@ -1,13 +1,13 @@
 import { ManageCustomersHeaderProps } from './types';
-import StationIcon from './DeskIcon';
+import DeskIcon from './DeskIcon';
 import StatusFilters from './StatusFilters';
 import DateToggler from './DateToggler';
-import { FaChevronDown } from 'react-icons/fa';
+// import { FaChevronDown } from 'react-icons/fa';
 import { useContext, useRef, useState } from 'react';
 import { UserContext } from 'components/UserContextProvider/context';
-import StationMenu from './StationMenu';
-import { Division } from 'utils/types';
-import { getNextElement } from 'utils/helpers';
+import DeskMenu from './DeskMenu';
+// import { Division } from 'utils/types';
+// import { getNextElement } from 'utils/helpers';
 
 export default function ManageCustomersHeader({
   filters,
@@ -18,14 +18,14 @@ export default function ManageCustomersHeader({
   const stationIconBtnRef = useRef<HTMLButtonElement>(null);
   const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
 
-  const handleChangeDeptBtnClick = () => {
-    // API.getOfficeDivisions returns
-    const divisions = ['Motor Vehicle', 'Driver License'];
+  // const handleChangeDeptBtnClick = () => {
+  //   // API.getOfficeDivisions returns
+  //   const divisions = ['Motor Vehicle', 'Driver License'];
 
-    filterSetters.setDivision(
-      getNextElement<Division>(divisions, filters.division)!
-    );
-  };
+  //   filterSetters.setDivision(
+  //     getNextElement<Division>(divisions, filters.division)!
+  //   );
+  // };
 
   return (
     <header className="h-28">
@@ -36,16 +36,16 @@ export default function ManageCustomersHeader({
             <h1 className="mr-4 inline-block w-80 items-center text-2xl font-bold">
               {filters.division} Customers
             </h1>
-            <button
+            {/* <button
               onClick={handleChangeDeptBtnClick}
               className="border-french_gray_1 hover:text-slate_gray mt-1 rounded-sm border"
             >
               <FaChevronDown size={14} />
-            </button>
+            </button> */}
           </div>
           <div className="flex items-center">
             {user.division && ( // TODO: determine behavior of no station
-              <StationIcon
+              <DeskIcon
                 onClick={() => setStationMenuActive(!stationMenuActive)}
                 forwardRef={stationIconBtnRef}
                 focused={stationMenuActive}
@@ -53,7 +53,7 @@ export default function ManageCustomersHeader({
             )}
           </div>
           {stationMenuActive && (
-            <StationMenu
+            <DeskMenu
               buttonRef={stationIconBtnRef}
               setError={setError}
               active={stationMenuActive}

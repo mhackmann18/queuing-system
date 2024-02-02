@@ -1,4 +1,4 @@
-export interface StationMenuProps {
+export interface DeskMenuProps {
   setError: (error: string) => void;
   active: boolean;
   setActive: (active: boolean) => void;
