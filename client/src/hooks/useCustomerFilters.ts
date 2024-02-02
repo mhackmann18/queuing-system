@@ -16,6 +16,8 @@ export default function useCustomerFilters() {
     [date, statuses, division]
   );
 
+  console.log(statuses);
+
   return {
     filters,
     setDate,

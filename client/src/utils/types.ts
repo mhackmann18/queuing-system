@@ -35,7 +35,6 @@ export interface Customer {
   callTimes: Date[];
   reasonsForVisit: Division[];
   atOtherDivision?: Division;
-  atOtherDesk?: number; // Redundant
 }
 
 export type StatusFilters = Partial<Record<StatusFilter, boolean>>;

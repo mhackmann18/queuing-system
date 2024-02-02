@@ -1,5 +1,6 @@
 import { get12HourTimeString, formatTimePassed } from 'utils/helpers';
 import { CustomerListRowProps } from './types';
+import { CustomerStatus } from 'utils/types';
 
 export default function CustomerListRow({
   customer,
@@ -11,46 +12,66 @@ export default function CustomerListRow({
 }: CustomerListRowProps) {
   const { status, name, checkInTime, callTimes } = customer;
 
-  const containerStyles = {
+  const containerStyles: Record<CustomerStatus, string> = {
     Waiting: `border-waiting`,
     Serving: 'bg-green-50 border-serving',
     Served: 'border-served',
     'No Show': 'border-no_show',
-    MV1: 'border-mv1',
-    MV2: 'border-mv2',
-    MV3: 'border-mv3',
-    MV4: 'border-mv4',
-    DL1: 'border-dl1',
-    DL2: 'border-dl2'
+    'Desk 1': 'border-desk_1',
+    'Desk 2': 'border-desk_2',
+    'Desk 3': 'border-desk_3',
+    'Desk 4': 'border-desk_4',
+    'Desk 5': 'border-desk_5',
+    'Desk 6': 'border-desk_6'
   };
 
-  const statusTextStyles = {
+  const statusTextStyles: Record<CustomerStatus, string> = {
     Waiting: 'text-waiting',
     Serving: 'text-serving font-semibold',
     Served: 'text-served',
     'No Show': 'text-no_show',
-    MV1: 'text-mv1',
-    MV2: 'text-mv2',
-    MV3: 'text-mv3',
-    MV4: 'text-mv4',
-    DL1: 'text-dl1',
-    DL2: 'text-dl2'
+    'Desk 1': 'text-desk_1',
+    'Desk 2': 'text-desk_2',
+    'Desk 3': 'text-desk_3',
+    'Desk 4': 'text-desk_4',
+    'Desk 5': 'text-desk_5',
+    'Desk 6': 'text-desk_6'
+  };
+
+  const getContainerStyles = () => {
+    if (
+      /^Desk \d+$/.test(customer.status) &&
+      Number(customer.status[customer.status.length - 1]) > 6
+    ) {
+      return containerStyles['Desk 6'];
+    }
+
+    return containerStyles[customer.status];
+  };
+
+  const getStatusTextStyles = () => {
+    if (
+      /^Desk \d+$/.test(customer.status) &&
+      Number(customer.status[customer.status.length - 1]) > 6
+    ) {
+      return statusTextStyles['Desk 6'];
+    }
+
+    return statusTextStyles[customer.status];
   };
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full justify-between p-3 text-left ${
-        containerStyles[status]
-      } ${selected ? 'bg-seasalt-500 border-l-4' : ''} ${styles}`}
+      className={`flex w-full justify-between p-3 text-left ${getContainerStyles()} ${
+        selected ? 'bg-seasalt-500 border-l-4' : ''
+      } ${styles}`}
       {...{ onMouseEnter }}
     >
       <div>
         {/* Status */}
-        <span
-          className={`inline-block w-20 font-medium ${statusTextStyles[status]}`}
-        >
+        <span className={`inline-block w-20 font-medium ${getStatusTextStyles()}`}>
           {status}
         </span>
         {/* Customer Name */}

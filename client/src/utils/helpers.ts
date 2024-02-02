@@ -1,9 +1,9 @@
 import {
-  CustomerStatus,
   StatusFilters,
   Customer,
   ManageCustomerAction,
-  Division
+  Division,
+  StatusFilter
 } from './types';
 
 /**
@@ -144,10 +144,10 @@ const getDateString = (date: Date): string => {
 };
 
 const statusFiltersToArr = (statuses: StatusFilters) => {
-  const statusesArr: CustomerStatus[] = [];
+  const statusesArr: StatusFilter[] = [];
   Object.entries(statuses).forEach(([status, active]) => {
     if (active) {
-      const customerStatus = status as CustomerStatus;
+      const customerStatus = status as StatusFilter;
       statusesArr.push(customerStatus);
     }
   });

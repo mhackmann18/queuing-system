@@ -25,8 +25,8 @@ export default function CustomerPanel({ customer, children }: CustomerPanelProps
   ];
 
   const getStatusStyles = () => {
-    if (customer.atOtherDesk) {
-      return stylesByDeskNum[customer.atOtherDesk];
+    if (/^Desk \d+$/.test(customer.status)) {
+      return stylesByDeskNum[Number(customer.status[customer.status.length - 1])];
     }
 
     return stylesByStatus[customer.status];

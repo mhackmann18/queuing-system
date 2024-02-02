@@ -1,4 +1,4 @@
-import { Customer, CustomerStatus, Division } from 'utils/types';
+import { Customer, CustomerStatus, Division, StatusFilter } from 'utils/types';
 import {
   CustomerRaw,
   CustomerControllerManyResult,
@@ -6,9 +6,11 @@ import {
   CustomerRawStatus
 } from './types';
 import DummyApi from './DummyApi';
+import UserController from 'utils/UserController';
 
 const division = 'Motor Vehicle';
 const deskNum = 1;
+const officeId = 1;
 
 export default class CustomerController {
   /**
@@ -22,16 +24,27 @@ export default class CustomerController {
   async get(filters: {
     date: Date;
     division: Division;
-    statuses?: CustomerStatus[];
+    statuses?: StatusFilter[];
   }): Promise<CustomerControllerManyResult> {
     const { date, division, statuses } = filters;
 
-    let sanitizedStatuses: CustomerRawStatus[] | undefined;
+    const sanitizedStatuses: CustomerRawStatus[] = [];
 
-    // 'Serving' status is only valid on the client and must be translated to the current station
-    if (statuses?.includes('Serving')) {
-      sanitizedStatuses =
-        statuses && statuses.map((s) => (s === 'Serving' ? `Desk ${deskNum}` : s));
+    if (statuses) {
+      if (statuses.includes('Other Desks')) {
+        const numDesks = await UserController.getNumDesks({ officeId, division });
+        for (let i = 1; i <= numDesks; i++) {
+          sanitizedStatuses.push(`Desk ${i}`);
+        }
+      } else if (statuses.includes('Serving')) {
+        sanitizedStatuses.push(`Desk ${deskNum}`);
+      }
+
+      for (const status of statuses) {
+        if (status !== 'Serving' && status !== 'Other Desks') {
+          sanitizedStatuses.push(status);
+        }
+      }
     }
 
     // TODO: Make POST request /api/v1/customers
