@@ -5,12 +5,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        mv1: { DEFAULT: '#4285f4' },
-        mv2: { DEFAULT: '#ea4335' },
-        mv3: { DEFAULT: '#fbbc04' },
-        mv4: { DEFAULT: '#34a853' },
-        dl1: { DEFAULT: '#ff6d01' },
-        dl2: { DEFAULT: '#46bdc6' },
+        desk_1: { DEFAULT: '#4285f4' },
+        desk_2: { DEFAULT: '#ea4335' },
+        desk_3: { DEFAULT: '#fbbc04' },
+        desk_4: { DEFAULT: '#34a853' },
+        desk_5: { DEFAULT: '#ff6d01' },
+        desk_6: { DEFAULT: '#46bdc6' },
         waiting: { DEFAULT: '#a7adb2' },
         serving: { DEFAULT: '#53db00' },
         served: { DEFAULT: '#ced3d8' },

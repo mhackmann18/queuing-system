@@ -1,4 +1,4 @@
-import { Customer, Department } from 'utils/types';
+import { Customer, Division } from 'utils/types';
 
 export interface ActionViewConfigProp {
   delete: {
@@ -48,5 +48,5 @@ export type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
 export interface ActionViewProps {
   customer: Customer;
   actionConfig: ActionViewConfigProp;
-  currentDept: Department;
+  currentDivision: Division;
 }

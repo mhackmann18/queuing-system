@@ -2,7 +2,6 @@ import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import StationIcon from '.';
-import { Station } from 'utils/types';
 
 const mockOnClick = jest.fn();
 
@@ -29,7 +28,7 @@ describe.each([
   ['MV4' as Station],
   ['DL1' as Station],
   ['DL2' as Station]
-])('applies corresponding style for', (station) => {
+])('applies corresponding style for desk number', (station) => {
   test(`${station} station`, () => {
     render(
       <StationIcon menuActive={false} station={station} onClick={mockOnClick} />

@@ -119,8 +119,8 @@ export default function CustomerManagerView() {
           onClick: async () => {
             if (customers.find((c) => c.status === 'Serving')) {
               setError('You are already serving a customer.');
-            } else if (selectedCustomer.atOtherDept) {
-              setError('Customer is being served at another department.');
+            } else if (selectedCustomer.atOtherDivision) {
+              setError('Customer is being served at another division.');
             } else {
               const res = await controller.callToStation(selectedCustomer.id);
               if (res.error) {
@@ -192,8 +192,8 @@ export default function CustomerManagerView() {
             <CustomerPanel customer={selectedCustomer}>
               <ActionView
                 customer={selectedCustomer}
-                actionConfig={panelComponentActionBtnHandlers}
-                currentDept={filters.department}
+                actionConfig={panelComponentActionBtnHandlers!}
+                currentDivision={filters.division}
               />
             </CustomerPanel>
           </div>

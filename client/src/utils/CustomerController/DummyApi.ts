@@ -1,11 +1,6 @@
 import { sameDay } from 'utils/helpers';
-import {
-  CustomerRaw,
-  CustomerRawGenericStatus,
-  CustomerRawStatus,
-  DLCustomerRawStatus,
-  MVCustomerRawStatus
-} from './types';
+import { CustomerRaw, CustomerRawStatus } from './types';
+import { Division } from 'utils/types';
 
 function getFinalCheckInTime() {
   const finalCheckInTime = new Date();
@@ -48,12 +43,12 @@ export type ApiResponse = Promise<{
 
 export interface GetCustomersBody {
   date: Date;
-  department?: 'Motor Vehicle' | "Driver's License";
+  division?: Division;
   statuses?: CustomerRawStatus[];
 }
 
 export interface UpdateCustomerBody {
-  department: 'Motor Vehicle' | "Driver's License";
+  division: Division;
   addCallTime?: Date;
   waitingListIndex?: number;
   status?: CustomerRawStatus;
@@ -92,7 +87,7 @@ function generateRandomDates(startDate: Date, endDate: Date, numberOfDates: numb
 function getCallTimes(checkInTime: Date, status: CustomerRawStatus): Date[] {
   const callTimes: Date[] = [];
 
-  if (['MV1', 'MV2', 'MV3', 'MV4', 'DL1', 'DL2'].includes(status)) {
+  if (/^Desk \d+$/.test(status)) {
     callTimes.push(getRandomDateWithinXHours(checkInTime, 0.3));
   } else if (status === 'No Show') {
     const cutoff = getRandomDateWithinXHours(checkInTime, 2);
@@ -121,6 +116,14 @@ function getDayBackFinalCheckInTime(dayBack: number) {
   return finalCheckInTime;
 }
 
+const getXDesks = (x: number): `Desk ${number}`[] => {
+  const desks: `Desk ${number}`[] = [];
+  for (let i = 1; i <= x; i++) {
+    desks.push(`Desk ${i}`);
+  }
+  return desks;
+};
+
 export default class DummyApi {
   static #getOldCustomers(dayBack: number) {
     const numCustomers = 40;
@@ -143,9 +146,11 @@ export default class DummyApi {
         checkInTime: checkInTime.toISOString(),
         firstName: `FirstName${id}`,
         lastName: `LastName${id}`,
-        motorVehicle: {
-          status,
-          callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
+        divisions: {
+          'Motor Vehicle': {
+            status,
+            callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
+          }
         }
       });
     }
@@ -161,9 +166,11 @@ export default class DummyApi {
         checkInTime: checkInTime.toISOString(),
         firstName: `FirstName${id}`,
         lastName: `LastName${id}`,
-        driversLicense: {
-          status: status,
-          callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
+        divisions: {
+          "Driver's License": {
+            status: status,
+            callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
+          }
         }
       });
     }
@@ -178,8 +185,8 @@ export default class DummyApi {
       getFinalCheckInTime(),
       100
     );
-    const mvRemainingStations: MVCustomerRawStatus[] = ['MV1', 'MV2', 'MV3', 'MV4'];
-    const dlRemainingStations: DLCustomerRawStatus[] = ['DL1', 'DL2'];
+    const mvRemainingDesks = getXDesks(4);
+    const dlRemainingStations = getXDesks(2);
 
     for (let i = 0; i < 100; i++) {
       const id = i + 1;
@@ -190,22 +197,22 @@ export default class DummyApi {
       // 10% of MV customers will be DL in addition to MV. If not MV then guarunteed to be DL
       const isDriversLicense = isMotorVehicle ? Math.random() < 0.1 : true;
 
-      let mvStatus: MVCustomerRawStatus | undefined;
-      let dlStatus: DLCustomerRawStatus | undefined;
+      let mvStatus: CustomerRawStatus | undefined;
+      let dlStatus: CustomerRawStatus | undefined;
 
       // Determine customer's statuses
       if (i < 35) {
         // The first 35 customers have an 80% chance of being served and 20% for no show
         if (isMotorVehicle && isDriversLicense) {
           mvStatus = Math.random() < 0.8 ? 'Served' : 'No Show';
-          dlStatus = mvStatus as CustomerRawGenericStatus;
+          dlStatus = mvStatus;
         } else if (isMotorVehicle) {
           mvStatus = Math.random() < 0.8 ? 'Served' : 'No Show';
         } else {
           dlStatus = Math.random() < 0.8 ? 'Served' : 'No Show';
         }
-      } else if (isMotorVehicle && mvRemainingStations.length) {
-        mvStatus = mvRemainingStations.shift()!;
+      } else if (isMotorVehicle && mvRemainingDesks.length) {
+        mvStatus = mvRemainingDesks.shift()!;
         if (isDriversLicense) dlStatus = 'Waiting';
       } else if (isDriversLicense && dlRemainingStations.length) {
         dlStatus = dlRemainingStations.shift()!;
@@ -224,21 +231,23 @@ export default class DummyApi {
         checkInTime: checkInTime.toISOString(),
         firstName: `FirstName${i + 1}`,
         lastName: `LastName${i + 1}`,
-        ...{
-          motorVehicle: mvStatus! && {
-            status: mvStatus,
-            callTimes: getCallTimes(checkInTime, mvStatus).map((t) =>
-              t.toISOString()
-            )
-          }
-        },
-        ...{
-          driversLicense: dlStatus && {
-            status: dlStatus,
-            callTimes: getCallTimes(checkInTime, dlStatus).map((t) =>
-              t.toISOString()
-            )
-          }
+        divisions: {
+          ...(mvStatus && {
+            'Motor Vehicle': {
+              status: mvStatus,
+              callTimes: getCallTimes(checkInTime, mvStatus).map((t) =>
+                t.toISOString()
+              )
+            }
+          }),
+          ...(dlStatus && {
+            "Driver's License": {
+              status: dlStatus,
+              callTimes: getCallTimes(checkInTime, dlStatus).map((t) =>
+                t.toISOString()
+              )
+            }
+          })
         }
       });
     }
@@ -250,7 +259,7 @@ export default class DummyApi {
 
   static async getCustomers({
     date,
-    department,
+    division,
     statuses
   }: GetCustomersBody): ApiResponse {
     const customers = localStorage.getItem('customers');
@@ -265,20 +274,11 @@ export default class DummyApi {
 
     for (const c of rawCustomers) {
       if (sameDay(new Date(c.checkInTime), date)) {
-        if (department) {
-          // Get customers for specific department
-
-          if (department === 'Motor Vehicle' && c.motorVehicle) {
+        if (division) {
+          // Get customers for specific division
+          if (c.divisions[division]) {
             if (statuses) {
-              if (statuses.includes(c.motorVehicle.status)) {
-                result.push(c);
-              }
-            } else {
-              result.push(c);
-            }
-          } else if (department === "Driver's License" && c.driversLicense) {
-            if (statuses) {
-              if (statuses.includes(c.driversLicense.status)) {
+              if (statuses.includes(c.divisions[division].status)) {
                 result.push(c);
               }
             } else {
@@ -288,11 +288,10 @@ export default class DummyApi {
         } else {
           // Get customers from all departments
           if (statuses) {
-            if (
-              (c.driversLicense && statuses.includes(c.driversLicense.status)) ||
-              (c.motorVehicle && statuses.includes(c.motorVehicle.status))
-            ) {
-              result.push(c);
+            for (const { status } of Object.values(c.divisions)) {
+              if (statuses.includes(status)) {
+                result.push(c);
+              }
             }
           } else {
             result.push(c);
@@ -346,7 +345,7 @@ export default class DummyApi {
 
   static async updateCustomer(
     id: number,
-    { addCallTime, status, waitingListIndex, department }: UpdateCustomerBody
+    { addCallTime, status, waitingListIndex, division }: UpdateCustomerBody
   ): ApiResponse {
     const customers = localStorage.getItem('customers');
 
@@ -362,18 +361,19 @@ export default class DummyApi {
       return { data: null, error: `No customer exists with id: ${id}` };
     }
 
-    const deptKey =
-      department === 'Motor Vehicle' ? 'motorVehicle' : 'driversLicense';
-
-    if (!rawCustomers[indexOfCustomerToUpdate][deptKey]) {
+    if (
+      !Object.keys(rawCustomers[indexOfCustomerToUpdate].divisions).includes(
+        division
+      )
+    ) {
       return {
         data: null,
-        error: `No customer exists in the department: ${department} with id: ${id}`
+        error: `No customer exists in the division: ${division} with id: ${id}`
       };
     } else {
       // Call time is most recent, it should appear at beginning of array
       if (addCallTime) {
-        rawCustomers[indexOfCustomerToUpdate][deptKey]!.callTimes.splice(
+        rawCustomers[indexOfCustomerToUpdate].divisions[division].callTimes.splice(
           0,
           0,
           addCallTime.toISOString()
@@ -385,7 +385,7 @@ export default class DummyApi {
         // Find the index in customers to place the updated customer at
         const insertIndex = findIndexOfWaitingListIndex(
           rawCustomers,
-          department,
+          division,
           waitingListIndex
         );
 
@@ -397,7 +397,7 @@ export default class DummyApi {
 
         // Insert updated customer
         rawCustomers.splice(insertIndex, 0, customerToUpdate);
-        rawCustomers[insertIndex][deptKey]!.status = 'Waiting';
+        rawCustomers[insertIndex].divisions[division].status = 'Waiting';
 
         // If inserting the updated customer causes the old one to be pushed back in the array,
         // the index of the old one needs to be updated
@@ -416,7 +416,7 @@ export default class DummyApi {
         }
       }
       if (status && !waitingListIndex) {
-        rawCustomers[indexOfCustomerToUpdate][deptKey]!.status = status;
+        rawCustomers[indexOfCustomerToUpdate].divisions[division].status = status;
 
         if (['MV1', 'MV2', 'MV3', 'MV4', 'DL1', 'DL2'].includes(status)) {
           //
@@ -424,10 +424,10 @@ export default class DummyApi {
 
           for (let i = 0; i < rawCustomers.length; i++) {
             if (
-              rawCustomers[i][deptKey] &&
-              rawCustomers[i][deptKey]!.status &&
+              rawCustomers[i].divisions[division] &&
+              rawCustomers[i].divisions[division].status &&
               ['MV1', 'MV2', 'MV3', 'MV4', 'DL1', 'DL2'].includes(
-                rawCustomers[i][deptKey]!.status
+                rawCustomers[i].divisions[division].status
               )
             ) {
               rawCustomers.splice(i, 0, c);
@@ -449,19 +449,17 @@ export default class DummyApi {
 
 function findIndexOfWaitingListIndex(
   customers: CustomerRaw[], // Array of all customers
-  department: 'Motor Vehicle' | "Driver's License", // The department for which the waiting list index is being found
+  division: Division, // The division for which the waiting list index is being found
   waitingListIndex: number // The waiting list index for which the overall index should be found
 ): number {
   let indexOfWaitingListPosition = -1;
-  const deptProp =
-    department === 'Motor Vehicle' ? 'motorVehicle' : 'driversLicense';
 
   let currentWaitingListIndex = -1;
   let indexOfLastWaitingCustomer = -1;
   for (let i = 0; i < customers.length; i++) {
     const c = customers[i];
 
-    if (c[deptProp] && c[deptProp]?.status === 'Waiting') {
+    if (c.divisions[division] && c.divisions[division].status === 'Waiting') {
       currentWaitingListIndex += 1;
       indexOfLastWaitingCustomer = i;
     }
@@ -478,36 +476,4 @@ function findIndexOfWaitingListIndex(
   }
 
   return indexOfWaitingListPosition;
-}
-
-// ONLY GIVES MV CUSTOMERS
-export function getSortedCustomers(customers: CustomerRaw[]) {
-  const servedCustomers = [];
-  const servingCustomers = [];
-  const waitingCustomers = [];
-
-  for (const c of customers) {
-    const { motorVehicle } = c;
-    if (motorVehicle) {
-      if (['No Show', 'Served'].includes(motorVehicle.status)) {
-        servedCustomers.push(c);
-      } else if (['MV1', 'MV2', 'MV3', 'MV4'].includes(motorVehicle.status)) {
-        servingCustomers.push(c);
-      } else if (motorVehicle.status === 'Waiting') {
-        waitingCustomers.push(c);
-      }
-    }
-  }
-
-  // Sort served customers by check in time
-  servedCustomers.sort(
-    (a, b) => new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime()
-  );
-
-  // Sort waiting customers by check in time
-  waitingCustomers.sort(
-    (a, b) => new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime()
-  );
-
-  return [...servedCustomers, ...servingCustomers, ...waitingCustomers];
 }

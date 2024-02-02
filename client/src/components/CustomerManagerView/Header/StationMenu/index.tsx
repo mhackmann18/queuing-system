@@ -1,7 +1,5 @@
 import { useEffect, useRef, useContext } from 'react';
-import { getDeptFromStation } from 'utils/helpers';
 import { UserContext } from 'components/UserContextProvider/context';
-import { Station } from 'utils/types';
 import { StationMenuProps } from './types';
 
 export default function StationMenu({
@@ -13,15 +11,15 @@ export default function StationMenu({
   const elementRef = useRef<HTMLDivElement>(null);
   const user = useContext(UserContext);
 
-  const menuStylesByStation: Record<Station | 'none', string> = {
-    MV1: 'bg-mv1',
-    MV2: 'bg-mv2',
-    MV3: 'bg-mv3',
-    MV4: 'bg-mv4',
-    DL1: 'bg-dl1',
-    DL2: 'bg-dl2',
-    none: 'bg-white'
-  };
+  const menuStylesByDeskNum = [
+    '',
+    'bg-desk_1',
+    'bg-desk_2',
+    'bg-desk_3',
+    'bg-desk_4',
+    'bg-desk_5',
+    'bg-desk_6'
+  ];
 
   // Close menu when clicking outside of menu
   useEffect(() => {
@@ -53,14 +51,10 @@ export default function StationMenu({
     >
       <div
         className={`bg-mv1 p-3 font-medium text-white ${
-          user.station ? menuStylesByStation[user.station] : 'bg-slate_gray'
+          menuStylesByDeskNum[user.deskNum > 6 ? 6 : user.deskNum]
         }`}
       >
-        <h4>
-          {user.station
-            ? `${getDeptFromStation(user.station)} Station ${user.station[2]}`
-            : 'No Station Selected'}
-        </h4>
+        <h4>{`${user.division} Desk ${user.deskNum}`}</h4>
       </div>
       <div className="p-2">
         <button

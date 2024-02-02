@@ -1,28 +1,19 @@
-import { DLStation, MVStation, RequireAtLeastOne, Customer } from 'utils/types';
+import { Customer, Division } from 'utils/types';
 
-export type CustomerRawGenericStatus = 'Waiting' | 'Served' | 'No Show';
+export type CustomerRawStatus = 'Waiting' | 'Served' | 'No Show' | `Desk ${number}`;
 
-export type DLCustomerRawStatus = DLStation | CustomerRawGenericStatus;
-export type MVCustomerRawStatus = MVStation | CustomerRawGenericStatus;
+interface CustomerRawDivisionData {
+  status: CustomerRawStatus;
+  callTimes: string[];
+}
 
-export type CustomerRawStatus = DLCustomerRawStatus | MVCustomerRawStatus;
-
-interface CRaw {
+export interface CustomerRaw {
   id: number;
   firstName: string;
   lastName: string;
   checkInTime: string;
-  motorVehicle?: {
-    status: MVCustomerRawStatus;
-    callTimes: string[];
-  };
-  driversLicense?: {
-    status: DLCustomerRawStatus;
-    callTimes: string[];
-  };
+  divisions: Record<Division, CustomerRawDivisionData>;
 }
-
-export type CustomerRaw = RequireAtLeastOne<CRaw, 'motorVehicle' | 'driversLicense'>;
 
 // There should only be an error when the data is null.
 // Similarly, the data should only be null when there's an error.

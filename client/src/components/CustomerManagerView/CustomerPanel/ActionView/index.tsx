@@ -3,14 +3,13 @@ import CustomerPanelActionButton from '../ActionButton';
 import Confirm from 'components/Confirm';
 import { ActionViewProps } from './types';
 import { UserContext } from 'components/UserContextProvider/context';
-import { getDeptFromStation, getAvailableActions } from 'utils/helpers';
-import { stationsByDept } from 'utils/types';
+import { getAvailableActions } from 'utils/helpers';
 import { CustomerPanelContext } from '../context';
 
 export default function ActionView({
   customer,
   actionConfig,
-  currentDept
+  currentDivision
 }: ActionViewProps) {
   const { state, setState } = useContext(CustomerPanelContext);
   const user = useContext(UserContext);
@@ -138,19 +137,12 @@ export default function ActionView({
     case 'default': {
       let actionsUnavailableMsg: string | undefined;
 
-      if (!user.station) {
-        actionsUnavailableMsg = 'Sign in to a station to use actions.';
-      } // If customer is at another station within the user's dept, no actions are available
-      else if (
-        stationsByDept[getDeptFromStation(user!.station)].includes(customer.status)
-      ) {
-        actionsUnavailableMsg = 'Unavailable while customer is at another station.';
-      } else if (currentDept !== getDeptFromStation(user!.station)) {
-        actionsUnavailableMsg = `Unavailable to ${getDeptFromStation(
-          user!.station
-        )} stations.`;
-      } else if (customer.atOtherDept) {
-        actionsUnavailableMsg = `Unavailable while customer is at a ${customer.atOtherDept} desk.`;
+      if (customer.atOtherDesk) {
+        actionsUnavailableMsg = 'Unavailable while customer is at another desk.';
+      } else if (currentDivision !== user.division) {
+        actionsUnavailableMsg = `Unavailable to ${user.division} stations.`;
+      } else if (customer.atOtherDivision) {
+        actionsUnavailableMsg = `Unavailable while customer is at a ${customer.atOtherDivision} desk.`;
       }
 
       return (

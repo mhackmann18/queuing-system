@@ -1,9 +1,6 @@
-export type MVStation = 'MV1' | 'MV2' | 'MV3' | 'MV4';
+export type Office = string;
 
-export const stationsByDept = {
-  'Motor Vehicle': ['MV1', 'MV2', 'MV3', 'MV4'],
-  "Driver's License": ['DL1', 'DL2']
-};
+export type Division = string;
 
 export type ManageCustomerAction =
   | 'Finish Serving'
@@ -14,39 +11,34 @@ export type ManageCustomerAction =
 
 export interface User {
   id: number;
-  station?: Station;
+  division: Division;
+  deskNum: number;
 }
 
-export type DLStation = 'DL1' | 'DL2';
+export type CustomerStatusBase = 'Waiting' | 'Serving' | 'Served' | 'No Show';
 
-export type Station = MVStation | DLStation;
+export type CustomerStatus = CustomerStatusBase | `Desk ${number}`;
 
-export type Department = 'Motor Vehicle' | "Driver's License";
-
-export type CustomerStatus =
-  | 'Waiting'
-  | 'Serving'
-  | 'Served'
-  | 'No Show'
-  | `${Station}`;
+export type StatusFilter = CustomerStatusBase | 'Other Desks';
 
 export interface CustomerFilters {
   date: Date;
   statuses: StatusFilters;
-  department: Department;
+  division: Division;
 }
 
 export interface Customer {
-  id: number; // This should be a string?
+  id: number; // TODO: uuid
   status: CustomerStatus;
-  name: string;
+  name: string; // TODO: first and last name
   checkInTime: Date;
   callTimes: Date[];
-  reasonsForVisit: string[];
-  atOtherDept?: Department;
+  reasonsForVisit: Division[];
+  atOtherDivision?: Division;
+  atOtherDesk?: number; // Redundant
 }
 
-export type StatusFilters = Partial<Record<CustomerStatus, boolean>>;
+export type StatusFilters = Partial<Record<StatusFilter, boolean>>;
 
 // https://stackoverflow.com/questions/40510611/typescript-interface-require-one-of-two-properties-to-exist
 export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<

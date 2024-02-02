@@ -1,11 +1,20 @@
 import {
   CustomerStatus,
-  Department,
-  Station,
   StatusFilters,
   Customer,
   ManageCustomerAction
 } from './types';
+
+const getNextElement = <T>(arr: T[], currentElement: T): T | undefined => {
+  const currentIndex = arr.indexOf(currentElement);
+
+  if (currentIndex !== -1) {
+    const nextIndex = (currentIndex + 1) % arr.length;
+    return arr[nextIndex];
+  }
+
+  return undefined;
+};
 
 const getAvailableActions = (customer: Customer): ManageCustomerAction[] => {
   let actions: ManageCustomerAction[] = [];
@@ -68,9 +77,6 @@ const formatTimePassed = (startDate: Date, endDate: Date): string => {
 
   return timeParts.length > 0 ? timeParts.join(' ') : '0 min';
 };
-
-const getDeptFromStation = (station: Station): Department =>
-  station[0] === 'M' ? 'Motor Vehicle' : "Driver's License";
 
 const get12HourTimeString = (date: Date) => {
   let dateString;
@@ -139,8 +145,8 @@ export {
   sameDay,
   getDateString,
   statusFiltersToArr,
-  getDeptFromStation,
   formatTimePassed,
   sortDatesDescending,
-  getAvailableActions
+  getAvailableActions,
+  getNextElement
 };

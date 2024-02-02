@@ -1,4 +1,4 @@
-import { Customer, CustomerStatus, Department, Station } from 'utils/types';
+import { Customer, CustomerStatus, Division } from 'utils/types';
 import {
   CustomerRaw,
   CustomerControllerManyResult,
@@ -6,53 +6,38 @@ import {
   CustomerRawStatus
 } from './types';
 import DummyApi from './DummyApi';
-import { getDeptFromStation } from 'utils/helpers';
+
+const division = 'Motor Vehicle';
+const deskNum = 1;
 
 export default class CustomerController {
-  station?: Station;
-  department?: Department;
-
-  constructor(station?: Station) {
-    DummyApi.init();
-    if (station) {
-      this.station = station;
-      this.department = getDeptFromStation(station);
-    }
-  }
-
-  /******************/
-  /* CORE FUNCTIONS */
-  /******************/
-
   /**
    * Gets an array of customers matching the specified filter criteria.
    *
    * @param {Object} filters - An object with filter properties.
    * @param {Date} filters.date - The date for filtering customers.
-   * @param {('Motor Vehicle' | "Driver's License")} [filters.department] - The department for filtering customers.
+   * @param {Division} [filters.division] - The division for filtering customers.
    * @param {CustomerStatus[]} [filters.statuses] - An array of customer statuses for filtering.
    */
   async get(filters: {
     date: Date;
-    department: 'Motor Vehicle' | "Driver's License";
+    division: Division;
     statuses?: CustomerStatus[];
   }): Promise<CustomerControllerManyResult> {
-    const { date, department, statuses } = filters;
+    const { date, division, statuses } = filters;
 
     let sanitizedStatuses: CustomerRawStatus[] | undefined;
 
     // 'Serving' status is only valid on the client and must be translated to the current station
-    if (!this.station) {
-      sanitizedStatuses = statuses as CustomerRawStatus[];
-    } else {
+    if (statuses?.includes('Serving')) {
       sanitizedStatuses =
-        statuses && statuses.map((s) => (s === 'Serving' ? this.station! : s));
+        statuses && statuses.map((s) => (s === 'Serving' ? `Desk ${deskNum}` : s));
     }
 
     // TODO: Make POST request /api/v1/customers
     const response = await DummyApi.getCustomers({
       date,
-      department,
+      division,
       statuses: sanitizedStatuses
     });
 
@@ -65,10 +50,10 @@ export default class CustomerController {
     const rawCustomers: CustomerRaw[] = JSON.parse(data);
 
     const sanitizedCustomers = rawCustomers
-      .filter((c) => fromDepartment(c, department))
+      .filter((c) => !!c.divisions[division])
       .map((c) => {
-        const sc = this.#sanitizeCustomer(c, department)!;
-        sc.status = this.station !== sc.status ? sc.status : 'Serving';
+        const sc = this.#sanitizeCustomer(c, division)!;
+        sc.status = `Desk ${deskNum}` !== sc.status ? sc.status : 'Serving';
         return sc;
       });
 
@@ -93,16 +78,13 @@ export default class CustomerController {
     const rawCustomer = JSON.parse(data);
 
     // TODO remove fallback dept
-    const selectedCustomer = this.#sanitizeCustomer(
-      rawCustomer,
-      this.department || 'Motor Vehicle'
-    );
+    const selectedCustomer = this.#sanitizeCustomer(rawCustomer, division);
 
     if (!selectedCustomer) {
       return {
         data: null,
         error:
-          'getCustomerById response invalid. Customer does not belong to the current department.'
+          'getCustomerById response invalid. Customer does not belong to the current division.'
       };
     }
 
@@ -134,16 +116,13 @@ export default class CustomerController {
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
     // TODO remove fallback dept
-    const result = this.#sanitizeCustomer(
-      rawCustomer,
-      this.department || 'Motor Vehicle'
-    );
+    const result = this.#sanitizeCustomer(rawCustomer, division);
 
     if (!result) {
       return {
         data: null,
         error:
-          'deleteCustomer response invalid. Customer does not belong to the current department.'
+          'deleteCustomer response invalid. Customer does not belong to the current division.'
       };
     }
 
@@ -171,14 +150,6 @@ export default class CustomerController {
 
     // Error checks
 
-    if (!this.station) {
-      return {
-        data: null,
-        error:
-          'PUT requests to /api/v1/customers/id are only available to signed in stations'
-      };
-    }
-
     if (!Object.keys(updatedProperties).length) {
       return {
         data: null,
@@ -196,8 +167,8 @@ export default class CustomerController {
 
     // TODO: Make PUT request to /api/v1/customers/id
     const { data, error } = await DummyApi.updateCustomer(id, {
-      department: getDeptFromStation(this.station),
-      status: status === 'Serving' ? this.station : status,
+      division,
+      status: status === 'Serving' ? `Desk ${deskNum}` : status,
       waitingListIndex,
       addCallTime
     });
@@ -209,16 +180,13 @@ export default class CustomerController {
     // Updated customer data
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
-    const updatedCustomer = this.#sanitizeCustomer(
-      rawCustomer,
-      getDeptFromStation(this.station)
-    );
+    const updatedCustomer = this.#sanitizeCustomer(rawCustomer, division);
 
     if (!updatedCustomer) {
       return {
         data: null,
         error:
-          'updateCustomer response invalid. Customer does not belong to the current department.'
+          'updateCustomer response invalid. Customer does not belong to the current division.'
       };
     }
 
@@ -252,18 +220,10 @@ export default class CustomerController {
   }
 
   async callNext(): Promise<CustomerControllerSingleResult> {
-    if (!this.station) {
-      return {
-        data: null,
-        error:
-          'PUT requests to /api/v1/customers/id are only available to signed in stations'
-      };
-    }
-
     // Get customers in the WL
     const res = await this.get({
       date: new Date(),
-      department: getDeptFromStation(this.station),
+      division: division,
       statuses: ['Waiting']
     });
 
@@ -304,91 +264,38 @@ export default class CustomerController {
   /* HELPER FUNCTIONS */
   /********************/
 
-  #sanitizeCustomer(customer: CustomerRaw, department: Department): Customer | null {
-    const { id, motorVehicle, driversLicense, firstName, lastName, checkInTime } =
-      customer;
+  #sanitizeCustomer(customer: CustomerRaw, division: Division): Customer | null {
+    const { id, divisions, firstName, lastName, checkInTime } = customer;
 
-    // Return null for customers that aren't relevant to the specified department
-    if (department === 'Motor Vehicle' && !motorVehicle) {
-      return null;
-    } else if (department === "Driver's License" && !driversLicense) {
+    // Return null for customers that aren't relevant to the specified division
+    if (!Object.keys(divisions).includes(division)) {
       return null;
     }
 
     // Get reasons for visit
-    const reasonsForVisit: Department[] = [];
-    motorVehicle && reasonsForVisit.push('Motor Vehicle');
-    driversLicense && reasonsForVisit.push("Driver's License");
+    const reasonsForVisit: Division[] = Object.keys(divisions);
 
     // Get call times
-    const callTimes = getSanitizedCallTimes(customer, department);
-    if (!callTimes) {
-      return null;
-    }
+    const callTimes = divisions[division].callTimes.map((t) => new Date(t));
 
-    let sanitizedStatus: CustomerStatus =
-      department === 'Motor Vehicle' ? motorVehicle!.status : driversLicense!.status;
+    const status: CustomerStatus = divisions[division].status;
 
-    let atOtherDept: Department | undefined;
+    let atOtherDivision: Division | undefined;
 
-    if (department === 'Motor Vehicle') {
-      sanitizedStatus = motorVehicle!.status;
-
-      if (
-        motorVehicle!.status === 'Waiting' &&
-        driversLicense &&
-        ['DL1', 'DL2'].includes(driversLicense.status)
-      ) {
-        atOtherDept = "Driver's License";
-      }
-    }
-
-    if (department === "Driver's License") {
-      sanitizedStatus = driversLicense!.status;
-
-      if (
-        driversLicense!.status === 'Waiting' &&
-        motorVehicle &&
-        ['MV1', 'MV2', 'MV3', 'MV4'].includes(motorVehicle.status)
-      ) {
-        atOtherDept = 'Motor Vehicle';
+    for (const [dName, dData] of Object.entries(divisions)) {
+      if (dName !== division && /^Desk \d+$/.test(dData.status)) {
+        atOtherDivision = dName;
       }
     }
 
     return {
       id,
       name: `${firstName} ${lastName}`,
-      status: sanitizedStatus,
+      status,
       checkInTime: new Date(checkInTime),
       callTimes,
       reasonsForVisit,
-      atOtherDept
+      atOtherDivision
     };
   }
-}
-
-function getSanitizedCallTimes(
-  customer: CustomerRaw,
-  department: Department
-): Date[] | null {
-  const { motorVehicle, driversLicense } = customer;
-  let callTimes = null;
-
-  if (department === 'Motor Vehicle' && motorVehicle) {
-    callTimes = motorVehicle.callTimes.map((t) => new Date(t));
-  } else if (department === "Driver's License" && driversLicense) {
-    callTimes = driversLicense.callTimes.map((t) => new Date(t));
-  }
-
-  return callTimes;
-}
-
-function fromDepartment(customer: CustomerRaw, department: Department): boolean {
-  let belongs = false;
-  if (department === 'Motor Vehicle' && customer.motorVehicle) {
-    belongs = true;
-  } else if (department === "Driver's License" && customer.driversLicense) {
-    belongs = true;
-  }
-  return belongs;
 }

@@ -1,99 +1,44 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import FilterButton from 'components/CustomerManagerView/Header/StatusFilters/FilterButton';
 import { StatusFilterButtonsProps } from './types';
 import { sameDay } from 'utils/helpers';
-import { CustomerStatus } from 'utils/types';
+import { StatusFilter } from 'utils/types';
 
 export default function StatusFilterButtons({
   filters,
-  setStatuses
+  setStatusFilters
 }: StatusFilterButtonsProps) {
-  const {
-    statuses: { Waiting, Served, MV1, MV2, MV3, MV4, DL1, DL2 },
-    department
-  } = filters;
-
-  // Keep the status filters in sync with the current dept
-  useEffect(() => {
-    if (MV1 && department !== 'Motor Vehicle') {
-      setStatuses({
-        ...filters.statuses,
-        MV1: !MV1,
-        MV2: !MV2,
-        MV3: !MV3,
-        MV4: !MV4,
-        DL1: true,
-        DL2: true
-      });
-    } else if (DL1 && department !== "Driver's License") {
-      setStatuses({
-        ...filters.statuses,
-        MV1: true,
-        MV2: true,
-        MV3: true,
-        MV4: true,
-        DL1: !DL1,
-        DL2: !DL2
-      });
-    }
-  }, [DL1, DL2, MV1, MV2, MV3, MV4, department, filters.statuses, setStatuses]);
+  const { statuses } = filters;
 
   const buttonsConfig = useMemo(() => {
-    const toggleStatus = (status: CustomerStatus) =>
-      setStatuses({ ...filters.statuses, [status]: !filters.statuses[status] });
-    const handleOtherStationsClick = () => {
-      if (filters.department === 'Motor Vehicle') {
-        setStatuses({
-          ...filters.statuses,
-          MV1: !MV1,
-          MV2: !MV2,
-          MV3: !MV3,
-          MV4: !MV4
-        });
-      } else {
-        setStatuses({ ...filters.statuses, DL1: !DL1, DL2: !DL2 });
-      }
-    };
-    const otherStationsBtnActive = MV1 || MV2 || MV3 || MV4 || DL1 || DL2 || false;
+    const toggleStatusFilter = (statusFilter: StatusFilter) =>
+      setStatusFilters({ ...statuses, [statusFilter]: !statuses[statusFilter] });
 
     return [
       {
         name: 'Waiting',
-        onClick: () => toggleStatus('Waiting'),
-        active: !!Waiting,
+        onClick: () => toggleStatusFilter('Waiting'),
+        active: !!statuses.Waiting,
         disabled: !sameDay(filters.date, new Date())
       },
       {
         name: 'No Show',
-        onClick: () => toggleStatus('No Show'),
+        onClick: () => toggleStatusFilter('No Show'),
         active: !!filters.statuses['No Show']
       },
       {
         name: 'Served',
-        onClick: () => toggleStatus('Served'),
-        active: !!Served
+        onClick: () => toggleStatusFilter('Served'),
+        active: !!statuses.Served
       },
       {
-        name: 'Other Stations',
-        onClick: handleOtherStationsClick,
-        active: otherStationsBtnActive,
+        name: 'Other Desks',
+        onClick: () => toggleStatusFilter('Other Desks'),
+        active: !!statuses['Other Desks'],
         disabled: !sameDay(filters.date, new Date())
       }
     ];
-  }, [
-    DL1,
-    DL2,
-    MV1,
-    MV2,
-    MV3,
-    MV4,
-    Served,
-    Waiting,
-    filters.date,
-    filters.department,
-    filters.statuses,
-    setStatuses
-  ]);
+  }, [filters.date, filters.statuses, setStatusFilters, statuses]);
 
   return (
     <div>

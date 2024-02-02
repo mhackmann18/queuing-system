@@ -7,17 +7,29 @@ import { CustomerPanelContext } from './context';
 export default function CustomerPanel({ customer, children }: CustomerPanelProps) {
   const [state, setState] = useState<CustomerPanelState>('default');
 
-  const statusStyles: Record<CustomerStatus, string> = {
+  const stylesByStatus: Record<CustomerStatus, string> = {
     Served: 'text-served border-served',
     'No Show': 'text-no_show border-no_show',
     Serving: 'text-serving border-serving',
-    Waiting: 'text-waiting border-waiting',
-    MV1: 'text-mv1 border-mv1',
-    MV2: 'text-mv2 border-mv2',
-    MV3: 'text-mv3 border-mv3',
-    MV4: 'text-mv4 border-mv4',
-    DL1: 'text-dl1 border-dl1',
-    DL2: 'text-dl2 border-dl2'
+    Waiting: 'text-waiting border-waiting'
+  };
+
+  const stylesByDeskNum = [
+    '',
+    'text-desk_1 border-desk_1',
+    'text-desk_2 border-desk_2',
+    'text-desk_3 border-desk_3',
+    'text-desk_4 border-desk_4',
+    'text-desk_5 border-desk_5',
+    'text-desk_6 border-desk_6'
+  ];
+
+  const getStatusStyles = () => {
+    if (customer.atOtherDesk) {
+      return stylesByDeskNum[customer.atOtherDesk];
+    }
+
+    return stylesByStatus[customer.status];
   };
 
   // Reset state when customer changes
@@ -36,9 +48,7 @@ export default function CustomerPanel({ customer, children }: CustomerPanelProps
         <div className="mb-4 flex items-start justify-between border-b pb-1.5">
           <h2 className="mb-1 max-w-36 text-xl font-bold">{customer.name}</h2>
           <span
-            className={`rounded-md border-2 px-1 py-0.5 text-xs font-semibold ${
-              statusStyles[customer.status]
-            }`}
+            className={`rounded-md border-2 px-1 py-0.5 text-xs font-semibold ${getStatusStyles()}`}
           >
             {customer.status}
           </span>

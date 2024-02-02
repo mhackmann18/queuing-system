@@ -1,15 +1,10 @@
-import { useState, useCallback, useEffect, useContext, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { statusFiltersToArr } from 'utils/helpers';
 import { Customer, CustomerFilters } from 'utils/types';
 import CustomerController from 'utils/CustomerController';
-import { UserContext } from 'components/UserContextProvider/context';
 
 export default function useCustomers(filters: CustomerFilters) {
-  const user = useContext(UserContext);
-  const controller = useMemo(
-    () => new CustomerController(user.station),
-    [user.station]
-  );
+  const controller = useMemo(() => new CustomerController(), []);
   const [customers, setCustomers] = useState<Customer[]>([]);
 
   const fetchCustomers = useCallback(async () => {
@@ -17,9 +12,10 @@ export default function useCustomers(filters: CustomerFilters) {
 
     const { error, data } = await controller.get({
       date: filters.date,
-      department: filters.department,
+      division: filters.division,
       statuses
     });
+
     if (!error && data) {
       setCustomers(data);
     } else {

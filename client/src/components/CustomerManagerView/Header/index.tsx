@@ -6,6 +6,8 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useContext, useRef, useState } from 'react';
 import { UserContext } from 'components/UserContextProvider/context';
 import StationMenu from './StationMenu';
+import { Division } from 'utils/types';
+import { getNextElement } from 'utils/helpers';
 
 export default function ManageCustomersHeader({
   filters,
@@ -17,8 +19,11 @@ export default function ManageCustomersHeader({
   const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
 
   const handleChangeDeptBtnClick = () => {
-    filterSetters.setDepartment(
-      filters.department === 'Motor Vehicle' ? "Driver's License" : 'Motor Vehicle'
+    // API.getOfficeDivisions returns
+    const divisions = ['Motor Vehicle', "Driver's License"];
+
+    filterSetters.setDivision(
+      getNextElement<Division>(divisions, filters.division)!
     );
   };
 
@@ -29,7 +34,7 @@ export default function ManageCustomersHeader({
         <div className="relative mx-auto flex h-16 max-w-5xl justify-between">
           <div className="flex items-center">
             <h1 className="mr-4 inline-block w-80 items-center text-2xl font-bold">
-              {filters.department} Customers
+              {filters.division} Customers
             </h1>
             <button
               onClick={handleChangeDeptBtnClick}
@@ -39,10 +44,9 @@ export default function ManageCustomersHeader({
             </button>
           </div>
           <div className="flex items-center">
-            {user.station && ( // TODO: determine behavior of no station
+            {user.division && ( // TODO: determine behavior of no station
               <StationIcon
                 onClick={() => setStationMenuActive(!stationMenuActive)}
-                station={user!.station}
                 forwardRef={stationIconBtnRef}
                 menuActive={stationMenuActive}
               />
@@ -61,7 +65,10 @@ export default function ManageCustomersHeader({
       {/* Header Row 2 */}
       <div className="border-b shadow-sm">
         <div className="mx-auto flex max-w-5xl justify-between py-3">
-          <StatusFilters filters={filters} setStatuses={filterSetters.setStatuses} />
+          <StatusFilters
+            filters={filters}
+            setStatusFilters={filterSetters.setStatuses}
+          />
           <DateToggler
             date={filters.date}
             setDate={(newDate: Date) => filterSetters.setDate(newDate)}
