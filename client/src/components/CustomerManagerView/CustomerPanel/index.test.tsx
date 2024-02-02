@@ -42,7 +42,7 @@ const mockCustomer: Customer = {
   id: 1,
   name: 'John Doe',
   status: 'Serving',
-  reasonsForVisit: ['Motor Vehicle', "Driver's License"],
+  reasonsForVisit: ['Motor Vehicle', 'Driver License'],
   checkInTime: new Date(),
   callTimes: [
     new Date('December 17, 1995 03:24:00'),

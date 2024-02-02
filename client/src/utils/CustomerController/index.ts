@@ -8,7 +8,7 @@ import {
 import DummyApi from './DummyApi';
 import UserController from 'utils/UserController';
 
-const division = 'Motor Vehicle';
+const userDivision = 'Motor Vehicle';
 const deskNum = 1;
 const officeId = 1;
 
@@ -29,14 +29,14 @@ export default class CustomerController {
     const { date, division, statuses } = filters;
 
     const sanitizedStatuses: CustomerRawStatus[] = [];
-
+    console.log(statuses);
     if (statuses) {
       if (statuses.includes('Other Desks')) {
         const numDesks = await UserController.getNumDesks({ officeId, division });
         for (let i = 1; i <= numDesks; i++) {
           sanitizedStatuses.push(`Desk ${i}`);
         }
-      } else if (statuses.includes('Serving')) {
+      } else if (statuses.includes('Serving') && division === userDivision) {
         sanitizedStatuses.push(`Desk ${deskNum}`);
       }
 
@@ -66,7 +66,6 @@ export default class CustomerController {
       .filter((c) => !!c.divisions[division])
       .map((c) => {
         const sc = this.#sanitizeCustomer(c, division)!;
-        sc.status = `Desk ${deskNum}` !== sc.status ? sc.status : 'Serving';
         return sc;
       });
 
@@ -91,7 +90,7 @@ export default class CustomerController {
     const rawCustomer = JSON.parse(data);
 
     // TODO remove fallback dept
-    const selectedCustomer = this.#sanitizeCustomer(rawCustomer, division);
+    const selectedCustomer = this.#sanitizeCustomer(rawCustomer, userDivision);
 
     if (!selectedCustomer) {
       return {
@@ -129,7 +128,7 @@ export default class CustomerController {
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
     // TODO remove fallback dept
-    const result = this.#sanitizeCustomer(rawCustomer, division);
+    const result = this.#sanitizeCustomer(rawCustomer, userDivision);
 
     if (!result) {
       return {
@@ -180,7 +179,7 @@ export default class CustomerController {
 
     // TODO: Make PUT request to /api/v1/customers/id
     const { data, error } = await DummyApi.updateCustomer(id, {
-      division,
+      division: userDivision,
       status: status === 'Serving' ? `Desk ${deskNum}` : status,
       waitingListIndex,
       addCallTime
@@ -193,7 +192,7 @@ export default class CustomerController {
     // Updated customer data
     const rawCustomer: CustomerRaw = JSON.parse(data);
 
-    const updatedCustomer = this.#sanitizeCustomer(rawCustomer, division);
+    const updatedCustomer = this.#sanitizeCustomer(rawCustomer, userDivision);
 
     if (!updatedCustomer) {
       return {
@@ -236,7 +235,7 @@ export default class CustomerController {
     // Get customers in the WL
     const res = await this.get({
       date: new Date(),
-      division: division,
+      division: userDivision,
       statuses: ['Waiting']
     });
 
@@ -291,7 +290,10 @@ export default class CustomerController {
     // Get call times
     const callTimes = divisions[division].callTimes.map((t) => new Date(t));
 
-    const status: CustomerStatus = divisions[division].status;
+    const status: CustomerStatus =
+      divisions[division].status == `Desk ${deskNum}` && userDivision === division
+        ? 'Serving'
+        : divisions[division].status;
 
     let atOtherDivision: Division | undefined;
 

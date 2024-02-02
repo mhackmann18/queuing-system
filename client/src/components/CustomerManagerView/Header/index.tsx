@@ -20,7 +20,7 @@ export default function ManageCustomersHeader({
 
   const handleChangeDeptBtnClick = () => {
     // API.getOfficeDivisions returns
-    const divisions = ['Motor Vehicle', "Driver's License"];
+    const divisions = ['Motor Vehicle', 'Driver License'];
 
     filterSetters.setDivision(
       getNextElement<Division>(divisions, filters.division)!

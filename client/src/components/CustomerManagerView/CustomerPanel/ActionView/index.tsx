@@ -137,10 +137,10 @@ export default function ActionView({
     case 'default': {
       let actionsUnavailableMsg: string | undefined;
 
-      if (customer.atOtherDesk) {
-        actionsUnavailableMsg = 'Unavailable while customer is at another desk.';
-      } else if (currentDivision !== user.division) {
+      if (currentDivision !== user.division) {
         actionsUnavailableMsg = `Unavailable to ${user.division} stations.`;
+      } else if (/^Desk \d+$/.test(customer.status)) {
+        actionsUnavailableMsg = 'Unavailable while customer is at another desk.';
       } else if (customer.atOtherDivision) {
         actionsUnavailableMsg = `Unavailable while customer is at a ${customer.atOtherDivision} desk.`;
       }

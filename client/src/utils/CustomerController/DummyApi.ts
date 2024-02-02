@@ -167,7 +167,7 @@ export default class DummyApi {
         firstName: `FirstName${id}`,
         lastName: `LastName${id}`,
         divisions: {
-          "Driver's License": {
+          'Driver License': {
             status: status,
             callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
           }
@@ -241,7 +241,7 @@ export default class DummyApi {
             }
           }),
           ...(dlStatus && {
-            "Driver's License": {
+            'Driver License': {
               status: dlStatus,
               callTimes: getCallTimes(checkInTime, dlStatus).map((t) =>
                 t.toISOString()
