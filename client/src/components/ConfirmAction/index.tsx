@@ -1,26 +1,21 @@
-interface ConfirmProps {
-  title: string;
-  message: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-  confirmBtnStyles?: string;
-  confirmBtnText?: string;
-  cancelBtnText?: string;
-  confirmBtnDisabled?: boolean;
-}
+import { ConfirmActionProps } from './types';
 
-export default function Confirm({
+/**
+ * Renders title in large bold font, and a message below the title in medium font.
+ * Displays a cancel button and a confirm button below the message on the right.
+ */
+export default function ConfirmAction({
   title,
   message,
   confirmBtnText = 'Confirm',
-  confirmBtnStyles = 'bg-onyx text-white hover:bg-outer_space',
   cancelBtnText = 'Cancel',
   onCancel,
   onConfirm,
+  confirmBtnStyles = 'bg-onyx text-white hover:bg-outer_space',
   confirmBtnDisabled = false
-}: ConfirmProps) {
+}: ConfirmActionProps) {
   return (
-    <div>
+    <>
       <h3 className="text-eerie_black mt-2 font-semibold">{title}</h3>
       <p className="text-french_gray_2-500 mt-2 font-medium">{message}</p>
       <div className="mt-8 flex justify-end">
@@ -41,6 +36,6 @@ export default function Confirm({
           {confirmBtnText}
         </button>
       </div>
-    </div>
+    </>
   );
 }

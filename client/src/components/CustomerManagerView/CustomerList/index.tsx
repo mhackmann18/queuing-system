@@ -2,6 +2,7 @@ import CustomerRow from 'components/CustomerManagerView/CustomerList/Row';
 import { Customer } from 'utils/types';
 import { CustomerListProps } from './types';
 import { useEffect, useState } from 'react';
+import ColumnHeaders from './ColumnHeaders';
 
 export default function CustomerList({
   customers,
@@ -23,78 +24,57 @@ export default function CustomerList({
     }
   }, [wlPosPicker, customers, selectedCustomer]);
 
-  const mapCustomersToListItem = (c: Customer, index: number) => {
-    let handleClick;
-    let handleMouseEnter;
-    let styles = 'group';
-
-    // If WL position picker is active, applies appropriate behaviors to the CustomerRow buttons
+  const getCustomerRowClickHandler = (customer: Customer) => {
     if (wlPosPicker) {
       // Clicking selected customer controls whether their WL pos is locked
-      if (c.id === selectedCustomer.id) {
-        handleClick = () => wlPosPicker.setLocked(!wlPosPicker.locked);
-      }
-
-      // If WL pos isn't locked, reposition selected customer at index of moused over customer
-      if (!wlPosPicker.locked) {
-        handleMouseEnter = () => wlPosPicker.setIndex(index);
-      }
-
-      // Determine hover cursor style
-      if (c.id === selectedCustomer.id) {
-        styles = wlPosPicker.locked
-          ? 'hover:cursor-grab'
-          : 'hover:cursor-grabbing shadow-md';
-      } else {
-        styles = 'hover:cursor-default no-underline';
-      }
+      return customer.id === selectedCustomer.id
+        ? () => wlPosPicker.setLocked(!wlPosPicker.locked)
+        : () => null;
     } else {
-      // Default behavior
-      handleClick = () => setSelectedCustomer(c);
+      return () => setSelectedCustomer(customer);
+    }
+  };
+
+  const getCustomerRowStyles = (customer: Customer) => {
+    // Default styles
+    if (!wlPosPicker) {
+      return 'group';
     }
 
-    return (
-      <li className="border-french_gray_1 border-b border-r" key={c.id}>
-        <CustomerRow
-          customer={c}
-          selected={c.id === selectedCustomer.id}
-          onClick={handleClick}
-          onMouseEnter={handleMouseEnter}
-          styles={styles}
-          isPastDate={isPastDate}
-        />
-      </li>
-    );
+    // No hover styles on WLPP customers that aren't selected
+    if (customer.id !== selectedCustomer.id) {
+      return 'hover:cursor-default no-underline';
+    }
+
+    // Selected customer styles for WLPP
+    return wlPosPicker.locked
+      ? 'hover:cursor-grab'
+      : 'hover:cursor-grabbing shadow-md';
   };
 
   return (
     <div
       className={`flex grow flex-col bg-white ${
-        wlPosPicker && selectingWLPositionContainerStyles
+        wlPosPicker && 'border-french_gray_1 z-10 rounded-lg border'
       }`}
     >
-      <div className="my-1 flex justify-between pl-4 pr-5 text-sm font-semibold">
-        <div>
-          <span className="inline-block w-20">Status</span>
-          <span className="inline-block w-52">Customer Name</span>
-        </div>
-        {isPastDate ? (
-          <div>
-            <span className="inline-block w-28 pl-2">Wait Time</span>
-          </div>
-        ) : (
-          <div>
-            <span className="inline-block w-32 pl-1">Check In Time</span>
-            <span className="inline-block w-24 pl-1">Time Called</span>
-          </div>
-        )}
-      </div>
+      <ColumnHeaders isOldCustomers={isPastDate} />
       <ul className={`border-french_gray_1 grow overflow-y-scroll border`}>
-        {orderedCustomers.map(mapCustomersToListItem)}
+        {orderedCustomers.map((customer, index) => (
+          <li className="border-french_gray_1 border-b border-r" key={customer.id}>
+            <CustomerRow
+              customer={customer}
+              selected={customer.id === selectedCustomer.id}
+              onClick={getCustomerRowClickHandler(customer)}
+              onMouseEnter={() =>
+                wlPosPicker && !wlPosPicker.locked && wlPosPicker.setIndex(index)
+              }
+              styles={getCustomerRowStyles(customer)}
+              isPastDate={isPastDate}
+            />
+          </li>
+        ))}
       </ul>
     </div>
   );
 }
-
-export const selectingWLPositionContainerStyles =
-  'z-10 rounded-lg border border-french_gray_1';

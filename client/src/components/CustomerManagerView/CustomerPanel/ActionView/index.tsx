@@ -1,6 +1,6 @@
 import { useContext, useMemo } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
-import Confirm from 'components/Confirm';
+import Confirm from 'components/ConfirmAction';
 import { ActionViewProps } from './types';
 import { UserContext } from 'components/UserContextProvider/context';
 import { getAvailableActions } from 'utils/helpers';
