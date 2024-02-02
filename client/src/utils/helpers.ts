@@ -2,8 +2,22 @@ import {
   CustomerStatus,
   StatusFilters,
   Customer,
-  ManageCustomerAction
+  ManageCustomerAction,
+  Division
 } from './types';
+
+/**
+ * Returns a 2-3 character long string derived from the division and deskNum
+ */
+const getDeskName = (division: Division, deskNum: number) => {
+  const divWords = division.split(' ');
+
+  if (deskNum > 9 || divWords.length === 1) {
+    return `${division[0]}${deskNum}`;
+  } else {
+    return `${divWords[0][0]}${divWords[divWords.length - 1][0]}${deskNum}`;
+  }
+};
 
 const getNextElement = <T>(arr: T[], currentElement: T): T | undefined => {
   const currentIndex = arr.indexOf(currentElement);
@@ -148,5 +162,6 @@ export {
   formatTimePassed,
   sortDatesDescending,
   getAvailableActions,
-  getNextElement
+  getNextElement,
+  getDeskName
 };

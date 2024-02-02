@@ -1,7 +1,7 @@
 import { ReactEventHandler } from 'react';
 
-export interface StationIconProps {
+export interface DeskIconProps {
   onClick: ReactEventHandler;
   forwardRef?: React.RefObject<HTMLButtonElement>;
-  menuActive: boolean;
+  focused: boolean;
 }

@@ -1,5 +1,5 @@
 import { ManageCustomersHeaderProps } from './types';
-import StationIcon from './StationIcon';
+import StationIcon from './DeskIcon';
 import StatusFilters from './StatusFilters';
 import DateToggler from './DateToggler';
 import { FaChevronDown } from 'react-icons/fa';
@@ -48,7 +48,7 @@ export default function ManageCustomersHeader({
               <StationIcon
                 onClick={() => setStationMenuActive(!stationMenuActive)}
                 forwardRef={stationIconBtnRef}
-                menuActive={stationMenuActive}
+                focused={stationMenuActive}
               />
             )}
           </div>

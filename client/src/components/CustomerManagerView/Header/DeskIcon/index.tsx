@@ -1,18 +1,14 @@
-import { StationIconProps } from './types';
-import './styles.css';
+import { DeskIconProps } from './types';
 import { useContext } from 'react';
 import { UserContext } from 'components/UserContextProvider/context';
+import { getDeskName } from 'utils/helpers';
+import './styles.css';
 
-export default function StationIcon({
-  onClick,
-  forwardRef,
-  menuActive
-}: StationIconProps) {
+export default function DeskIcon({ onClick, forwardRef, focused }: DeskIconProps) {
   const user = useContext(UserContext);
-  const tokens = user.division.split(' ');
-  const stationId = `${tokens[0][0]}${tokens[1][1]}${user.deskNum}`;
 
   const stylesByDeskNum = [
+    '',
     'bg-desk_1',
     'bg-desk_2',
     'bg-desk_3',
@@ -24,13 +20,13 @@ export default function StationIcon({
   return (
     <button
       className={`${stylesByDeskNum[user.deskNum > 6 ? 6 : user.deskNum]} ${
-        menuActive ? 'si-outline-dark' : 'si-outline-light'
+        focused ? 'si-outline-dark' : 'si-outline-light'
       } relative h-10 w-10 rounded-full text-sm font-semibold text-white`}
       type="button"
       onClick={onClick}
       ref={forwardRef}
     >
-      {stationId}
+      {getDeskName(user.division, user.deskNum)}
     </button>
   );
 }
