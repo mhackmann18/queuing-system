@@ -418,17 +418,14 @@ export default class DummyApi {
       if (status && !waitingListIndex) {
         rawCustomers[indexOfCustomerToUpdate].divisions[division].status = status;
 
-        if (['MV1', 'MV2', 'MV3', 'MV4', 'DL1', 'DL2'].includes(status)) {
+        if (/^Desk \d+$/.test(status)) {
           //
           const [c] = rawCustomers.splice(indexOfCustomerToUpdate, 1);
 
           for (let i = 0; i < rawCustomers.length; i++) {
             if (
               rawCustomers[i].divisions[division] &&
-              rawCustomers[i].divisions[division].status &&
-              ['MV1', 'MV2', 'MV3', 'MV4', 'DL1', 'DL2'].includes(
-                rawCustomers[i].divisions[division].status
-              )
+              /^Desk \d+$/.test(rawCustomers[i].divisions[division].status)
             ) {
               rawCustomers.splice(i, 0, c);
               indexOfCustomerToUpdate = i;
