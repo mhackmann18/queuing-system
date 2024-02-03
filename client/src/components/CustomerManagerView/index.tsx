@@ -36,32 +36,25 @@ export default function CustomerManagerView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep selectedCustomer in sync with the customers on the screen
+  // Ensure selected customer is always up to date.
   useEffect(() => {
-    // If there's no customers, there can be no selected customer.
-    if (!customers || !customers.length) {
+    //  If there's no customers, there can be no selected customer.
+    if (!customers?.length) {
       setSelectedCustomer(null);
       return;
     }
 
-    // If no selected customer, select one
-    if (!selectedCustomer) {
-      setSelectedCustomer(
-        getNextSelectedCustomer(customers, nextSelectedCustomerCandidateId)
-      );
-    } else {
-      const updatedSelectedCustomer = customers.find(
-        (c) => c.id === selectedCustomer.id
-      );
+    /* If selectedCustomer exists, find its updated version in the list, otherwise find 
+    the next selected customer with the nextSelectedCustomerCandidateId. */
+    const updatedSelectedCustomer =
+      (selectedCustomer && customers.find((c) => c.id === selectedCustomer.id)) ||
+      customers.find((c) => c.id === nextSelectedCustomerCandidateId);
 
-      if (updatedSelectedCustomer) {
-        setSelectedCustomer(updatedSelectedCustomer);
-      } else {
-        setSelectedCustomer(
-          getNextSelectedCustomer(customers, nextSelectedCustomerCandidateId)
-        );
-      }
-    }
+    /* If a selected customer is found, set it as the selected customer. 
+    Otherwise, find the next selected customer. */
+    setSelectedCustomer(
+      updatedSelectedCustomer || getNextSelectedCustomer(customers)
+    );
   }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
 
   // Save old status filters so that when customer returns to main view, their old filters are active

@@ -3,60 +3,30 @@ import {
   Customer,
   ManageCustomerAction,
   Division,
-  StatusFilter,
-  CustomerStatus
+  StatusFilter
 } from './types';
 
 /**
  * @param {Customer[]} customers The customers to find the next selected customer from.
- * @param {number} [candidateId] The id of the desired next selected customer.
- * @returns If candidateId is present, returns customer whose id matches candidateId. Otherwise, returns a customer
- * with the highest priority status.
+ * @returns Returns a customer with the highest priority status.
  */
-const getNextSelectedCustomer = (
-  customers: Customer[],
-  candidateId: number = 0
-): Customer => {
-  // If a candidateId is provided, find matching customer and return
-  if (candidateId) {
-    const candidateCustomer = customers.find((c) => c.id === candidateId);
+const getNextSelectedCustomer = (customers: Customer[]): Customer => {
+  const priorityOrder = ['Serving', 'Waiting', ['No Show', 'Served']];
 
-    if (candidateCustomer) {
-      return candidateCustomer;
+  for (const status of priorityOrder) {
+    if (Array.isArray(status)) {
+      const customer = customers.find((customer) =>
+        status.includes(customer.status)
+      );
+      if (customer) {
+        return customer;
+      }
+    } else {
+      const customer = customers.find((customer) => customer.status === status);
+      if (customer) {
+        return customer;
+      }
     }
-  }
-
-  const customerIndexByStatus: Record<CustomerStatus, number> = {
-    Serving: -1,
-    Waiting: -1,
-    'No Show': -1,
-    Served: -1
-  };
-
-  for (let i = 0; i < customers.length; i++) {
-    const status = customers[i].status;
-
-    if (customerIndexByStatus[status] && customerIndexByStatus[status] === -1) {
-      customerIndexByStatus[status] = i;
-    }
-  }
-
-  if (customerIndexByStatus.Serving !== -1) {
-    return customers[customerIndexByStatus.Serving];
-  } else if (customerIndexByStatus.Waiting !== -1) {
-    return customers[customerIndexByStatus.Waiting];
-  } else if (
-    customerIndexByStatus['No Show'] !== -1 &&
-    customerIndexByStatus.Served !== -1
-  ) {
-    return customers[customerIndexByStatus['No Show']] <
-      customers[customerIndexByStatus.Served]
-      ? customers[customerIndexByStatus['No Show']]
-      : customers[customerIndexByStatus.Served];
-  } else if (customerIndexByStatus['No Show'] !== -1) {
-    return customers[customerIndexByStatus['No Show']];
-  } else if (customerIndexByStatus.Served !== -1) {
-    return customers[customerIndexByStatus.Served];
   }
 
   return customers[0];
