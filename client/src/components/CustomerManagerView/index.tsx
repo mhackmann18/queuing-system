@@ -6,10 +6,12 @@ import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/useCustomers';
 import Error from 'components/Error';
-import { sameDay } from 'utils/helpers';
+import { sameDay, getNextSelectedCustomer } from 'utils/helpers';
 import { ActionViewConfigProp } from 'components/CustomerManagerView/CustomerPanel/ActionView/types';
 import { WaitingListPositionPickerState } from 'utils/types';
 import ActionView from './CustomerPanel/ActionView';
+import DummyApi from 'utils/CustomerController/DummyApi';
+import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 
 export default function CustomerManagerView() {
   // Application state
@@ -18,10 +20,22 @@ export default function CustomerManagerView() {
   const [savedStatusFilters, setSavedStatusFilters] = useState<StatusFilters | null>(
     null
   );
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<string>('');
   const { filters, ...filterUtils } = useCustomerFilters();
   const { customers, fetchCustomers, controller } = useCustomers(filters);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const nextSelectedCustomerCandidateId = useNextCustomerId(
+    selectedCustomer,
+    customers
+  );
+
+  // Load initial customers
+  useEffect(() => {
+    localStorage.clear();
+    DummyApi.init();
+    fetchCustomers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Keep selectedCustomer in sync with the customers on the screen
   useEffect(() => {
@@ -31,20 +45,25 @@ export default function CustomerManagerView() {
       return;
     }
 
-    // If no selected customer, select one, prefer 'Serving', otherwise pick the first
+    // If no selected customer, select one
     if (!selectedCustomer) {
       setSelectedCustomer(
-        customers.find((c) => c.status === 'Serving') || customers[0]
+        getNextSelectedCustomer(customers, nextSelectedCustomerCandidateId)
       );
     } else {
-      // If there is a selected customer, find them. If they no longer exist, set to null.
-      setSelectedCustomer(
-        customers.find((c) => c.id === selectedCustomer.id) ||
-          customers.find((c) => c.status === 'Serving') ||
-          customers[0]
+      const updatedSelectedCustomer = customers.find(
+        (c) => c.id === selectedCustomer.id
       );
+
+      if (updatedSelectedCustomer) {
+        setSelectedCustomer(updatedSelectedCustomer);
+      } else {
+        setSelectedCustomer(
+          getNextSelectedCustomer(customers, nextSelectedCustomerCandidateId)
+        );
+      }
     }
-  }, [customers, selectedCustomer]);
+  }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
 
   // Save old status filters so that when customer returns to main view, their old filters are active
   useEffect(() => {

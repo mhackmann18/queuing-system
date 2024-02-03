@@ -3,8 +3,56 @@ import {
   Customer,
   ManageCustomerAction,
   Division,
-  StatusFilter
+  StatusFilter,
+  CustomerStatus
 } from './types';
+
+/**
+ * @param {Customer[]} customers The customers to find the next selected customer from.
+ * @param {number} [candidateId] The id of the desired next selected customer.
+ * @returns If candidateId is present, returns customer whose id matches candidateId. Otherwise, returns a customer
+ * with the highest priority status.
+ */
+const getNextSelectedCustomer = (
+  customers: Customer[],
+  candidateId: number = 0
+): Customer => {
+  // If a candidateId is provided, find matching customer and return
+  if (candidateId) {
+    const candidateCustomer = customers.find((c) => c.id === candidateId);
+
+    if (candidateCustomer) {
+      return candidateCustomer;
+    }
+  }
+
+  const customerIndexByStatus: Record<CustomerStatus, number> = {
+    Serving: -1,
+    Waiting: -1,
+    'No Show': -1,
+    Served: -1
+  };
+
+  for (let i = 0; i < customers.length; i++) {
+    const status = customers[i].status;
+
+    if (customerIndexByStatus[status] && customerIndexByStatus[status] === -1) {
+      customerIndexByStatus[status] = i;
+    }
+  }
+
+  if (customerIndexByStatus.Serving !== -1) {
+    return customers[customerIndexByStatus.Serving];
+  } else if (customerIndexByStatus.Waiting !== -1) {
+    return customers[customerIndexByStatus.Waiting];
+  } else if (customerIndexByStatus['No Show'] !== -1) {
+    return customers[customerIndexByStatus['No Show']];
+  } else if (customerIndexByStatus.Served !== -1) {
+    return customers[customerIndexByStatus.Served];
+  }
+
+  return customers[0];
+};
 
 /**
  * Returns a 2-3 character long string derived from the division and deskNum
@@ -163,5 +211,6 @@ export {
   sortDatesDescending,
   getAvailableActions,
   getNextElement,
-  getDeskName
+  getDeskName,
+  getNextSelectedCustomer
 };
