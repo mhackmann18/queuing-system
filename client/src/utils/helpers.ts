@@ -45,6 +45,14 @@ const getNextSelectedCustomer = (
     return customers[customerIndexByStatus.Serving];
   } else if (customerIndexByStatus.Waiting !== -1) {
     return customers[customerIndexByStatus.Waiting];
+  } else if (
+    customerIndexByStatus['No Show'] !== -1 &&
+    customerIndexByStatus.Served !== -1
+  ) {
+    return customers[customerIndexByStatus['No Show']] <
+      customers[customerIndexByStatus.Served]
+      ? customers[customerIndexByStatus['No Show']]
+      : customers[customerIndexByStatus.Served];
   } else if (customerIndexByStatus['No Show'] !== -1) {
     return customers[customerIndexByStatus['No Show']];
   } else if (customerIndexByStatus.Served !== -1) {
