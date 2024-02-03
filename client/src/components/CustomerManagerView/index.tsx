@@ -59,8 +59,9 @@ export default function CustomerManagerView() {
 
   // Save old status filters so that when customer returns to main view, their old filters are active
   useEffect(() => {
-    // If there are saved status filters, and no special conditions apply (previous date, or
-    // WL pos picker active) replace the current ones with the saved, and clear clear the saved
+    /* If there are saved status filters, and no special conditions apply (previous 
+    date, or WL pos picker active) replace the current ones with the saved, and clear 
+    clear the saved */
     if (savedStatusFilters && sameDay(filters.date, new Date()) && !wlPosPicker) {
       filterUtils.setStatuses({ ...savedStatusFilters });
       setSavedStatusFilters(null);
