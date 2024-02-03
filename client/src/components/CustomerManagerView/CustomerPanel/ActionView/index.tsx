@@ -1,20 +1,16 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
 import Confirm from 'components/ConfirmAction';
-import { ActionViewProps } from './types';
-import { UserContext } from 'components/UserContextProvider/context';
+import { CustomerPanelActionViewProps } from './types';
 import { getAvailableActions } from 'utils/helpers';
-import { CustomerPanelContext } from '../context';
 import { DESK_REGEX } from 'utils/constants';
 
-export default function ActionView({
+export default function CustomerPanelActionView({
   customer,
-  actionConfig,
-  currentDivision
-}: ActionViewProps) {
-  const { state, setState } = useContext(CustomerPanelContext);
-  const user = useContext(UserContext);
-
+  actionEventHandlers,
+  panelState,
+  setPanelState
+}: CustomerPanelActionViewProps) {
   const actionBtnConfig = useMemo(
     () =>
       getAvailableActions(customer).map((action) => {
@@ -23,30 +19,30 @@ export default function ActionView({
         switch (action) {
           case 'Finish Serving':
             onClick = () => {
-              actionConfig.finishServing.onClick();
+              actionEventHandlers.finishServing.onClick();
             };
             break;
           case 'Mark No Show':
             onClick = () => {
-              actionConfig.markNoShow.onClick();
-              setState('mark_no_show');
+              actionEventHandlers.markNoShow.onClick();
+              setPanelState('mark_no_show');
             };
             break;
           case 'Call to Station':
             onClick = () => {
-              actionConfig.callToStation.onClick();
+              actionEventHandlers.callToStation.onClick();
             };
             break;
           case 'Delete':
             onClick = () => {
-              actionConfig.delete.onClick();
-              setState('delete');
+              actionEventHandlers.delete.onClick();
+              setPanelState('delete');
             };
             break;
           case 'Return to Waiting List':
             onClick = () => {
-              actionConfig.returnToWaitingList.onClick();
-              setState('rtwl');
+              actionEventHandlers.returnToWaitingList.onClick();
+              setPanelState('rtwl');
             };
             break;
         }
@@ -54,20 +50,20 @@ export default function ActionView({
         return { name: action, onClick };
       }),
     [
-      actionConfig.callToStation,
-      actionConfig.delete,
-      actionConfig.finishServing,
-      actionConfig.markNoShow,
-      actionConfig.returnToWaitingList,
-      setState,
+      actionEventHandlers.callToStation,
+      actionEventHandlers.delete,
+      actionEventHandlers.finishServing,
+      actionEventHandlers.markNoShow,
+      actionEventHandlers.returnToWaitingList,
+      setPanelState,
       customer
     ]
   );
 
   // Determine rendered component
-  switch (state) {
+  switch (panelState) {
     case 'delete': {
-      const { onCancel, onConfirm } = actionConfig.delete;
+      const { onCancel, onConfirm } = actionEventHandlers.delete;
 
       return (
         <Confirm
@@ -77,11 +73,11 @@ export default function ActionView({
           }
           onCancel={() => {
             onCancel();
-            setState('default');
+            setPanelState('default');
           }}
           onConfirm={() =>
             onConfirm({
-              onSuccess: () => setState('default'),
+              onSuccess: () => setPanelState('default'),
               onFailure: () => null
             })
           }
@@ -92,7 +88,7 @@ export default function ActionView({
     }
     case 'rtwl': {
       const { onCancel, onConfirm, confirmBtnDisabled } =
-        actionConfig.returnToWaitingList;
+        actionEventHandlers.returnToWaitingList;
 
       return (
         <Confirm
@@ -100,11 +96,11 @@ export default function ActionView({
           message={'Select where this customer should appear in the waiting list.'}
           onCancel={() => {
             onCancel();
-            setState('default');
+            setPanelState('default');
           }}
           onConfirm={() =>
             onConfirm({
-              onSuccess: () => setState('default'),
+              onSuccess: () => setPanelState('default'),
               onFailure: () => null
             })
           }
@@ -113,7 +109,7 @@ export default function ActionView({
       );
     }
     case 'mark_no_show': {
-      const { onConfirm, onCancel } = actionConfig.markNoShow;
+      const { onConfirm, onCancel } = actionEventHandlers.markNoShow;
 
       return (
         <Confirm
@@ -123,12 +119,12 @@ export default function ActionView({
           }
           onCancel={() => {
             onCancel();
-            setState('default');
+            setPanelState('default');
           }}
           confirmBtnText="Mark No Show"
           onConfirm={() =>
             onConfirm({
-              onSuccess: () => setState('default'),
+              onSuccess: () => setPanelState('default'),
               onFailure: () => null
             })
           }
@@ -138,9 +134,10 @@ export default function ActionView({
     case 'default': {
       let actionsUnavailableMsg: string | undefined;
 
-      if (currentDivision !== user.division) {
-        actionsUnavailableMsg = `Unavailable to ${user.division} stations.`;
-      } else if (DESK_REGEX.test(customer.status)) {
+      // if (currentDivision !== user.division) {
+      //   actionsUnavailableMsg = `Unavailable to ${user.division} stations.`;
+      // } else
+      if (DESK_REGEX.test(customer.status)) {
         actionsUnavailableMsg = 'Unavailable while customer is at another desk.';
       } else if (customer.atOtherDivision) {
         actionsUnavailableMsg = `Unavailable while customer is at a ${customer.atOtherDivision} desk.`;

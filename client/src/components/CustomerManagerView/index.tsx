@@ -7,9 +7,8 @@ import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/useCustomers';
 import Error from 'components/Error';
 import { sameDay, getNextSelectedCustomer } from 'utils/helpers';
-import { ActionViewConfigProp } from 'components/CustomerManagerView/CustomerPanel/ActionView/types';
 import { WaitingListPositionPickerState } from 'utils/types';
-import ActionView from './CustomerPanel/ActionView';
+import { ActionEventHandlersProp } from './CustomerPanel/types';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 
@@ -97,7 +96,7 @@ export default function CustomerManagerView() {
     selectedCustomer
   ]);
 
-  const panelComponentActionBtnHandlers: ActionViewConfigProp | null = useMemo(
+  const panelComponentActionBtnHandlers: ActionEventHandlersProp | null = useMemo(
     () =>
       selectedCustomer && {
         delete: {
@@ -208,13 +207,10 @@ export default function CustomerManagerView() {
             }
           />
           <div className={`ml-4`}>
-            <CustomerPanel customer={selectedCustomer}>
-              <ActionView
-                customer={selectedCustomer}
-                actionConfig={panelComponentActionBtnHandlers!}
-                currentDivision={filters.division}
-              />
-            </CustomerPanel>
+            <CustomerPanel
+              customer={selectedCustomer}
+              actionEventHandlers={panelComponentActionBtnHandlers!}
+            />
           </div>
         </div>
       ) : (

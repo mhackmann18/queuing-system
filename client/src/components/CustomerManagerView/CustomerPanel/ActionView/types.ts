@@ -1,52 +1,9 @@
-import { Customer, Division } from 'utils/types';
+import { Customer } from 'utils/types';
+import { ActionEventHandlersProp, CustomerPanelState } from '../types';
 
-export interface ActionViewConfigProp {
-  delete: {
-    onClick: () => void;
-    onCancel: () => void;
-    onConfirm: ({
-      onSuccess,
-      onFailure
-    }: {
-      onSuccess: () => void;
-      onFailure: () => void;
-    }) => void;
-  };
-  returnToWaitingList: {
-    onClick: () => void;
-    onCancel: () => void;
-    onConfirm: ({
-      onSuccess,
-      onFailure
-    }: {
-      onSuccess: () => void;
-      onFailure: () => void;
-    }) => void;
-    confirmBtnDisabled: boolean;
-  };
-  callToStation: {
-    onClick: () => void;
-  };
-  finishServing: {
-    onClick: () => void;
-  };
-  markNoShow: {
-    onClick: () => void;
-    onCancel: () => void;
-    onConfirm: ({
-      onSuccess,
-      onFailure
-    }: {
-      onSuccess: () => void;
-      onFailure: () => void;
-    }) => void;
-  };
-}
-
-export type ActionViewMode = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
-
-export interface ActionViewProps {
+export interface CustomerPanelActionViewProps {
   customer: Customer;
-  actionConfig: ActionViewConfigProp;
-  currentDivision: Division;
+  actionEventHandlers: ActionEventHandlersProp;
+  panelState: CustomerPanelState;
+  setPanelState: (panelState: CustomerPanelState) => void;
 }
