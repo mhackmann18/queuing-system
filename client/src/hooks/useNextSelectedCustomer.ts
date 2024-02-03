@@ -2,11 +2,11 @@ import { useRef, useEffect } from 'react';
 import { Customer } from 'utils/types';
 
 /**
- * This hook is meant to be used in the CustomerManager root component only.
+ * This hook is meant to be used in the CustomerManager root component only. Returns Id of the customer immediately
+ * after selectedCustomer in customers
  *
  * @param {Customer} selectedCustomer
  * @param {Customer[]} customers
- * @returns Id of the customer immediately after selectedCustomer in customers
  */
 export default function useNextCustomerId(
   selectedCustomer: Customer | null,

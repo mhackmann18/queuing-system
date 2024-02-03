@@ -14,7 +14,7 @@ const officeId = 1;
 
 export default class CustomerController {
   /**
-   * Gets an array of customers matching the specified filter criteria.
+   * Returns a Promise containing array of customers matching the specified filter criteria.
    *
    * @param {Object} filters - An object with filter properties.
    * @param {Date} filters.date - The date for filtering customers.
