@@ -3,9 +3,11 @@ import { CustomerStatus } from 'utils/types';
 import { CustomerPanelProps, CustomerPanelState } from './types';
 import CustomerPanelInfo from './Info';
 import { CustomerPanelContext } from './context';
+import { DESK_REGEX } from 'utils/constants';
 
 export default function CustomerPanel({ customer, children }: CustomerPanelProps) {
   const [state, setState] = useState<CustomerPanelState>('default');
+  const { status } = customer;
 
   const stylesByStatus: Record<CustomerStatus, string> = {
     Served: 'text-served border-served',
@@ -25,11 +27,11 @@ export default function CustomerPanel({ customer, children }: CustomerPanelProps
   ];
 
   const getStatusStyles = () => {
-    if (/^Desk \d+$/.test(customer.status)) {
-      return stylesByDeskNum[Number(customer.status[customer.status.length - 1])];
+    if (DESK_REGEX.test(status)) {
+      return stylesByDeskNum[Number(status[status.length - 1])];
     }
 
-    return stylesByStatus[customer.status];
+    return stylesByStatus[status];
   };
 
   // Reset state when customer changes
@@ -50,7 +52,7 @@ export default function CustomerPanel({ customer, children }: CustomerPanelProps
           <span
             className={`rounded-md border-2 px-1 py-0.5 text-xs font-semibold ${getStatusStyles()}`}
           >
-            {customer.status}
+            {status}
           </span>
         </div>
 

@@ -1,6 +1,7 @@
 import { sameDay } from 'utils/helpers';
 import { CustomerRaw, CustomerRawStatus } from './types';
 import { Division } from 'utils/types';
+import { DESK_REGEX } from 'utils/constants';
 
 function getFinalCheckInTime() {
   const finalCheckInTime = new Date();
@@ -87,7 +88,7 @@ function generateRandomDates(startDate: Date, endDate: Date, numberOfDates: numb
 function getCallTimes(checkInTime: Date, status: CustomerRawStatus): Date[] {
   const callTimes: Date[] = [];
 
-  if (/^Desk \d+$/.test(status)) {
+  if (DESK_REGEX.test(status)) {
     callTimes.push(getRandomDateWithinXHours(checkInTime, 0.3));
   } else if (status === 'No Show') {
     const cutoff = getRandomDateWithinXHours(checkInTime, 2);
@@ -418,14 +419,14 @@ export default class DummyApi {
       if (status && !waitingListIndex) {
         rawCustomers[indexOfCustomerToUpdate].divisions[division].status = status;
 
-        if (/^Desk \d+$/.test(status)) {
+        if (DESK_REGEX.test(status)) {
           //
           const [c] = rawCustomers.splice(indexOfCustomerToUpdate, 1);
 
           for (let i = 0; i < rawCustomers.length; i++) {
             if (
               rawCustomers[i].divisions[division] &&
-              /^Desk \d+$/.test(rawCustomers[i].divisions[division].status)
+              DESK_REGEX.test(rawCustomers[i].divisions[division].status)
             ) {
               rawCustomers.splice(i, 0, c);
               indexOfCustomerToUpdate = i;

@@ -1,6 +1,7 @@
 import { get12HourTimeString, formatTimePassed } from 'utils/helpers';
 import { CustomerListRowProps } from './types';
 import { CustomerStatus } from 'utils/types';
+import { DESK_REGEX } from 'utils/constants';
 
 export default function CustomerListRow({
   customer,
@@ -40,7 +41,7 @@ export default function CustomerListRow({
 
   const getContainerStyles = () => {
     if (
-      /^Desk \d+$/.test(customer.status) &&
+      DESK_REGEX.test(customer.status) &&
       Number(customer.status[customer.status.length - 1]) > 6
     ) {
       return containerStyles['Desk 6'];
@@ -51,7 +52,7 @@ export default function CustomerListRow({
 
   const getStatusTextStyles = () => {
     if (
-      /^Desk \d+$/.test(customer.status) &&
+      DESK_REGEX.test(customer.status) &&
       Number(customer.status[customer.status.length - 1]) > 6
     ) {
       return statusTextStyles['Desk 6'];

@@ -7,6 +7,7 @@ import {
 } from './types';
 import DummyApi from './DummyApi';
 import UserController from 'utils/UserController';
+import { DESK_REGEX } from 'utils/constants';
 
 const userDivision = 'Motor Vehicle';
 const deskNum = 1;
@@ -298,7 +299,7 @@ export default class CustomerController {
     let atOtherDivision: Division | undefined;
 
     for (const [dName, dData] of Object.entries(divisions)) {
-      if (dName !== division && /^Desk \d+$/.test(dData.status)) {
+      if (dName !== division && DESK_REGEX.test(dData.status)) {
         atOtherDivision = dName;
       }
     }

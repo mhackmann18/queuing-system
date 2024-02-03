@@ -5,6 +5,7 @@ import { ActionViewProps } from './types';
 import { UserContext } from 'components/UserContextProvider/context';
 import { getAvailableActions } from 'utils/helpers';
 import { CustomerPanelContext } from '../context';
+import { DESK_REGEX } from 'utils/constants';
 
 export default function ActionView({
   customer,
@@ -139,7 +140,7 @@ export default function ActionView({
 
       if (currentDivision !== user.division) {
         actionsUnavailableMsg = `Unavailable to ${user.division} stations.`;
-      } else if (/^Desk \d+$/.test(customer.status)) {
+      } else if (DESK_REGEX.test(customer.status)) {
         actionsUnavailableMsg = 'Unavailable while customer is at another desk.';
       } else if (customer.atOtherDivision) {
         actionsUnavailableMsg = `Unavailable while customer is at a ${customer.atOtherDivision} desk.`;
