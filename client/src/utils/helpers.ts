@@ -61,7 +61,7 @@ const getAvailableActions = (customer: Customer): ManageCustomerAction[] => {
 
   switch (customer.status) {
     case 'Waiting':
-      if (customer.callTimes.length) {
+      if (customer.timesCalled.length) {
         actions = ['Call to Station', 'Mark No Show', 'Delete'];
       } else {
         actions = ['Call to Station', 'Delete'];

@@ -11,7 +11,7 @@ export default function CustomerListRow({
   onMouseEnter,
   styles = ''
 }: CustomerListRowProps) {
-  const { status, name, checkInTime, callTimes } = customer;
+  const { status, name, checkInTime, timesCalled } = customer;
 
   const containerStyles: Record<CustomerStatus, string> = {
     Waiting: `border-waiting`,
@@ -83,8 +83,8 @@ export default function CustomerListRow({
       {isPastDate ? (
         <div>
           <span className="inline-block w-24">
-            {formatTimePassed(checkInTime, callTimes[callTimes.length - 1])}
-            {/* {callTimes.length ? get12HourTimeString(callTimes[0]) : ''} */}
+            {formatTimePassed(checkInTime, timesCalled[timesCalled.length - 1])}
+            {/* {timesCalled.length ? get12HourTimeString(timesCalled[0]) : ''} */}
           </span>
         </div>
       ) : (
@@ -95,7 +95,7 @@ export default function CustomerListRow({
           </span>
           {/* Time Called */}
           <span className="inline-block w-20">
-            {callTimes.length ? get12HourTimeString(callTimes[0]) : ''}
+            {timesCalled.length ? get12HourTimeString(timesCalled[0]) : ''}
           </span>
         </div>
       )}

@@ -49,7 +49,7 @@ test('dfsfd', () => {
 //   status: 'Serving',
 //   reasonsForVisit: ['Motor Vehicle', 'Driver License'],
 //   checkInTime: new Date(),
-//   callTimes: [
+//   timesCalled: [
 //     new Date('December 17, 1995 03:24:00'),
 //     new Date('December 17, 1995 03:28:00'),
 //     new Date('December 17, 1995 03:49:30')
@@ -73,7 +73,7 @@ test('dfsfd', () => {
 //     screen.getByText(new RegExp(get12HourTimeString(mockCustomer.checkInTime)))
 //   ).toBeInTheDocument();
 //   // Call times
-//   mockCustomer.callTimes.forEach((time) =>
+//   mockCustomer.timesCalled.forEach((time) =>
 //     expect(
 //       screen.getByText(new RegExp(get12HourTimeString(time)))
 //     ).toBeInTheDocument()

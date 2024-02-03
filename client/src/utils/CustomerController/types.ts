@@ -4,7 +4,7 @@ export type CustomerRawStatus = 'Waiting' | 'Served' | 'No Show' | `Desk ${numbe
 
 interface CustomerRawDivisionData {
   status: CustomerRawStatus;
-  callTimes: string[];
+  timesCalled: string[];
 }
 
 export interface CustomerRaw {

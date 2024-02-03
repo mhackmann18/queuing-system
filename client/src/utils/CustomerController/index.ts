@@ -149,17 +149,17 @@ export default class CustomerController {
    * @param {Object} updatedProperties - The customer properties to update.
    * @param {CustomerStatus} [updatedProperties.status] - Updated status.
    * @param {number} [updatedProperties.waitingListIndex] - Updated position in the waiting list.
-   * @param {Date} [updatedProperties.addCallTime] - New call time to add to existing call times.
+   * @param {Date} [updatedProperties.addTimeCalled] - New call time to add to existing call times.
    */
   async update(
     id: number,
     updatedProperties: {
       status?: CustomerStatus;
       waitingListIndex?: number;
-      addCallTime?: Date;
+      addTimeCalled?: Date;
     }
   ): Promise<CustomerControllerSingleResult> {
-    const { status, waitingListIndex, addCallTime } = updatedProperties;
+    const { status, waitingListIndex, addTimeCalled } = updatedProperties;
 
     // Error checks
 
@@ -183,7 +183,7 @@ export default class CustomerController {
       division: userDivision,
       status: status === 'Serving' ? `Desk ${deskNum}` : status,
       waitingListIndex,
-      addCallTime
+      addTimeCalled
     });
 
     if (!data) {
@@ -227,7 +227,7 @@ export default class CustomerController {
   async callToStation(id: number): Promise<CustomerControllerSingleResult> {
     const res = await this.update(id, {
       status: 'Serving',
-      addCallTime: new Date()
+      addTimeCalled: new Date()
     });
     return res;
   }
@@ -289,7 +289,7 @@ export default class CustomerController {
     const reasonsForVisit: Division[] = Object.keys(divisions);
 
     // Get call times
-    const callTimes = divisions[division].callTimes.map((t) => new Date(t));
+    const timesCalled = divisions[division].timesCalled.map((t) => new Date(t));
 
     const status: CustomerStatus =
       divisions[division].status == `Desk ${deskNum}` && userDivision === division
@@ -309,7 +309,7 @@ export default class CustomerController {
       name: `${firstName} ${lastName}`,
       status,
       checkInTime: new Date(checkInTime),
-      callTimes,
+      timesCalled,
       reasonsForVisit,
       atOtherDivision
     };
