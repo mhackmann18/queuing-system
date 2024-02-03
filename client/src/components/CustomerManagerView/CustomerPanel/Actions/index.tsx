@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
 import Confirm from 'components/ConfirmAction';
-import { CustomerPanelActionViewProps } from './types';
+import { CustomerPanelActionsProps } from './types';
 import { getAvailableActions } from 'utils/helpers';
 import { DESK_REGEX } from 'utils/constants';
 
-export default function CustomerPanelActionView({
+export default function CustomerPanelActions({
   customer,
   actionEventHandlers,
   panelState,
   setPanelState
-}: CustomerPanelActionViewProps) {
+}: CustomerPanelActionsProps) {
   const actionBtnConfig = useMemo(
     () =>
       getAvailableActions(customer).map((action) => {

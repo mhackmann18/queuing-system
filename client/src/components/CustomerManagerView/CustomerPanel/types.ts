@@ -1,6 +1,6 @@
 import { Customer } from 'utils/types';
 
-export interface ActionEventHandlersProp {
+export interface CustomerPanelActionEventHandlers {
   delete: {
     onClick: () => void;
     onCancel: () => void;
@@ -45,7 +45,7 @@ export interface ActionEventHandlersProp {
 
 export interface CustomerPanelProps {
   customer: Customer;
-  actionEventHandlers: ActionEventHandlersProp;
+  actionEventHandlers: CustomerPanelActionEventHandlers;
 }
 
 export type CustomerPanelState = 'default' | 'delete' | 'rtwl' | 'mark_no_show';

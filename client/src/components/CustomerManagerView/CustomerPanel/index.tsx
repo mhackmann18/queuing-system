@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CustomerPanelProps, CustomerPanelState } from './types';
 import CustomerPanelInfo from './Info';
 import StatusIndicator from './StatusIndicator';
-import ActionView from './ActionView';
+import Actions from './Actions';
 
 export default function CustomerPanel({
   customer,
@@ -30,7 +30,7 @@ export default function CustomerPanel({
       </div>
 
       {/* Actions */}
-      <ActionView
+      <Actions
         customer={customer}
         actionEventHandlers={actionEventHandlers}
         panelState={state}

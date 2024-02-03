@@ -8,7 +8,7 @@ import useCustomers from 'hooks/useCustomers';
 import Error from 'components/Error';
 import { sameDay, getNextSelectedCustomer } from 'utils/helpers';
 import { WaitingListPositionPickerState } from 'utils/types';
-import { ActionEventHandlersProp } from './CustomerPanel/types';
+import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 
@@ -96,91 +96,92 @@ export default function CustomerManagerView() {
     selectedCustomer
   ]);
 
-  const panelComponentActionBtnHandlers: ActionEventHandlersProp | null = useMemo(
-    () =>
-      selectedCustomer && {
-        delete: {
-          onClick: () => null,
-          onCancel: () => null,
-          onConfirm: async ({ onSuccess }) => {
-            const res = await controller.delete(selectedCustomer.id);
+  const panelComponentActionBtnHandlers: CustomerPanelActionEventHandlers | null =
+    useMemo(
+      () =>
+        selectedCustomer && {
+          delete: {
+            onClick: () => null,
+            onCancel: () => null,
+            onConfirm: async ({ onSuccess }) => {
+              const res = await controller.delete(selectedCustomer.id);
 
-            if (res.error) {
-              setError(res.error);
-            } else {
-              onSuccess();
-              fetchCustomers();
-            }
-          }
-        },
-        returnToWaitingList: {
-          onClick: () => {
-            setWlPosPicker({ index: 0, locked: false });
-          },
-          onCancel: () => setWlPosPicker(null),
-          onConfirm: async ({ onSuccess }) => {
-            const res = await controller.update(selectedCustomer.id, {
-              status: 'Waiting',
-              waitingListIndex: wlPosPicker!.index
-            });
-            if (res.error) {
-              setError(res.error);
-            } else {
-              onSuccess();
-              fetchCustomers();
-              setWlPosPicker(null);
+              if (res.error) {
+                setError(res.error);
+              } else {
+                onSuccess();
+                fetchCustomers();
+              }
             }
           },
-          confirmBtnDisabled: !wlPosPicker?.locked
-        },
-        callToStation: {
-          onClick: async () => {
-            if (customers.find((c) => c.status === 'Serving')) {
-              setError('You are already serving a customer.');
-            } else if (selectedCustomer.atOtherDivision) {
-              setError('Customer is being served at another division.');
-            } else {
-              const res = await controller.callToStation(selectedCustomer.id);
+          returnToWaitingList: {
+            onClick: () => {
+              setWlPosPicker({ index: 0, locked: false });
+            },
+            onCancel: () => setWlPosPicker(null),
+            onConfirm: async ({ onSuccess }) => {
+              const res = await controller.update(selectedCustomer.id, {
+                status: 'Waiting',
+                waitingListIndex: wlPosPicker!.index
+              });
+              if (res.error) {
+                setError(res.error);
+              } else {
+                onSuccess();
+                fetchCustomers();
+                setWlPosPicker(null);
+              }
+            },
+            confirmBtnDisabled: !wlPosPicker?.locked
+          },
+          callToStation: {
+            onClick: async () => {
+              if (customers.find((c) => c.status === 'Serving')) {
+                setError('You are already serving a customer.');
+              } else if (selectedCustomer.atOtherDivision) {
+                setError('Customer is being served at another division.');
+              } else {
+                const res = await controller.callToStation(selectedCustomer.id);
+                if (res.error) {
+                  setError(res.error);
+                } else {
+                  fetchCustomers();
+                }
+              }
+            }
+          },
+          finishServing: {
+            onClick: async () => {
+              const res = await controller.update(selectedCustomer.id, {
+                status: 'Served'
+              });
               if (res.error) {
                 setError(res.error);
               } else {
                 fetchCustomers();
               }
             }
-          }
-        },
-        finishServing: {
-          onClick: async () => {
-            const res = await controller.update(selectedCustomer.id, {
-              status: 'Served'
-            });
-            if (res.error) {
-              setError(res.error);
-            } else {
-              fetchCustomers();
-            }
-          }
-        },
-        markNoShow: {
-          onClick: () => null,
-          onCancel: () => null,
-          onConfirm: async ({ onSuccess }) => {
-            const res = await controller.update(selectedCustomer.id, {
-              status: 'No Show'
-            });
+          },
+          markNoShow: {
+            onClick: () => null,
+            onCancel: () => null,
+            onConfirm: async ({ onSuccess }) => {
+              const res = await controller.update(selectedCustomer.id, {
+                status: 'No Show'
+              });
 
-            if (res.error) {
-              setError(res.error);
-            } else {
-              // TODO: Give success indication
-              fetchCustomers();
-              onSuccess();
+              if (res.error) {
+                setError(res.error);
+              } else {
+                // TODO: Give success indication
+                fetchCustomers();
+                onSuccess();
+              }
             }
           }
-        }
-      },
-    [wlPosPicker, controller, selectedCustomer, customers, fetchCustomers]
-  );
+        },
+      [wlPosPicker, controller, selectedCustomer, customers, fetchCustomers]
+    );
 
   return (
     <>
