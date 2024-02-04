@@ -1,6 +1,6 @@
 import CustomerPanel from './CustomerPanel';
 import { Customer, StatusFilters } from 'utils/types';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import CustomerList from './CustomerList';
 import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
@@ -11,9 +11,10 @@ import { WaitingListPositionPickerState } from 'utils/types';
 import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
+import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
 
 export default function CustomerManagerView() {
-  // Application state
+  // Application state and custom hooks
   const [wlPosPicker, setWlPosPicker] =
     useState<WaitingListPositionPickerState>(null);
   const [savedStatusFilters, setSavedStatusFilters] = useState<StatusFilters | null>(
@@ -27,6 +28,16 @@ export default function CustomerManagerView() {
     selectedCustomer,
     customers
   );
+  const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
+    useCustomerPanelActionEventHandlers(
+      selectedCustomer,
+      controller,
+      customers,
+      wlPosPicker,
+      setWlPosPicker,
+      setError,
+      fetchCustomers
+    );
 
   // Load initial customers
   useEffect(() => {
@@ -50,8 +61,8 @@ export default function CustomerManagerView() {
       (selectedCustomer && customers.find((c) => c.id === selectedCustomer.id)) ||
       customers.find((c) => c.id === nextSelectedCustomerCandidateId);
 
-    /* If a selected customer is found, set it as the selected customer. 
-    Otherwise, find the next selected customer. */
+    /* If an updated selected customer was found, set it as the selected customer. 
+    Otherwise, find a new selected customer. */
     setSelectedCustomer(
       updatedSelectedCustomer || getNextSelectedCustomer(customers)
     );
@@ -90,93 +101,6 @@ export default function CustomerManagerView() {
     selectedCustomer
   ]);
 
-  const panelComponentActionBtnHandlers: CustomerPanelActionEventHandlers | null =
-    useMemo(
-      () =>
-        selectedCustomer && {
-          delete: {
-            onClick: () => null,
-            onCancel: () => null,
-            onConfirm: async ({ onSuccess }) => {
-              const res = await controller.delete(selectedCustomer.id);
-
-              if (res.error) {
-                setError(res.error);
-              } else {
-                onSuccess();
-                fetchCustomers();
-              }
-            }
-          },
-          returnToWaitingList: {
-            onClick: () => {
-              setWlPosPicker({ index: 0, locked: false });
-            },
-            onCancel: () => setWlPosPicker(null),
-            onConfirm: async ({ onSuccess }) => {
-              const res = await controller.update(selectedCustomer.id, {
-                status: 'Waiting',
-                waitingListIndex: wlPosPicker!.index
-              });
-              if (res.error) {
-                setError(res.error);
-              } else {
-                onSuccess();
-                fetchCustomers();
-                setWlPosPicker(null);
-              }
-            },
-            confirmBtnDisabled: !wlPosPicker?.locked
-          },
-          callToStation: {
-            onClick: async () => {
-              if (customers.find((c) => c.status === 'Serving')) {
-                setError('You are already serving a customer.');
-              } else if (selectedCustomer.atOtherDivision) {
-                setError('Customer is being served at another division.');
-              } else {
-                const res = await controller.callToStation(selectedCustomer.id);
-                if (res.error) {
-                  setError(res.error);
-                } else {
-                  fetchCustomers();
-                }
-              }
-            }
-          },
-          finishServing: {
-            onClick: async () => {
-              const res = await controller.update(selectedCustomer.id, {
-                status: 'Served'
-              });
-              if (res.error) {
-                setError(res.error);
-              } else {
-                fetchCustomers();
-              }
-            }
-          },
-          markNoShow: {
-            onClick: () => null,
-            onCancel: () => null,
-            onConfirm: async ({ onSuccess }) => {
-              const res = await controller.update(selectedCustomer.id, {
-                status: 'No Show'
-              });
-
-              if (res.error) {
-                setError(res.error);
-              } else {
-                // TODO: Give success indication
-                fetchCustomers();
-                onSuccess();
-              }
-            }
-          }
-        },
-      [wlPosPicker, controller, selectedCustomer, customers, fetchCustomers]
-    );
-
   return (
     <>
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
@@ -204,7 +128,7 @@ export default function CustomerManagerView() {
           <div className={`ml-4`}>
             <CustomerPanel
               customer={selectedCustomer}
-              actionEventHandlers={panelComponentActionBtnHandlers!}
+              actionEventHandlers={customerPanelActionEventHandlers!}
             />
           </div>
         </div>
