@@ -12,6 +12,7 @@ import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
+import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
@@ -43,6 +44,10 @@ export default function CustomerManagerView() {
   useEffect(() => {
     localStorage.clear();
     DummyApi.init();
+    const { events } = signalRConnection();
+    events((username: string, message: string) => {
+      console.log(username, message);
+    });
     fetchCustomers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
