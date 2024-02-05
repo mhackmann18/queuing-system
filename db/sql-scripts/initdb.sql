@@ -1,5 +1,12 @@
-CREATE SCHEMA queuing_system;
+-- CREATE DATABASE queuing_system;
 USE queuing_system;
+
+CREATE TABLE DIVISION (
+	divisionId VARCHAR(36) NOT NULL,
+	divisionName VARCHAR(50) NOT NULL,
+    
+    PRIMARY KEY(divisionId)
+);
 
 CREATE TABLE CUSTOMER (
 	customerId VARCHAR(36) NOT NULL,
@@ -10,13 +17,6 @@ CREATE TABLE CUSTOMER (
 
     PRIMARY KEY(customerId),
     FOREIGN KEY(divisionId) REFERENCES DIVISION(divisionId)
-);
-
-CREATE TABLE DIVISION (
-	divisionId VARCHAR(36) NOT NULL,
-	divisionName VARCHAR(50) NOT NULL,
-    
-    PRIMARY KEY(divisionId)
 );
 
 CREATE TABLE CUSTOMERDIVISION (
@@ -40,8 +40,8 @@ CREATE TABLE CUSTOMERDIVISIONTIMECALLED (
 	FOREIGN KEY(divisionId) REFERENCES DIVISION(divisionId)
 );
 
-
-SELECT c.customerId, c.checkInTime, c.divisionId, c.firstName, c.lastName FROM Customers AS c;
+SHOW TABLES IN queuing_system;
+-- SELECT c.customerId, c.checkInTime, c.divisionId, c.firstName, c.lastName FROM Customer AS c;
 
 SELECT VERSION();
 
