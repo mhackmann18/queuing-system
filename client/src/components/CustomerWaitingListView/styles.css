@@ -1,0 +1,14 @@
+.waiting-list-blur {
+  position: relative;
+}
+
+.waiting-list-blur::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px; /* Adjust this value to control the height of the blur effect */
+  background: linear-gradient(to top, white, transparent);
+  pointer-events: none; /* This allows clicks to pass through the pseudo-element */
+}
