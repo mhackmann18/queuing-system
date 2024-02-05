@@ -14,5 +14,5 @@ public class CustomerContext : DbContext
     }
 
 
-    public DbSet<Customer> Customer { get; set; } = null!;
+    public DbSet<Customer> CUSTOMER { get; set; } = null!;
 }

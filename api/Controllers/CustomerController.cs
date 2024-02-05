@@ -33,14 +33,14 @@ namespace CustomerApi.Controllers
 
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
-            return await _context.Customer.ToListAsync();
+            return await _context.CUSTOMER.ToListAsync();
         }
 
         // GET: api/Customers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(string id)
         {
-            var customer = await _context.Customer.FindAsync(id);
+            var customer = await _context.CUSTOMER.FindAsync(id);
 
 
             if (customer == null)
@@ -87,7 +87,7 @@ namespace CustomerApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
-            _context.Customer.Add(customer);
+            _context.CUSTOMER.Add(customer);
             await _context.SaveChangesAsync();
 
             //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
@@ -98,13 +98,13 @@ namespace CustomerApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(string id)
         {
-            var customer = await _context.Customer.FindAsync(id);
+            var customer = await _context.CUSTOMER.FindAsync(id);
             if (customer == null)
             {
                 return NotFound();
             }
 
-            _context.Customer.Remove(customer);
+            _context.CUSTOMER.Remove(customer);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -112,7 +112,7 @@ namespace CustomerApi.Controllers
 
         private bool CustomerExists(string id)
         {
-            return _context.Customer.Any(e => e.customerId == id);
+            return _context.CUSTOMER.Any(e => e.customerId == id);
         }
     }
 }

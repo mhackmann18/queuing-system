@@ -66,21 +66,21 @@ internal class MyContext : DbContext
 {
     public DbSet<Division> Division { get; set; }
 
-    public DbSet<Customer> Customer { get; set; }
+    public DbSet<Customer> CUSTOMER { get; set; }
 
     #region Required
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Division>()
-            .ToTable("DIVISION", schema: "dmv3");
+            .ToTable("DIVISION", schema: "queuing_system");
         modelBuilder.Entity<Customer>()
-            .ToTable("CUSTOMER", schema: "dmv3");
+            .ToTable("CUSTOMER", schema: "queuing_system");
         modelBuilder.Entity<CustomerDivision>()
-            .ToTable("CUSTOMERDIVISION", schema: "dmv3")
+            .ToTable("CUSTOMERDIVISION", schema: "queuing_system")
             .Property(e => e.Status)
             .HasConversion<string>();
         modelBuilder.Entity<CustomerDivisionTimeCalled>()
-            .ToTable("CUSTOMERDIVISIONTIMECALLED", schema: "dmv3");
+            .ToTable("CUSTOMERDIVISIONTIMECALLED", schema: "queuing_system");
 
         // .Property(b => b.Url)
         // .IsRequired();
