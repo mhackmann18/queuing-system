@@ -1,6 +1,7 @@
 import { sameDay } from 'utils/helpers';
 import { CustomerRaw, CustomerRawStatus } from './types';
 import { Division } from 'utils/types';
+import { DESK_REGEX } from 'utils/constants';
 
 function getFinalCheckInTime() {
   const finalCheckInTime = new Date();
@@ -49,7 +50,7 @@ export interface GetCustomersBody {
 
 export interface UpdateCustomerBody {
   division: Division;
-  addCallTime?: Date;
+  addTimeCalled?: Date;
   waitingListIndex?: number;
   status?: CustomerRawStatus;
 }
@@ -84,20 +85,20 @@ function generateRandomDates(startDate: Date, endDate: Date, numberOfDates: numb
   return randomDates;
 }
 
-function getCallTimes(checkInTime: Date, status: CustomerRawStatus): Date[] {
-  const callTimes: Date[] = [];
+function getTimesCalled(checkInTime: Date, status: CustomerRawStatus): Date[] {
+  const timesCalled: Date[] = [];
 
-  if (/^Desk \d+$/.test(status)) {
-    callTimes.push(getRandomDateWithinXHours(checkInTime, 0.3));
+  if (DESK_REGEX.test(status)) {
+    timesCalled.push(getRandomDateWithinXHours(checkInTime, 0.3));
   } else if (status === 'No Show') {
     const cutoff = getRandomDateWithinXHours(checkInTime, 2);
     const randomNumber = getRandomNumber(2, 5);
-    callTimes.push(...generateRandomDates(checkInTime, cutoff, randomNumber));
+    timesCalled.push(...generateRandomDates(checkInTime, cutoff, randomNumber));
   } else if (status === 'Served') {
-    callTimes.push(getRandomDateWithinXHours(checkInTime, 1));
+    timesCalled.push(getRandomDateWithinXHours(checkInTime, 1));
   }
 
-  return callTimes;
+  return timesCalled;
 }
 
 function getDayBackCheckInTime(x: number) {
@@ -149,7 +150,9 @@ export default class DummyApi {
         divisions: {
           'Motor Vehicle': {
             status,
-            callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
+            timesCalled: getTimesCalled(checkInTime, status).map((t) =>
+              t.toISOString()
+            )
           }
         }
       });
@@ -169,7 +172,9 @@ export default class DummyApi {
         divisions: {
           'Driver License': {
             status: status,
-            callTimes: getCallTimes(checkInTime, status).map((t) => t.toISOString())
+            timesCalled: getTimesCalled(checkInTime, status).map((t) =>
+              t.toISOString()
+            )
           }
         }
       });
@@ -235,7 +240,7 @@ export default class DummyApi {
           ...(mvStatus && {
             'Motor Vehicle': {
               status: mvStatus,
-              callTimes: getCallTimes(checkInTime, mvStatus).map((t) =>
+              timesCalled: getTimesCalled(checkInTime, mvStatus).map((t) =>
                 t.toISOString()
               )
             }
@@ -243,7 +248,7 @@ export default class DummyApi {
           ...(dlStatus && {
             'Driver License': {
               status: dlStatus,
-              callTimes: getCallTimes(checkInTime, dlStatus).map((t) =>
+              timesCalled: getTimesCalled(checkInTime, dlStatus).map((t) =>
                 t.toISOString()
               )
             }
@@ -345,7 +350,7 @@ export default class DummyApi {
 
   static async updateCustomer(
     id: number,
-    { addCallTime, status, waitingListIndex, division }: UpdateCustomerBody
+    { addTimeCalled, status, waitingListIndex, division }: UpdateCustomerBody
   ): ApiResponse {
     const customers = localStorage.getItem('customers');
 
@@ -372,11 +377,11 @@ export default class DummyApi {
       };
     } else {
       // Call time is most recent, it should appear at beginning of array
-      if (addCallTime) {
-        rawCustomers[indexOfCustomerToUpdate].divisions[division].callTimes.splice(
+      if (addTimeCalled) {
+        rawCustomers[indexOfCustomerToUpdate].divisions[division].timesCalled.splice(
           0,
           0,
-          addCallTime.toISOString()
+          addTimeCalled.toISOString()
         );
       }
       if (waitingListIndex || waitingListIndex === 0) {
@@ -418,14 +423,14 @@ export default class DummyApi {
       if (status && !waitingListIndex) {
         rawCustomers[indexOfCustomerToUpdate].divisions[division].status = status;
 
-        if (/^Desk \d+$/.test(status)) {
+        if (DESK_REGEX.test(status)) {
           //
           const [c] = rawCustomers.splice(indexOfCustomerToUpdate, 1);
 
           for (let i = 0; i < rawCustomers.length; i++) {
             if (
               rawCustomers[i].divisions[division] &&
-              /^Desk \d+$/.test(rawCustomers[i].divisions[division].status)
+              DESK_REGEX.test(rawCustomers[i].divisions[division].status)
             ) {
               rawCustomers.splice(i, 0, c);
               indexOfCustomerToUpdate = i;

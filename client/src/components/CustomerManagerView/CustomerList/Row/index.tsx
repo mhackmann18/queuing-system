@@ -1,6 +1,7 @@
 import { get12HourTimeString, formatTimePassed } from 'utils/helpers';
 import { CustomerListRowProps } from './types';
 import { CustomerStatus } from 'utils/types';
+import { DESK_REGEX } from 'utils/constants';
 
 export default function CustomerListRow({
   customer,
@@ -10,7 +11,7 @@ export default function CustomerListRow({
   onMouseEnter,
   styles = ''
 }: CustomerListRowProps) {
-  const { status, name, checkInTime, callTimes } = customer;
+  const { status, name, checkInTime, timesCalled } = customer;
 
   const containerStyles: Record<CustomerStatus, string> = {
     Waiting: `border-waiting`,
@@ -40,7 +41,7 @@ export default function CustomerListRow({
 
   const getContainerStyles = () => {
     if (
-      /^Desk \d+$/.test(customer.status) &&
+      DESK_REGEX.test(customer.status) &&
       Number(customer.status[customer.status.length - 1]) > 6
     ) {
       return containerStyles['Desk 6'];
@@ -51,7 +52,7 @@ export default function CustomerListRow({
 
   const getStatusTextStyles = () => {
     if (
-      /^Desk \d+$/.test(customer.status) &&
+      DESK_REGEX.test(customer.status) &&
       Number(customer.status[customer.status.length - 1]) > 6
     ) {
       return statusTextStyles['Desk 6'];
@@ -82,8 +83,8 @@ export default function CustomerListRow({
       {isPastDate ? (
         <div>
           <span className="inline-block w-24">
-            {formatTimePassed(checkInTime, callTimes[callTimes.length - 1])}
-            {/* {callTimes.length ? get12HourTimeString(callTimes[0]) : ''} */}
+            {formatTimePassed(checkInTime, timesCalled[timesCalled.length - 1])}
+            {/* {timesCalled.length ? get12HourTimeString(timesCalled[0]) : ''} */}
           </span>
         </div>
       ) : (
@@ -94,7 +95,7 @@ export default function CustomerListRow({
           </span>
           {/* Time Called */}
           <span className="inline-block w-20">
-            {callTimes.length ? get12HourTimeString(callTimes[0]) : ''}
+            {timesCalled.length ? get12HourTimeString(timesCalled[0]) : ''}
           </span>
         </div>
       )}

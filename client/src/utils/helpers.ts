@@ -7,6 +7,32 @@ import {
 } from './types';
 
 /**
+ * @param {Customer[]} customers The customers to find the next selected customer from.
+ * @returns Returns a customer with the highest priority status.
+ */
+const getNextSelectedCustomer = (customers: Customer[]): Customer => {
+  const priorityOrder = ['Serving', 'Waiting', ['No Show', 'Served']];
+
+  for (const status of priorityOrder) {
+    if (Array.isArray(status)) {
+      const customer = customers.find((customer) =>
+        status.includes(customer.status)
+      );
+      if (customer) {
+        return customer;
+      }
+    } else {
+      const customer = customers.find((customer) => customer.status === status);
+      if (customer) {
+        return customer;
+      }
+    }
+  }
+
+  return customers[0];
+};
+
+/**
  * Returns a 2-3 character long string derived from the division and deskNum
  */
 const getDeskName = (division: Division, deskNum: number) => {
@@ -35,7 +61,7 @@ const getAvailableActions = (customer: Customer): ManageCustomerAction[] => {
 
   switch (customer.status) {
     case 'Waiting':
-      if (customer.callTimes.length) {
+      if (customer.timesCalled.length) {
         actions = ['Call to Station', 'Mark No Show', 'Delete'];
       } else {
         actions = ['Call to Station', 'Delete'];
@@ -163,5 +189,6 @@ export {
   sortDatesDescending,
   getAvailableActions,
   getNextElement,
-  getDeskName
+  getDeskName,
+  getNextSelectedCustomer
 };

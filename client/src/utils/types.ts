@@ -32,7 +32,7 @@ export interface Customer {
   status: CustomerStatus;
   name: string; // TODO: first and last name
   checkInTime: Date;
-  callTimes: Date[];
+  timesCalled: Date[];
   reasonsForVisit: Division[];
   atOtherDivision?: Division;
 }

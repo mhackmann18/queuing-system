@@ -1,55 +1,83 @@
 import CustomerPanel from './CustomerPanel';
 import { Customer, StatusFilters } from 'utils/types';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import CustomerList from './CustomerList';
 import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/useCustomers';
 import Error from 'components/Error';
-import { sameDay } from 'utils/helpers';
-import { ActionViewConfigProp } from 'components/CustomerManagerView/CustomerPanel/ActionView/types';
+import { sameDay, getNextSelectedCustomer } from 'utils/helpers';
 import { WaitingListPositionPickerState } from 'utils/types';
-import ActionView from './CustomerPanel/ActionView';
+import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
+import DummyApi from 'utils/CustomerController/DummyApi';
+import useNextCustomerId from 'hooks/useNextSelectedCustomer';
+import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
+// import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
-  // Application state
+  // Application state and custom hooks
   const [wlPosPicker, setWlPosPicker] =
     useState<WaitingListPositionPickerState>(null);
   const [savedStatusFilters, setSavedStatusFilters] = useState<StatusFilters | null>(
     null
   );
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<string>('');
   const { filters, ...filterUtils } = useCustomerFilters();
   const { customers, fetchCustomers, controller } = useCustomers(filters);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const nextSelectedCustomerCandidateId = useNextCustomerId(
+    selectedCustomer,
+    customers
+  );
+  const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
+    useCustomerPanelActionEventHandlers(
+      selectedCustomer,
+      controller,
+      customers,
+      wlPosPicker,
+      setWlPosPicker,
+      setError,
+      fetchCustomers
+    );
 
-  // Keep selectedCustomer in sync with the customers on the screen
+  // Load initial customers
   useEffect(() => {
-    // If there's no customers, there can be no selected customer.
-    if (!customers || !customers.length) {
+    localStorage.clear();
+    DummyApi.init();
+    // const { events } = signalRConnection();
+    // events((username: string, message: string) => {
+    //   console.log(username, message);
+    // });
+    fetchCustomers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Ensure selected customer is always up to date.
+  useEffect(() => {
+    //  If there's no customers, there can be no selected customer.
+    if (!customers?.length) {
       setSelectedCustomer(null);
       return;
     }
 
-    // If no selected customer, select one, prefer 'Serving', otherwise pick the first
-    if (!selectedCustomer) {
-      setSelectedCustomer(
-        customers.find((c) => c.status === 'Serving') || customers[0]
-      );
-    } else {
-      // If there is a selected customer, find them. If they no longer exist, set to null.
-      setSelectedCustomer(
-        customers.find((c) => c.id === selectedCustomer.id) ||
-          customers.find((c) => c.status === 'Serving') ||
-          customers[0]
-      );
-    }
-  }, [customers, selectedCustomer]);
+    /* If selectedCustomer exists, find its updated version in the list, otherwise find 
+    the next selected customer with the nextSelectedCustomerCandidateId. */
+    const updatedSelectedCustomer =
+      (selectedCustomer && customers.find((c) => c.id === selectedCustomer.id)) ||
+      customers.find((c) => c.id === nextSelectedCustomerCandidateId);
+
+    /* If an updated selected customer was found, set it as the selected customer. 
+    Otherwise, find a new selected customer. */
+    setSelectedCustomer(
+      updatedSelectedCustomer || getNextSelectedCustomer(customers)
+    );
+  }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
 
   // Save old status filters so that when customer returns to main view, their old filters are active
   useEffect(() => {
-    // If there are saved status filters, and no special conditions apply (previous date, or
-    // WL pos picker active) replace the current ones with the saved, and clear clear the saved
+    /* If there are saved status filters, and no special conditions apply (previous 
+    date, or WL pos picker active) replace the current ones with the saved, and clear 
+    clear the saved */
     if (savedStatusFilters && sameDay(filters.date, new Date()) && !wlPosPicker) {
       filterUtils.setStatuses({ ...savedStatusFilters });
       setSavedStatusFilters(null);
@@ -78,92 +106,6 @@ export default function CustomerManagerView() {
     selectedCustomer
   ]);
 
-  const panelComponentActionBtnHandlers: ActionViewConfigProp | null = useMemo(
-    () =>
-      selectedCustomer && {
-        delete: {
-          onClick: () => null,
-          onCancel: () => null,
-          onConfirm: async ({ onSuccess }) => {
-            const res = await controller.delete(selectedCustomer.id);
-
-            if (res.error) {
-              setError(res.error);
-            } else {
-              onSuccess();
-              fetchCustomers();
-            }
-          }
-        },
-        returnToWaitingList: {
-          onClick: () => {
-            setWlPosPicker({ index: 0, locked: false });
-          },
-          onCancel: () => setWlPosPicker(null),
-          onConfirm: async ({ onSuccess }) => {
-            const res = await controller.update(selectedCustomer.id, {
-              status: 'Waiting',
-              waitingListIndex: wlPosPicker!.index
-            });
-            if (res.error) {
-              setError(res.error);
-            } else {
-              onSuccess();
-              fetchCustomers();
-              setWlPosPicker(null);
-            }
-          },
-          confirmBtnDisabled: !wlPosPicker?.locked
-        },
-        callToStation: {
-          onClick: async () => {
-            if (customers.find((c) => c.status === 'Serving')) {
-              setError('You are already serving a customer.');
-            } else if (selectedCustomer.atOtherDivision) {
-              setError('Customer is being served at another division.');
-            } else {
-              const res = await controller.callToStation(selectedCustomer.id);
-              if (res.error) {
-                setError(res.error);
-              } else {
-                fetchCustomers();
-              }
-            }
-          }
-        },
-        finishServing: {
-          onClick: async () => {
-            const res = await controller.update(selectedCustomer.id, {
-              status: 'Served'
-            });
-            if (res.error) {
-              setError(res.error);
-            } else {
-              fetchCustomers();
-            }
-          }
-        },
-        markNoShow: {
-          onClick: () => null,
-          onCancel: () => null,
-          onConfirm: async ({ onSuccess }) => {
-            const res = await controller.update(selectedCustomer.id, {
-              status: 'No Show'
-            });
-
-            if (res.error) {
-              setError(res.error);
-            } else {
-              // TODO: Give success indication
-              fetchCustomers();
-              onSuccess();
-            }
-          }
-        }
-      },
-    [wlPosPicker, controller, selectedCustomer, customers, fetchCustomers]
-  );
-
   return (
     <>
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
@@ -189,13 +131,10 @@ export default function CustomerManagerView() {
             }
           />
           <div className={`ml-4`}>
-            <CustomerPanel customer={selectedCustomer}>
-              <ActionView
-                customer={selectedCustomer}
-                actionConfig={panelComponentActionBtnHandlers!}
-                currentDivision={filters.division}
-              />
-            </CustomerPanel>
+            <CustomerPanel
+              customer={selectedCustomer}
+              actionEventHandlers={customerPanelActionEventHandlers!}
+            />
           </div>
         </div>
       ) : (

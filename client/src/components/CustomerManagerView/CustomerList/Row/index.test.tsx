@@ -14,7 +14,7 @@ const mockCustomer: Customer = {
   status: 'Served',
   name: 'John Doe',
   checkInTime: new Date('2023-01-01T10:00:00Z'),
-  callTimes: [new Date('2023-01-01T10:30:00Z')],
+  timesCalled: [new Date('2023-01-01T10:30:00Z')],
   reasonsForVisit: ['Motor Vehicle']
 };
 
@@ -36,7 +36,7 @@ test('displays customer information', () => {
     screen.getByText(get12HourTimeString(mockCustomer.checkInTime))
   ).toBeInTheDocument();
   expect(
-    screen.getByText(get12HourTimeString(mockCustomer.callTimes[0]))
+    screen.getByText(get12HourTimeString(mockCustomer.timesCalled[0]))
   ).toBeInTheDocument();
 });
 
@@ -50,7 +50,7 @@ describe.each([
     const customer: Customer = {
       status: customerStatus,
       name: 'John Doe',
-      callTimes: [new Date()],
+      timesCalled: [new Date()],
       checkInTime: new Date(),
       id: 1,
       reasonsForVisit: ['Motor Vehicle']
