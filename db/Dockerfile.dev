@@ -1,0 +1,13 @@
+# Use the official MySQL image
+FROM mysql:8.0
+
+# Set environment variables
+ENV MYSQL_DATABASE=queuing_system
+ENV MYSQL_ROOT_PASSWORD=SurfBreak1270!
+
+# When container starts, this script will be executed
+COPY ./sql-scripts/ /docker-entrypoint-initdb.d/
+
+# Commands to run (from the db directory): 
+# docker build -t mysql-db -f Dockerfile.dev .
+# docker run -d -p 3306:3306 mysql-db
