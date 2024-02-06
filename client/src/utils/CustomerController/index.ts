@@ -15,6 +15,24 @@ const officeId = 1;
 
 export default class CustomerController {
   /**
+   * Creates a new customer.
+   */
+  static async create({
+    fullName,
+    divisions,
+    officeId
+  }: {
+    fullName: string;
+    divisions: string[];
+    officeId: number;
+  }): Promise<CustomerControllerSingleResult> {
+    console.log('Creating customer:', fullName, divisions, officeId);
+    // const res = await axios.post('/api/v1/customers', { fullName, divisions, officeId });
+
+    return { data: null, error: 'Not implemented' };
+  }
+
+  /**
    * Returns a Promise containing array of customers matching the specified filter criteria.
    *
    * @param {Object} filters - An object with filter properties.

@@ -22,9 +22,12 @@ export default function CustomerCheckInView() {
             ))}
         </h1>
         {/* max width needed */}
-        <h2 className="text-outer_space mb-4 text-xl font-medium">Self Check In</h2>
+        <h2 className="text-onyx mb-4 text-xl font-medium">Self Check In</h2>
 
-        <CheckInForm divisions={DUMMY_DIVISIONS} />
+        <CheckInForm
+          divisions={DUMMY_DIVISIONS}
+          onSubmitSuccess={(customer) => console.log(customer)}
+        />
       </main>
     </div>
   );

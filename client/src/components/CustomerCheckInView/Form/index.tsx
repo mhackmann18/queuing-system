@@ -1,16 +1,38 @@
+import { useState } from 'react';
+import Error from 'components/Error';
 import { CheckInFormProps, CheckInFormValues } from './types';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FULL_NAME_MAX_LENGTH } from 'utils/constants';
+import CustomerController from 'utils/CustomerController';
 
-export default function CustomerCheckInViewForm({ divisions }: CheckInFormProps) {
+const DUMMY_OFFICE_ID = 1;
+
+export default function CustomerCheckInViewForm({
+  divisions,
+  onSubmitSuccess
+}: CheckInFormProps) {
+  const [submitError, setSubmitError] = useState<string>('');
   const {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm<CheckInFormValues>();
 
-  const onSubmit: SubmitHandler<CheckInFormValues> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<CheckInFormValues> = async ({
+    fullName,
+    reasonForVisit
+  }) => {
+    const { error, data } = await CustomerController.create({
+      fullName,
+      divisions: reasonForVisit,
+      officeId: DUMMY_OFFICE_ID
+    });
+
+    if (error) {
+      setSubmitError(error);
+    } else if (data) {
+      onSubmitSuccess(data);
+    }
   };
 
   return (
@@ -42,7 +64,6 @@ export default function CustomerCheckInViewForm({ divisions }: CheckInFormProps)
         }`}
       >
         <legend className="font-semibold">Reason for Visit</legend>
-        {/* <p className="text-french_gray_2 mb-1">(Check all that apply)</p> */}
         {divisions.map((division, index) => (
           <div key={index} className="mt-4 flex items-center first-of-type:mt-0">
             <input
@@ -68,6 +89,9 @@ export default function CustomerCheckInViewForm({ divisions }: CheckInFormProps)
       >
         Check In
       </button>
+      {submitError && (
+        <Error error={submitError} close={() => setSubmitError('')} styles="mt-4" />
+      )}
     </form>
   );
 }
