@@ -1,29 +1,12 @@
 import React from 'react';
 import CheckInForm from './Form';
+import { formatString } from 'utils/helpers';
 
 const DUMMY_COMPANY_NAME = 'P&H MGMT LC Troy License Office';
 const DUMMY_DIVISIONS = ['Motor Vehicle', 'Driver License'];
 
-function formatString(input: string, lineLength: number) {
-  const words = input.split(' ');
-  let line = '';
-  let result = '';
-
-  for (let i = 0; i < words.length; i++) {
-    if ((line + words[i]).length <= lineLength) {
-      line += words[i] + ' ';
-    } else {
-      result += line + '\n';
-      line = words[i] + ' ';
-    }
-  }
-
-  result += line;
-  return result;
-}
-
 export default function CustomerCheckInView() {
-  // on first render, get the office name from the server
+  // on first render, get the office name and divisions from the server
 
   return (
     <div className="flex h-full">

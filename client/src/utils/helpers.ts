@@ -6,6 +6,24 @@ import {
   StatusFilter
 } from './types';
 
+const formatString = (input: string, lineLength: number) => {
+  const words = input.split(' ');
+  let line = '';
+  let result = '';
+
+  for (let i = 0; i < words.length; i++) {
+    if ((line + words[i]).length <= lineLength) {
+      line += words[i] + ' ';
+    } else {
+      result += line + '\n';
+      line = words[i] + ' ';
+    }
+  }
+
+  result += line;
+  return result;
+};
+
 /**
  * @param {Customer[]} customers The customers to find the next selected customer from.
  * @returns Returns a customer with the highest priority status.
@@ -190,5 +208,6 @@ export {
   getAvailableActions,
   getNextElement,
   getDeskName,
-  getNextSelectedCustomer
+  getNextSelectedCustomer,
+  formatString
 };
