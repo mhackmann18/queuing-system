@@ -45,15 +45,18 @@ export default function CustomerCheckInViewForm({
         type="text"
         id="fullName"
         {...register('fullName', {
-          required: true,
-          maxLength: FULL_NAME_MAX_LENGTH
+          required: { value: true, message: 'This field is required' },
+          maxLength: {
+            value: FULL_NAME_MAX_LENGTH,
+            message: `Maximum length of ${FULL_NAME_MAX_LENGTH} characters`
+          }
         })}
         className={`rounded-sm border p-2 ${
           errors.fullName ? 'border-red-600' : 'border-french_gray_2'
         }`}
       />
       {errors.fullName && (
-        <span className="text-red-600">This field is required</span>
+        <span className="text-red-600">{errors.fullName.message}</span>
       )}
 
       {/* Reason for Visit */}
@@ -70,7 +73,9 @@ export default function CustomerCheckInViewForm({
               type="checkbox"
               id={division}
               value={division}
-              {...register('reasonForVisit', { required: true })}
+              {...register('reasonForVisit', {
+                required: 'Please select at least one'
+              })}
               className="mr-4 inline-block h-5 w-5"
             />
             <label htmlFor={division}>{division}</label>
@@ -78,7 +83,7 @@ export default function CustomerCheckInViewForm({
         ))}
       </fieldset>
       {errors.reasonForVisit && (
-        <span className="text-red-600">Please select at least one</span>
+        <span className="text-red-600">{errors.reasonForVisit.message}</span>
       )}
 
       {/* Submit Button */}
@@ -89,6 +94,8 @@ export default function CustomerCheckInViewForm({
       >
         Check In
       </button>
+
+      {/* Submit Error */}
       {submitError && (
         <Error error={submitError} close={() => setSubmitError('')} styles="mt-4" />
       )}
