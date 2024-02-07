@@ -9,6 +9,7 @@ const SUCCESS_MESSAGE_DURATION = 5000;
 const DUMMY_COMPANY_NAME = 'P&H MGMT LC Troy License Office';
 const DUMMY_DIVISIONS = ['Motor Vehicle', 'Driver License'];
 
+// TODO: responsive design. Kiosks could be a tablet, phone, or desktop
 export default function CustomerCheckInView() {
   const [displaySuccess, setDisplaySuccess] = useState(false);
 

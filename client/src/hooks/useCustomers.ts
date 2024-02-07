@@ -21,7 +21,7 @@ export default function useCustomers(filters: CustomerFilters) {
     } else {
       // setError(res.error)
     }
-  }, [filters, controller]);
+  }, [controller, filters]);
 
   // Load new customers when filters change
   useEffect(() => {

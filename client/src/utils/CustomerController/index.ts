@@ -29,7 +29,7 @@ export default class CustomerController {
     console.log('Creating customer:', fullName, divisions, officeId);
     // const res = await axios.post('/api/v1/customers', { fullName, divisions, officeId });
 
-    return { data: 'null', error: undefined };
+    return { data: null, error: 'Not implemented' };
   }
 
   /**
@@ -66,7 +66,7 @@ export default class CustomerController {
       }
     }
 
-    // TODO: Make POST request /api/v1/customers
+    // TODO: Make GET request /api/v1/customers
     const response = await DummyApi.getCustomers({
       date,
       division,
