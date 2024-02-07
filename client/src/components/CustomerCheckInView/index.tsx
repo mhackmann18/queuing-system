@@ -11,7 +11,7 @@ export default function CustomerCheckInView() {
   return (
     <div className="flex h-full">
       <main className="m-auto w-full max-w-96 p-4">
-        <h1 className="mb-12 text-center text-2xl font-bold">
+        <h1 className="text-slate_gray mb-12 text-center text-xl font-bold">
           {formatString(DUMMY_COMPANY_NAME, 16)
             .split('\n')
             .map((line, index) => (
@@ -22,7 +22,7 @@ export default function CustomerCheckInView() {
             ))}
         </h1>
         {/* max width needed */}
-        <h2 className="text-onyx mb-4 text-xl font-medium">Self Check In</h2>
+        <h2 className=" text-onyx mb-4 text-2xl font-semibold">Check In</h2>
 
         <CheckInForm
           divisions={DUMMY_DIVISIONS}
