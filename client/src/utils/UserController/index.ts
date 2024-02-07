@@ -16,4 +16,20 @@ export default class UserController {
       return 2;
     }
   }
+
+  static async signIn({
+    username,
+    password
+  }: {
+    username: string;
+    password: string;
+  }) {
+    console.log(username, password);
+
+    // Make post request to /api/v1/signin
+    return {
+      data: null,
+      error: 'Not implemented'
+    };
+  }
 }

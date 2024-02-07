@@ -1,5 +1,7 @@
-import React from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import UserController from 'utils/UserController';
+import Error from 'components/Error';
 
 type FormData = {
   username: string;
@@ -7,19 +9,26 @@ type FormData = {
 };
 
 export default function FormGeneralUser() {
+  const [submitError, setSubmitError] = useState<string>('');
   const {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm<FormData>();
 
-  const onSubmit = (data: FormData) => {
-    // Handle form submission here
-    console.log(data);
+  const onSubmit = async ({ username, password }: FormData) => {
+    const { data, error } = await UserController.signIn({ username, password });
+
+    if (error) {
+      setSubmitError(error);
+    } else if (data) {
+      console.log(data);
+    }
   };
 
   return (
     <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+      {/* Username */}
       <label htmlFor="username" className="mb-1 mt-2 font-semibold">
         Username
       </label>
@@ -35,6 +44,7 @@ export default function FormGeneralUser() {
         <span className="text-red-600">{errors.username.message}</span>
       )}
 
+      {/* Password */}
       <div className="mb-1 mt-3 flex items-end">
         <label htmlFor="password" className="grow font-semibold">
           Password
@@ -53,6 +63,7 @@ export default function FormGeneralUser() {
         <span className="text-red-600">{errors.password.message}</span>
       )}
 
+      {/* Submit Button */}
       <button
         type="submit"
         className="bg-onyx hover:bg-outer_space mt-4 rounded-md px-3
@@ -60,6 +71,11 @@ export default function FormGeneralUser() {
       >
         Sign In
       </button>
+
+      {/* Submit Error */}
+      {submitError && (
+        <Error error={submitError} close={() => setSubmitError('')} styles="mt-4" />
+      )}
     </form>
   );
 }
