@@ -51,7 +51,7 @@ export default function CustomerCheckInViewForm({
             message: `Maximum length of ${FULL_NAME_MAX_LENGTH} characters`
           }
         })}
-        className={`rounded-sm border p-1.5 ${
+        className={`rounded-md border p-2 ${
           errors.fullName ? 'border-red-600' : 'border-french_gray_2-600'
         }`}
       />
@@ -62,7 +62,7 @@ export default function CustomerCheckInViewForm({
       {/* Reason for Visit */}
       <fieldset
         name="reasonForVisit"
-        className={`mt-4 rounded-sm border p-2 ${
+        className={`mt-4 rounded-md border p-2 ${
           errors.reasonForVisit ? 'border-red-600' : 'border-french_gray_2-600'
         }`}
       >

@@ -1,34 +1,47 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
+import SuccessPage from './SuccessPage';
 import CheckInForm from './Form';
-import { formatString } from 'utils/helpers';
+import CompanyNameHeading from './CompanyNameHeading';
 
+const SUCCESS_MESSAGE_DURATION = 5000;
+
+// TODO: replace with real data
 const DUMMY_COMPANY_NAME = 'P&H MGMT LC Troy License Office';
 const DUMMY_DIVISIONS = ['Motor Vehicle', 'Driver License'];
 
 export default function CustomerCheckInView() {
+  const [displaySuccess, setDisplaySuccess] = useState(false);
+
   // on first render, get the office name and divisions from the server
 
-  return (
+  // Close the success message after a few seconds
+  useEffect(() => {
+    if (!displaySuccess) {
+      return;
+    }
+
+    setTimeout(() => {
+      setDisplaySuccess(false);
+    }, SUCCESS_MESSAGE_DURATION);
+  }, [displaySuccess]);
+
+  return !displaySuccess ? (
     <div className="flex h-full">
       <main className="m-auto w-full max-w-96 p-4">
-        <h1 className="text-slate_gray mb-12 text-center text-xl font-bold">
-          {formatString(DUMMY_COMPANY_NAME, 16)
-            .split('\n')
-            .map((line, index) => (
-              <React.Fragment key={index}>
-                {line}
-                <br />
-              </React.Fragment>
-            ))}
-        </h1>
-        {/* max width needed */}
+        <CompanyNameHeading companyName={DUMMY_COMPANY_NAME} />
+
         <h2 className=" text-onyx mb-4 text-2xl font-semibold">Check In</h2>
 
         <CheckInForm
           divisions={DUMMY_DIVISIONS}
-          onSubmitSuccess={(customer) => console.log(customer)}
+          onSubmitSuccess={(customer) => {
+            console.log(customer);
+            setDisplaySuccess(true);
+          }}
         />
       </main>
     </div>
+  ) : (
+    <SuccessPage onDoneBtnClick={() => setDisplaySuccess(false)} />
   );
 }
