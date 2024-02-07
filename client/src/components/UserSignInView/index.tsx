@@ -30,7 +30,15 @@ export default function UserSignInView() {
         </fieldset>
 
         {/* General user signin form */}
-        <FormGeneralUser />
+        {userType === 'general' ? (
+          <FormGeneralUser
+            onSubmitSuccess={(data) => {
+              console.log(data);
+            }}
+          />
+        ) : (
+          'Not implemented'
+        )}
       </div>
     </div>
   );

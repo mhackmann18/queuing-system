@@ -2,13 +2,20 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import UserController from 'utils/UserController';
 import Error from 'components/Error';
+import TextInputLabel from 'components/Form/TextInputLabel';
+import SubmitBtn from 'components/Form/SubmitBtn';
+import TextInput from 'components/Form/TextInput';
+
+interface FormGeneralUserProps {
+  onSubmitSuccess: (data: unknown) => void;
+}
 
 type FormData = {
   username: string;
   password: string;
 };
 
-export default function FormGeneralUser() {
+export default function FormGeneralUser({ onSubmitSuccess }: FormGeneralUserProps) {
   const [submitError, setSubmitError] = useState<string>('');
   const {
     register,
@@ -22,55 +29,37 @@ export default function FormGeneralUser() {
     if (error) {
       setSubmitError(error);
     } else if (data) {
-      console.log(data);
+      onSubmitSuccess(data);
     }
   };
 
   return (
     <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
       {/* Username */}
-      <label htmlFor="username" className="mb-1 mt-2 font-semibold">
-        Username
-      </label>
-      <input
+      <TextInputLabel htmlFor="username" styles="mt-2 mb-1" />
+      <TextInput
         type="text"
-        id="username"
-        {...register('username', { required: 'Username is required' })}
-        className={`rounded-md border p-2 ${
-          errors.username ? 'border-red-600' : 'border-french_gray_2-600'
-        }`}
+        name="username"
+        register={register}
+        error={errors.username?.message}
+        required={true}
       />
-      {errors.username && (
-        <span className="text-red-600">{errors.username.message}</span>
-      )}
 
       {/* Password */}
       <div className="mb-1 mt-3 flex items-end">
-        <label htmlFor="password" className="grow font-semibold">
-          Password
-        </label>
+        <TextInputLabel htmlFor="password" styles="grow" />
         <span className="text-french_gray_2-400 text-sm">Forgot your password?</span>
       </div>
-      <input
+      <TextInput
         type="password"
-        id="password"
-        {...register('password', { required: 'Password is required' })}
-        className={`rounded-md border p-2 ${
-          errors.password ? 'border-red-600' : 'border-french_gray_2-600'
-        }`}
+        name="password"
+        register={register}
+        error={errors.password?.message}
+        required={true}
       />
-      {errors.password && (
-        <span className="text-red-600">{errors.password.message}</span>
-      )}
 
       {/* Submit Button */}
-      <button
-        type="submit"
-        className="bg-onyx hover:bg-outer_space mt-4 rounded-md px-3
-      py-2.5 font-medium text-white"
-      >
-        Sign In
-      </button>
+      <SubmitBtn text="Sign In" styles="mt-4" />
 
       {/* Submit Error */}
       {submitError && (

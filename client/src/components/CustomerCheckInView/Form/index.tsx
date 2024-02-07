@@ -2,8 +2,9 @@ import { useState } from 'react';
 import Error from 'components/Error';
 import { CheckInFormProps, CheckInFormValues } from './types';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { FULL_NAME_MAX_LENGTH } from 'utils/constants';
+import { FULL_NAME_MAX_LENGTH, REQUIRED_FIELD_ERROR } from 'utils/constants';
 import CustomerController from 'utils/CustomerController';
+import SubmitBtn from 'components/Form/SubmitBtn';
 
 const DUMMY_OFFICE_ID = 1;
 
@@ -38,14 +39,14 @@ export default function CustomerCheckInViewForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
       {/* Full Name */}
-      <label htmlFor="fullName" className="font-semibold">
+      <label htmlFor="fullName" className="mb-1 font-semibold">
         Full Name
       </label>
       <input
         type="text"
         id="fullName"
         {...register('fullName', {
-          required: { value: true, message: 'This field is required' },
+          required: REQUIRED_FIELD_ERROR,
           maxLength: {
             value: FULL_NAME_MAX_LENGTH,
             message: `Maximum length of ${FULL_NAME_MAX_LENGTH} characters`
@@ -87,13 +88,7 @@ export default function CustomerCheckInViewForm({
       )}
 
       {/* Submit Button */}
-      <button
-        type="submit"
-        className="bg-onyx hover:bg-outer_space mt-6 rounded-md px-3
-      py-2.5 font-medium text-white"
-      >
-        Check In
-      </button>
+      <SubmitBtn text="Check In" styles="mt-6" />
 
       {/* Submit Error */}
       {submitError && (
