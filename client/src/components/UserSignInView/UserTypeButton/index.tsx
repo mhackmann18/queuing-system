@@ -30,11 +30,11 @@ export default function UserTypeButton({
           className="mr-4 inline-block h-5 w-5"
           onChange={() => null}
         />
-        <label htmlFor={type} className="align-top text-lg font-medium">
+        <label htmlFor={type} className="align-top font-medium">
           {labelText}
         </label>
       </div>
-      <p className="font-md text-slate_gray text-left">{message}</p>
+      <p className="font-md text-slate_gray text-left text-sm">{message}</p>
     </button>
   );
 }

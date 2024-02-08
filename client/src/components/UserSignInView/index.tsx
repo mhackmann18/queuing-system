@@ -16,7 +16,7 @@ export default function UserSignInView() {
           <UserTypeButton
             type="general"
             labelText="General User"
-            message="Can manage customer queues and view service history within their assigned office."
+            message="Can view service history and manage customer queues within their assigned office."
             onClick={() => setUserType('general')}
             selected={userType === 'general'}
           />

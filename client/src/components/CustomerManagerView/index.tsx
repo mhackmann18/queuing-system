@@ -12,10 +12,13 @@ import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
+import { useParams } from 'react-router-dom';
 // import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
+  const { deskName } = useParams<{ deskName: string }>();
+  console.log(typeof deskName);
   const [wlPosPicker, setWlPosPicker] =
     useState<WaitingListPositionPickerState>(null);
   const [savedStatusFilters, setSavedStatusFilters] = useState<StatusFilters | null>(
