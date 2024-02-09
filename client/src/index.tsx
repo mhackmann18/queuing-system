@@ -31,7 +31,7 @@ const router = createBrowserRouter([
             element: <DashboardView />
           },
           {
-            path: 'customer-manager/:deskName', // :desk-
+            path: 'customer-manager', // :desk-
             element: <CustomerManagerView />
           },
           {
