@@ -24,7 +24,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Outlet />,
+        element: (
+          <UserContextProvider>
+            <Outlet />
+          </UserContextProvider>
+        ),
         children: [
           {
             index: true,
@@ -52,8 +56,4 @@ const router = createBrowserRouter([
   }
 ]);
 
-root.render(
-  <UserContextProvider>
-    <RouterProvider router={router} />
-  </UserContextProvider>
-);
+root.render(<RouterProvider router={router} />);

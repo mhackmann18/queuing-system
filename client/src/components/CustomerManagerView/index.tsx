@@ -130,7 +130,7 @@ export default function CustomerManagerView() {
               }
             }
           />
-          <div className={`ml-4`}>
+          <div className={`ml-4 h-full`}>
             <CustomerPanel
               customer={selectedCustomer}
               actionEventHandlers={customerPanelActionEventHandlers!}

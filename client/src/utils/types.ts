@@ -13,6 +13,8 @@ export interface User {
   id: number;
   division: Division;
   deskNum: number;
+  firstName: string;
+  lastName: string;
 }
 
 export type CustomerStatusBase = 'Waiting' | 'Serving' | 'Served' | 'No Show';
