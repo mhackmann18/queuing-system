@@ -1,38 +1,29 @@
-import { Link } from 'react-router-dom';
-import { IoArrowBack } from 'react-icons/io5';
 import CurrentTime from 'components/CurrentTime';
 import React from 'react';
-import DeskIcon from 'components/CustomerManagerView/Header/DeskIcon';
+import Breadcrumbs from './Breadcrumbs';
+import { MdAccountCircle } from 'react-icons/md';
 
 interface DashboardHeaderProps {
-  backLink?: string;
-  viewTitle: string;
   bottomRowChild: React.ReactNode;
 }
 
-export default function DashboardHeader({
-  backLink,
-  viewTitle,
-  bottomRowChild
-}: DashboardHeaderProps) {
+export default function DashboardHeader({ bottomRowChild }: DashboardHeaderProps) {
   return (
     <header className="h-28">
       {/* Header Row 1 */}
-      <div className="border-french_gray_1-600 border-b">
+      <div className="border-platinum-700 border-b">
         <div className="relative mx-auto flex h-16 max-w-5xl justify-between">
           <div className="flex items-center">
-            {backLink && (
-              <Link to={backLink} className="absolute -left-8 mr-4">
-                <IoArrowBack size={18} />
-              </Link>
-            )}
-            <h1 className="mr-4 inline-block w-80 items-center text-2xl font-bold">
-              {viewTitle}
-            </h1>
+            <Breadcrumbs />
           </div>
           <div className="flex items-center">
-            <CurrentTime styles="text-onyx-600 font-medium mr-3" />
-            <DeskIcon onClick={() => null} focused={false} />
+            <CurrentTime styles="mr-4" />
+            <button
+              type="button"
+              className="text-french_gray_2 hover:text-french_gray_2-400"
+            >
+              <MdAccountCircle size={26} />
+            </button>
           </div>
         </div>
       </div>

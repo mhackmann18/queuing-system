@@ -112,8 +112,6 @@ export default function CustomerManagerView() {
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
 
       <DashboardHeader
-        backLink=".."
-        viewTitle={`${filters.division} Customers`}
         bottomRowChild={
           <StatusFiltersComponent
             filters={filters}

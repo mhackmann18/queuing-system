@@ -42,8 +42,6 @@ export default function ServiceHistoryView() {
   return (
     <div className="h-full">
       <DashboardHeader
-        backLink=".."
-        viewTitle="Service History"
         bottomRowChild={
           <>
             <DateToggler
@@ -51,8 +49,11 @@ export default function ServiceHistoryView() {
               setDate={(newDate: Date) => setForDate(newDate)}
               setError={setError}
             />
-            <span>
-              Avg. Wait Time: {Math.floor(averageWaitTime / 1000 / 60)} min
+            <span className="font-medium">
+              Average Wait Time{' '}
+              <span className="text-outer_space-500 font-normal">
+                {Math.floor(averageWaitTime / 1000 / 60)} min
+              </span>
             </span>
           </>
         }
