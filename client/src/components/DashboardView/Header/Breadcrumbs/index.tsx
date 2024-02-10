@@ -34,7 +34,7 @@ export default function Breadcrumbs() {
             to={joinPathSegments(pathSegments.slice(0, index + 1))}
             className={`${
               index === pathSegments.length - 1
-                ? 'text-eerie_black font-semibold'
+                ? 'text-eerie_black text-lg font-semibold'
                 : 'text-french_gray_2'
             }`}
           >

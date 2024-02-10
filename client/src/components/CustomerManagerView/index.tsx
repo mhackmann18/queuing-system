@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import CustomerPanel from './CustomerPanel';
 import { Customer, StatusFilters } from 'utils/types';
 import { useEffect, useState } from 'react';
@@ -11,8 +12,7 @@ import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
-import DashboardHeader from 'components/DashboardView/Header';
-import StatusFiltersComponent from './Header/StatusFilters';
+import StatusFiltersButtons from './Header/StatusFiltersButtons';
 // import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
@@ -108,20 +108,19 @@ export default function CustomerManagerView() {
   ]);
 
   return (
-    <>
+    <div className="h-full">
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
 
-      <DashboardHeader
-        bottomRowChild={
-          <StatusFiltersComponent
-            filters={filters}
-            setStatusFilters={filterUtils.setStatuses}
-          />
-        }
-      />
+      <div className="relative mx-auto flex h-14 max-w-5xl items-center">
+        <StatusFiltersButtons
+          filters={filters}
+          setStatusFilters={filterUtils.setStatuses}
+        />
+        <div className="border-platinum-700 absolute -left-[calc((100vw-64rem)/2)] bottom-0 w-screen border-b"></div>
+      </div>
 
       {customers.length && selectedCustomer ? (
-        <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
+        <div className="mx-auto flex h-[calc(100%-3.5rem)] max-w-5xl justify-between pt-4">
           <CustomerList
             customers={customers}
             selectedCustomer={selectedCustomer}
@@ -155,6 +154,6 @@ export default function CustomerManagerView() {
           <Error error={error} close={() => setError('')} />
         </div>
       )}
-    </>
+    </div>
   );
 }

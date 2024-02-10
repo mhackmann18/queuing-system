@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
-import FilterButton from 'components/CustomerManagerView/Header/StatusFilters/FilterButton';
-import { StatusFilterButtonsProps } from './types';
+import FilterButton from 'components/CustomerManagerView/Header/StatusFiltersButtons/FilterButton';
+import { StatusFiltersButtonsProps } from './types';
 import { sameDay } from 'utils/helpers';
 import { StatusFilter } from 'utils/types';
 
-export default function StatusFilterButtons({
+export default function StatusFiltersButtons({
   filters,
-  setStatusFilters
-}: StatusFilterButtonsProps) {
+  setStatusFilters,
+  containerStyles = ''
+}: StatusFiltersButtonsProps) {
   const { statuses } = filters;
 
   const buttonsConfig = useMemo(() => {
@@ -41,7 +42,7 @@ export default function StatusFilterButtons({
   }, [filters.date, filters.statuses, setStatusFilters, statuses]);
 
   return (
-    <div>
+    <div className={`${containerStyles}`}>
       <ul className="inline-block">
         {buttonsConfig.map(({ name, onClick, active, disabled }) => (
           <li key={name} className="mr-2 inline-block">

@@ -1,9 +1,10 @@
 import { ReactEventHandler } from 'react';
 import { CustomerFilters, StatusFilters } from 'utils/types';
 
-export interface StatusFilterButtonsProps {
+export interface StatusFiltersButtonsProps {
   filters: CustomerFilters;
   setStatusFilters: (statuses: StatusFilters) => void;
+  containerStyles?: string;
 }
 
 export interface FilterButtonComponent {

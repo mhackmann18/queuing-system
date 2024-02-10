@@ -9,6 +9,8 @@ import CustomerCheckInView from 'components/CustomerCheckInView';
 import CustomerWaitingListView from 'components/CustomerWaitingListView';
 import CustomerManagerView from 'components/CustomerManagerView';
 import ServiceHistoryView from 'components/ServiceHistoryView';
+import DashboardOutlet from 'components/DashboardView/Outlet';
+import DeskPickerView from 'components/DeskPickerView';
 import { Outlet } from 'react-router-dom';
 
 const container = document.getElementById('root') as HTMLDivElement;
@@ -27,7 +29,7 @@ const router = createBrowserRouter([
         path: 'dashboard',
         element: (
           <UserContextProvider>
-            <Outlet />
+            <DashboardOutlet />
           </UserContextProvider>
         ),
         children: [
@@ -37,7 +39,17 @@ const router = createBrowserRouter([
           },
           {
             path: 'customer-manager', // :desk-
-            element: <CustomerManagerView />
+            element: <Outlet />,
+            children: [
+              {
+                index: true,
+                element: <DeskPickerView />
+              },
+              {
+                path: ':customersType',
+                element: <CustomerManagerView />
+              }
+            ]
           },
           {
             path: 'waiting-list',

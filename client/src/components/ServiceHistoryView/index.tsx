@@ -4,7 +4,6 @@ import CustomerList from 'components/CustomerManagerView/CustomerList';
 import useCustomers from 'hooks/useCustomers';
 import { Customer } from 'utils/types';
 import Error from 'components/Error';
-import DashboardHeader from 'components/DashboardView/Header';
 import CustomerPanel from 'components/CustomerManagerView/CustomerPanel';
 
 export default function ServiceHistoryView() {
@@ -42,23 +41,19 @@ export default function ServiceHistoryView() {
 
   return (
     <div className="h-full">
-      <DashboardHeader
-        bottomRowChild={
-          <>
-            <DateToggler
-              date={forDate}
-              setDate={(newDate: Date) => setForDate(newDate)}
-              setError={setError}
-            />
-            <span className="font-medium">
-              Average Wait Time:{' '}
-              <span className="text-outer_space-500 font-normal">
-                {Math.floor(averageWaitTime / 1000 / 60)} min
-              </span>
-            </span>
-          </>
-        }
-      />
+      <div className="flex items-center justify-between">
+        <DateToggler
+          date={forDate}
+          setDate={(newDate: Date) => setForDate(newDate)}
+          setError={setError}
+        />
+        <span className="font-medium">
+          Average Wait Time:{' '}
+          <span className="text-outer_space-500 font-normal">
+            {Math.floor(averageWaitTime / 1000 / 60)} min
+          </span>
+        </span>
+      </div>
       <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
         {selectedCustomer && (
           <CustomerList
