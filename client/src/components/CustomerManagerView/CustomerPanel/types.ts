@@ -45,7 +45,7 @@ export interface CustomerPanelActionEventHandlers {
 
 export interface CustomerPanelProps {
   customer: Customer;
-  actionEventHandlers: CustomerPanelActionEventHandlers;
+  actionEventHandlers?: CustomerPanelActionEventHandlers;
 }
 
 export type CustomerPanelState = 'default' | 'delete' | 'rtwl' | 'mark_no_show';

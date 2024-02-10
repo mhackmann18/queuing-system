@@ -9,7 +9,8 @@ export default function UserContextProvider({ children }: UserContextProviderPro
     division: 'Motor Vehicle',
     deskNum: 1,
     firstName: 'John',
-    lastName: 'Doe'
+    lastName: 'Doe',
+    username: 'johndoe'
   });
 
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>;

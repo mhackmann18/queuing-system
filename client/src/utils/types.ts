@@ -15,6 +15,7 @@ export interface User {
   deskNum: number;
   firstName: string;
   lastName: string;
+  username: string;
 }
 
 export type CustomerStatusBase = 'Waiting' | 'Serving' | 'Served' | 'No Show';

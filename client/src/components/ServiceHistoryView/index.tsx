@@ -5,6 +5,7 @@ import useCustomers from 'hooks/useCustomers';
 import { Customer } from 'utils/types';
 import Error from 'components/Error';
 import DashboardHeader from 'components/DashboardView/Header';
+import CustomerPanel from 'components/CustomerManagerView/CustomerPanel';
 
 export default function ServiceHistoryView() {
   const [forDate, setForDate] = useState<Date>(new Date());
@@ -50,7 +51,7 @@ export default function ServiceHistoryView() {
               setError={setError}
             />
             <span className="font-medium">
-              Average Wait Time{' '}
+              Average Wait Time:{' '}
               <span className="text-outer_space-500 font-normal">
                 {Math.floor(averageWaitTime / 1000 / 60)} min
               </span>
@@ -58,7 +59,7 @@ export default function ServiceHistoryView() {
           </>
         }
       />
-      <div className="mx-auto mt-4 h-[calc(100%-8rem)] max-w-5xl">
+      <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
         {selectedCustomer && (
           <CustomerList
             customers={customers}
@@ -68,7 +69,16 @@ export default function ServiceHistoryView() {
             wlPosPicker={null}
           />
         )}
+        <div className={`ml-4 h-full`}>
+          {selectedCustomer && (
+            <CustomerPanel
+              customer={selectedCustomer}
+              // actionEventHandlers={customerPanelActionEventHandlers!}
+            />
+          )}
+        </div>
       </div>
+
       {error && (
         <div className={`fixed bottom-10 right-10 z-20`}>
           <Error error={error} close={() => setError('')} />

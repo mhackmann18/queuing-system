@@ -1,13 +1,16 @@
 import CurrentTime from 'components/CurrentTime';
-import React from 'react';
+import React, { useContext } from 'react';
 import Breadcrumbs from './Breadcrumbs';
 import { MdAccountCircle } from 'react-icons/md';
+import { UserContext } from 'components/UserContextProvider/context';
 
 interface DashboardHeaderProps {
   bottomRowChild: React.ReactNode;
 }
 
 export default function DashboardHeader({ bottomRowChild }: DashboardHeaderProps) {
+  const { username } = useContext(UserContext);
+
   return (
     <header className="h-28">
       {/* Header Row 1 */}
@@ -17,12 +20,13 @@ export default function DashboardHeader({ bottomRowChild }: DashboardHeaderProps
             <Breadcrumbs />
           </div>
           <div className="flex items-center">
-            <CurrentTime styles="mr-4" />
+            <CurrentTime styles="mr-6" />
             <button
               type="button"
-              className="text-french_gray_2 hover:text-french_gray_2-400"
+              className="text-french_gray_2 hover:text-french_gray_2-400 flex items-center"
             >
-              <MdAccountCircle size={26} />
+              <span className="mr-2 font-medium">{username}</span>
+              <MdAccountCircle className="inline" size={26} />
             </button>
           </div>
         </div>

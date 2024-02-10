@@ -30,12 +30,14 @@ export default function CustomerPanel({
       </div>
 
       {/* Actions */}
-      <Actions
-        customer={customer}
-        actionEventHandlers={actionEventHandlers}
-        panelState={state}
-        setPanelState={setState}
-      />
+      {actionEventHandlers && (
+        <Actions
+          customer={customer}
+          actionEventHandlers={actionEventHandlers}
+          panelState={state}
+          setPanelState={setState}
+        />
+      )}
 
       {/* Info */}
       {state === 'default' && <CustomerPanelInfo customer={customer} />}
