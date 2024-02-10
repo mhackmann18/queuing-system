@@ -8,6 +8,7 @@ import DashboardView from 'components/DashboardView';
 import CustomerCheckInView from 'components/CustomerCheckInView';
 import CustomerWaitingListView from 'components/CustomerWaitingListView';
 import CustomerManagerView from 'components/CustomerManagerView';
+import ServiceHistoryView from 'components/ServiceHistoryView';
 import { Outlet } from 'react-router-dom';
 
 const container = document.getElementById('root') as HTMLDivElement;
@@ -48,7 +49,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'service-history',
-            element: 'Service History'
+            element: <ServiceHistoryView />
           }
         ]
       }

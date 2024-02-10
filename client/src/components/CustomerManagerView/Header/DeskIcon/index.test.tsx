@@ -6,7 +6,15 @@ import { UserContext } from 'components/UserContextProvider/context';
 import { User } from 'utils/types';
 import { getDeskName } from 'utils/helpers';
 
-function setup(mockUser: User = { id: 1, division: 'Motor Vehicle', deskNum: 1 }) {
+function setup(
+  mockUser: User = {
+    id: 1,
+    division: 'Motor Vehicle',
+    deskNum: 1,
+    firstName: 'John',
+    lastName: 'Doe'
+  }
+) {
   const mockOnClick = jest.fn();
 
   const utils = render(
@@ -23,11 +31,35 @@ function setup(mockUser: User = { id: 1, division: 'Motor Vehicle', deskNum: 1 }
 }
 
 const mockUsers: User[] = [
-  { id: 1, division: 'Motor Vehicle', deskNum: 3 },
-  { id: 2, division: 'Licensing', deskNum: 1 },
-  { id: 3, division: 'License Offices Bureau', deskNum: 1 },
-  { id: 4, division: 'Driver License Bureau', deskNum: 11 },
-  { id: 5, division: 'Motor Vehicle', deskNum: 12 }
+  {
+    id: 1,
+    division: 'Motor Vehicle',
+    deskNum: 3,
+    firstName: 'John',
+    lastName: 'Doe'
+  },
+  { id: 2, division: 'Licensing', deskNum: 1, firstName: 'John', lastName: 'Doe' },
+  {
+    id: 3,
+    division: 'License Offices Bureau',
+    deskNum: 1,
+    firstName: 'John',
+    lastName: 'Doe'
+  },
+  {
+    id: 4,
+    division: 'Driver License Bureau',
+    deskNum: 11,
+    firstName: 'John',
+    lastName: 'Doe'
+  },
+  {
+    id: 5,
+    division: 'Motor Vehicle',
+    deskNum: 12,
+    firstName: 'John',
+    lastName: 'Doe'
+  }
 ];
 
 test.each(mockUsers)('displays station name properly', (mockUser) => {

@@ -1,22 +1,23 @@
 import { ManageCustomersHeaderProps } from './types';
-import DeskIcon from './DeskIcon';
+// import DeskIcon from './DeskIcon';
 import StatusFilters from './StatusFilters';
-import DateToggler from './DateToggler';
 // import { FaChevronDown } from 'react-icons/fa';
-import { useContext, useRef, useState } from 'react';
-import { UserContext } from 'components/UserContextProvider/context';
-import DeskMenu from './DeskMenu';
+// import { useContext, useRef, useState } from 'react';
+// import { UserContext } from 'components/UserContextProvider/context';
+// import DeskMenu from './DeskMenu';
+import { Link } from 'react-router-dom';
 // import { Division } from 'utils/types';
 // import { getNextElement } from 'utils/helpers';
+import { IoArrowBack } from 'react-icons/io5';
 
 export default function ManageCustomersHeader({
   filters,
   filterSetters,
   setError
 }: ManageCustomersHeaderProps) {
-  const user = useContext(UserContext);
-  const stationIconBtnRef = useRef<HTMLButtonElement>(null);
-  const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
+  // const user = useContext(UserContext);
+  // const stationIconBtnRef = useRef<HTMLButtonElement>(null);
+  // const [stationMenuActive, setStationMenuActive] = useState<boolean>(false);
 
   // const handleChangeDeptBtnClick = () => {
   //   // API.getOfficeDivisions returns
@@ -33,6 +34,9 @@ export default function ManageCustomersHeader({
       <div className="border-b">
         <div className="relative mx-auto flex h-16 max-w-5xl justify-between">
           <div className="flex items-center">
+            <Link to="/dashboard" className="mr-4">
+              <IoArrowBack />
+            </Link>
             <h1 className="mr-4 inline-block w-80 items-center text-2xl font-bold">
               {filters.division} Customers
             </h1>
@@ -44,6 +48,9 @@ export default function ManageCustomersHeader({
             </button> */}
           </div>
           <div className="flex items-center">
+            The current date and time goes here
+          </div>
+          {/* <div className="flex items-center">
             {user.division && ( // TODO: determine behavior of no station
               <DeskIcon
                 onClick={() => setStationMenuActive(!stationMenuActive)}
@@ -59,21 +66,21 @@ export default function ManageCustomersHeader({
               active={stationMenuActive}
               setActive={setStationMenuActive}
             />
-          )}
+          )} */}
         </div>
       </div>
       {/* Header Row 2 */}
       <div className="border-b shadow-sm">
-        <div className="mx-auto flex max-w-5xl justify-between py-3">
+        <div className="mx-auto flex max-w-5xl py-3">
           <StatusFilters
             filters={filters}
             setStatusFilters={filterSetters.setStatuses}
           />
-          <DateToggler
+          {/* <DateToggler
             date={filters.date}
             setDate={(newDate: Date) => filterSetters.setDate(newDate)}
             setError={setError}
-          />
+          /> */}
         </div>
       </div>
     </header>
