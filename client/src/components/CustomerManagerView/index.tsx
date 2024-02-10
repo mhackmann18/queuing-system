@@ -2,7 +2,6 @@ import CustomerPanel from './CustomerPanel';
 import { Customer, StatusFilters } from 'utils/types';
 import { useEffect, useState } from 'react';
 import CustomerList from './CustomerList';
-import Header from './Header';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/useCustomers';
 import Error from 'components/Error';
@@ -12,6 +11,8 @@ import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
+import DashboardHeader from 'components/DashboardView/Header';
+import StatusFiltersComponent from './Header/StatusFilters';
 // import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
@@ -110,7 +111,16 @@ export default function CustomerManagerView() {
     <>
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
 
-      <Header filters={filters} filterSetters={filterUtils} setError={setError} />
+      <DashboardHeader
+        backLink=".."
+        viewTitle={`${filters.division} Customers`}
+        bottomRowChild={
+          <StatusFiltersComponent
+            filters={filters}
+            setStatusFilters={filterUtils.setStatuses}
+          />
+        }
+      />
 
       {customers.length && selectedCustomer ? (
         <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">

@@ -54,7 +54,7 @@ export default function CustomerList({
 
   return (
     <div
-      className={`flex grow flex-col bg-white ${
+      className={`flex h-full grow flex-col bg-white ${
         wlPosPicker && 'border-french_gray_1 z-10 rounded-lg border'
       }`}
     >
