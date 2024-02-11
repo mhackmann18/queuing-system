@@ -57,29 +57,21 @@ namespace CustomerApi.Controllers
         }
         [HttpGet("divisions/{id}")]
         public async Task<ActionResult<Division>> GetDivision(string id)
-        {
-            if (id != customer.customerId)
-            {
-                return BadRequest();
-            }
+        {               Console.WriteLine("saklmfkalmsflkmalkmkmfs");
+            var x = 5;
+            var y = 7;
+            var square = Math.Pow(x, y);
+            var division = await _context.DIVISION.FindAsync(id);
 
-            _context.Entry(customer).State = EntityState.Modified;
+                Console.WriteLine("saklmfkalmsflkmalkmkmfs");
 
-            try
+            if (division == null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                Console.WriteLine("Division not found");
+                Console.WriteLine("saklmfkalmsflkmalkmkmfs");
+                return NotFound();
+            }                Console.WriteLine("saklmfkalmsflkmalkmkmfs");
+
 
             return NoContent();
         }
