@@ -57,15 +57,21 @@ namespace CustomerApi.Controllers
         }
         [HttpGet("divisions/{id}")]
         public async Task<ActionResult<Division>> GetDivision(string id)
-        {
+        {               Console.WriteLine("saklmfkalmsflkmalkmkmfs");
+            var x = 5;
+            var y = 7;
+            var square = Math.Pow(x, y);
             var division = await _context.DIVISION.FindAsync(id);
 
+                Console.WriteLine("saklmfkalmsflkmalkmkmfs");
 
             if (division == null)
             {
                 Console.WriteLine("Division not found");
+                Console.WriteLine("saklmfkalmsflkmalkmkmfs");
                 return NotFound();
-            }
+            }                Console.WriteLine("saklmfkalmsflkmalkmkmfs");
+
 
             return division;
         }
