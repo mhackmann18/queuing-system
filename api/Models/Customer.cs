@@ -1,56 +1,3 @@
-// using System.ComponentModel;
-// using Newtonsoft.Json;
-
-// namespace CustomerApi.Models;
-
-// public class Customer
-// {
-//     public required string FirstName { get; set; }
-
-//     public required string LastName { get; set; }
-
-//     public long Id { get; set; }
-
-//     public DateTime CheckInTime { get; set; }
-
-//     // public long DepartmentId { get; set;}
-//     public MotorVehicle? MotorVehicle { get; set; }
-//     public DriversLicense? DriversLicense { get; set; }
-
-// }
-
-
-// public class MotorVehicle
-// {
-//     public CustomerStatus Status { get; set; }
-//     public string[]? CallTimes { get; set; }
-// }
-
-// public class DriversLicense
-// {
-//     public CustomerStatus Status { get; set; }
-//     public string[]? CallTimes { get; set; }
-// }
-
-// public enum CustomerStatus
-// {
-//     // CustomerRawStatus enum values\    
-//     [JsonProperty("Waiting")]
-
-//     Waiting,
-//         [JsonProperty("Served")]
-
-//     Served,
-//         [JsonProperty("Serving")]
-
-//     Serving,
-//     [Description("No Show")]
-//     [JsonProperty("NoShow")]
-//     NoShow
-// }
-
-
-
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
@@ -91,32 +38,13 @@ internal class MyContext : DbContext
 }
 
 public class PostedCustomer
-        {
-            public required string fullName { get; set; }
-            public required string officeId { get; set; }
-            public required string[] divisions { get; set; }
+{
+    public required string fullName { get; set; }
+    public required string officeId { get; set; }
+    public required string[] divisions { get; set; }
 
-        };
+};
 
-// public class BloggingContext : DbContext
-// {
-//     public DbSet<Customer> Customers { get; set; }
-//     public DbSet<Division> Divisions { get; set; }
-
-//     public string DbPath { get; }
-
-//     public BloggingContext()
-//     {
-//         var folder = Environment.SpecialFolder.LocalApplicationData;
-//         var path = Environment.GetFolderPath(folder);
-//         DbPath = System.IO.Path.Join(path, "blogging.db");
-//     }
-
-//     // The following configures EF to create a Sqlite database file in the
-//     // special "local" folder for your platform.
-//     protected override void OnConfiguring(DbContextOptionsBuilder options)
-//         => options.UseSqlite($"Data Source={DbPath}");
-// }
 
 [PrimaryKey(nameof(customerId))]
 public class Customer
