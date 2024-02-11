@@ -22,7 +22,6 @@ namespace CustomerApi.Controllers
 
         // private readonly IConfiguration _configuration;
 
-
         public CustomerController(CustomerContext context)
         {
             _context = context;
@@ -73,12 +72,15 @@ namespace CustomerApi.Controllers
         public async Task<ActionResult<CustomerDivision>> GetCustomerDivision(string id)
         {
             var customerDivision = await _context.CUSTOMERDIVISION.FindAsync(id);
-
+            // bubbah bubbah bubbah
 
             if (customerDivision == null)
             {
                 return NotFound();
             }
+
+            Console.WriteLine("This is a waste of time");
+            customerDivision.customerId = "bubbah";
 
             return customerDivision;
         }
@@ -150,7 +152,7 @@ namespace CustomerApi.Controllers
                     await PostCustomerDivision(customerDivision);
                 }
             }
-            
+
             //  Customer customer = new Customer
             // {
             //     fullName = "js",
