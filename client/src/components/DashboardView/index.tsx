@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { PiUserListBold } from 'react-icons/pi';
 import { LuListChecks } from 'react-icons/lu';
-
 import { FaTabletScreenButton } from 'react-icons/fa6';
 import { PiTelevisionSimpleBold } from 'react-icons/pi';
 
@@ -19,7 +18,7 @@ export default function DashboardView() {
         </Link>
         <Link
           to="service-history"
-          className="bg-onyx hover:bg-outer_space mb-2 flex items-center rounded-md p-3 text-white"
+          className="bg-onyx hover:bg-outer_space mb-4 flex items-center rounded-md p-3 text-white"
         >
           <LuListChecks className="mr-2" />
           Service History

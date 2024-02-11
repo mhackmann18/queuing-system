@@ -1,6 +1,6 @@
 /* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import CustomerPanel from './CustomerPanel';
-import { Customer, StatusFilters } from 'utils/types';
+import { Customer } from 'utils/types';
 import { useEffect, useState } from 'react';
 import CustomerList from './CustomerList';
 import useCustomerFilters from 'hooks/useCustomerFilters';
@@ -19,9 +19,6 @@ export default function CustomerManagerView() {
   // Application state and custom hooks
   const [wlPosPicker, setWlPosPicker] =
     useState<WaitingListPositionPickerState>(null);
-  const [savedStatusFilters, setSavedStatusFilters] = useState<StatusFilters | null>(
-    null
-  );
   const [error, setError] = useState<string>('');
   const { filters, ...filterUtils } = useCustomerFilters();
   const { customers, fetchCustomers, controller } = useCustomers(filters);
@@ -73,39 +70,6 @@ export default function CustomerManagerView() {
       updatedSelectedCustomer || getNextSelectedCustomer(customers)
     );
   }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
-
-  // Save old status filters so that when customer returns to main view, their old filters are active
-  useEffect(() => {
-    /* If there are saved status filters, and no special conditions apply (previous 
-    date, or WL pos picker active) replace the current ones with the saved, and clear 
-    clear the saved */
-    if (savedStatusFilters && sameDay(filters.date, new Date()) && !wlPosPicker) {
-      filterUtils.setStatuses({ ...savedStatusFilters });
-      setSavedStatusFilters(null);
-    }
-    // Save current status filters and replace with relevant filters for previous date customers
-    if (!sameDay(filters.date, new Date()) && !savedStatusFilters) {
-      setSavedStatusFilters({ ...filters.statuses });
-      filterUtils.setStatuses({ Served: true, 'No Show': true });
-    }
-    // Save current status filters and replace with relevant filters for WL pos picker
-    if (wlPosPicker && !savedStatusFilters) {
-      setSavedStatusFilters({ ...filters.statuses });
-      if (selectedCustomer!.status === 'Serving') {
-        filterUtils.setStatuses({ Waiting: true, Serving: true });
-      } else if (selectedCustomer!.status === 'No Show') {
-        filterUtils.setStatuses({ 'No Show': true, Waiting: true });
-      }
-    }
-  }, [
-    filters.date,
-    filters.statuses,
-    filterUtils.setStatuses,
-    filterUtils,
-    savedStatusFilters,
-    wlPosPicker,
-    selectedCustomer
-  ]);
 
   return (
     <div className="h-full">
