@@ -68,6 +68,7 @@ internal class MyContext : DbContext
 
     public DbSet<Customer> CUSTOMER { get; set; }
 
+
     #region Required
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -89,6 +90,14 @@ internal class MyContext : DbContext
     #endregion
 }
 
+public class PostedCustomer
+        {
+            public required string fullName { get; set; }
+            public required string officeId { get; set; }
+            public required string[] divisions { get; set; }
+
+        };
+
 // public class BloggingContext : DbContext
 // {
 //     public DbSet<Customer> Customers { get; set; }
@@ -108,19 +117,18 @@ internal class MyContext : DbContext
 //     protected override void OnConfiguring(DbContextOptionsBuilder options)
 //         => options.UseSqlite($"Data Source={DbPath}");
 // }
+
 [PrimaryKey(nameof(customerId))]
 public class Customer
 {
     [Column(TypeName = "varchar(36)")]
     public required string customerId { get; set; }
 
-    [Column(TypeName = "varchar(36)")]
-    public required string divisionId { get; set; }
+    // [Column(TypeName = "varchar(36)")]
+    // public required string divisionId { get; set; }
 
     [Column(TypeName = "varchar(50)")]
-    public required string firstName { get; set; }
-    [Column(TypeName = "varchar(50)")]
-    public required string lastName { get; set; }
+    public required string fullName { get; set; }
 
     public required DateTime checkInTime { get; set; }
 }
