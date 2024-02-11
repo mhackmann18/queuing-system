@@ -15,4 +15,8 @@ public class CustomerContext : DbContext
 
 
     public DbSet<Customer> CUSTOMER { get; set; } = null!;
+    public DbSet<Division> DIVISION { get; set; } = null!;
+    public DbSet<CustomerDivision> CUSTOMERDIVISION { get; set; } = null!;
+
+
 }
