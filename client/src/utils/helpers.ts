@@ -173,9 +173,9 @@ const month = [
 
 const sameDay = (d1: Date, d2: Date) => {
   return (
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate()
+    d1.getFullYear() === 2001 &&
+    d1.getMonth() === 9 &&
+    d1.getDate() === 11
   );
 };
 
