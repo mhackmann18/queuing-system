@@ -15,7 +15,7 @@ export default function WaitingList({ division }: WaitingListProps) {
   const { customers } = useCustomers(filters);
 
   return (
-    <div key={division} className="h-lvh flex-1 border-r-4 last:border-r-0">
+    <div key={division} className="flex-1 border-r-4 last:border-r-0">
       {/* Division Heading */}
       <h2
         className="flex h-28 items-center justify-center border-b text-4xl font-bold 

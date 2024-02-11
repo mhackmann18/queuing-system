@@ -1,13 +1,18 @@
+/* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import { useEffect, useMemo, useState } from 'react';
-import DateToggler from 'components/CustomerManagerView/Header/DateToggler';
 import CustomerList from 'components/CustomerManagerView/CustomerList';
 import useCustomers from 'hooks/useCustomers';
 import { Customer } from 'utils/types';
 import Error from 'components/Error';
 import CustomerPanel from 'components/CustomerManagerView/CustomerPanel';
+import FilterButton from 'components/CustomerManagerView/Header/StatusFiltersButtons/FilterButton';
+import { getDateString } from 'utils/helpers';
+import { FaRegCalendarAlt } from 'react-icons/fa';
+
+const DUMMY_DIVISIONS = ['Motor Vehicle', 'Driver License'];
 
 export default function ServiceHistoryView() {
-  const [forDate, setForDate] = useState<Date>(new Date());
+  const [forDate] = useState<Date>(new Date());
   const filters = useMemo(
     () => ({
       statuses: { Served: true, 'No Show': true },
@@ -41,20 +46,30 @@ export default function ServiceHistoryView() {
 
   return (
     <div className="h-full">
-      <div className="flex items-center justify-between">
-        <DateToggler
-          date={forDate}
-          setDate={(newDate: Date) => setForDate(newDate)}
-          setError={setError}
-        />
+      <div className="relative flex h-14 items-center justify-between">
+        <div>
+          <FilterButton
+            onClick={() => null}
+            text={
+              <div className="flex items-center">
+                <FaRegCalendarAlt size={14} className="mr-2" />
+                {getDateString(forDate)}
+              </div>
+            }
+          />
+          {DUMMY_DIVISIONS.map((division) => (
+            <FilterButton onClick={() => null} text={division} key={division} />
+          ))}
+        </div>
         <span className="font-medium">
           Average Wait Time:{' '}
           <span className="text-outer_space-500 font-normal">
             {Math.floor(averageWaitTime / 1000 / 60)} min
           </span>
         </span>
+        <div className="border-platinum-700 absolute -left-[calc((100vw-64rem)/2)] bottom-0 w-screen border-b"></div>
       </div>
-      <div className="mx-auto mt-4 flex h-[calc(100%-8rem)] max-w-5xl justify-between pt-4">
+      <div className="mx-auto flex h-[calc(100%-3.5rem)] max-w-5xl justify-between pt-4">
         {selectedCustomer && (
           <CustomerList
             customers={customers}

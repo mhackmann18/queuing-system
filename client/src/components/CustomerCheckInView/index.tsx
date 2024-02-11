@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react';
 import SuccessPage from './SuccessPage';
-import CheckInForm from './Form';
-import CompanyNameHeading from './CompanyNameHeading';
+import CheckIn from './CheckIn';
 
 const SUCCESS_MESSAGE_DURATION = 5000;
-
-// TODO: replace with real data
-const DUMMY_COMPANY_NAME = 'P&H MGMT LC Troy License Office';
-const DUMMY_DIVISIONS = ['Motor Vehicle', 'Driver License'];
 
 // TODO: responsive design. Kiosks could be a tablet, phone, or desktop
 export default function CustomerCheckInView() {
@@ -26,23 +21,20 @@ export default function CustomerCheckInView() {
     }, SUCCESS_MESSAGE_DURATION);
   }, [displaySuccess]);
 
-  return !displaySuccess ? (
-    <div className="flex h-full">
-      <main className="m-auto w-full max-w-96 p-4">
-        <CompanyNameHeading companyName={DUMMY_COMPANY_NAME} />
-
-        <h2 className=" text-onyx mb-4 text-2xl font-semibold">Check In</h2>
-
-        <CheckInForm
-          divisions={DUMMY_DIVISIONS}
-          onSubmitSuccess={(customer) => {
-            console.log(customer);
-            setDisplaySuccess(true);
-          }}
-        />
-      </main>
+  return (
+    <div className="fixed inset-0 z-20 h-lvh w-screen bg-white">
+      {!displaySuccess ? (
+        <div className="flex h-full">
+          <CheckIn
+            onSubmitSuccess={(customer) => {
+              console.log(customer);
+              setDisplaySuccess(true);
+            }}
+          />
+        </div>
+      ) : (
+        <SuccessPage onDoneBtnClick={() => setDisplaySuccess(false)} />
+      )}
     </div>
-  ) : (
-    <SuccessPage onDoneBtnClick={() => setDisplaySuccess(false)} />
   );
 }

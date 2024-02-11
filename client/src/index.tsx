@@ -38,7 +38,7 @@ const router = createBrowserRouter([
             element: <DashboardView />
           },
           {
-            path: 'customer-manager', // :desk-
+            path: 'customer-manager',
             element: <Outlet />,
             children: [
               {
@@ -46,7 +46,7 @@ const router = createBrowserRouter([
                 element: <DeskPickerView />
               },
               {
-                path: ':customersType',
+                path: ':divisionName-desk-deskNum',
                 element: <CustomerManagerView />
               }
             ]

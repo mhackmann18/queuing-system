@@ -6,7 +6,7 @@ import './styles.css';
 const DUMMY_DIVISIONS = ['Motor Vehicle', 'Driver License'];
 
 export default function CustomerWaitingListView() {
-  const [divisions, setDivisions] = useState(DUMMY_DIVISIONS);
+  const [divisions] = useState(DUMMY_DIVISIONS);
 
   // Load initial customers
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function CustomerWaitingListView() {
   }, []);
 
   return (
-    <div className="flex">
+    <div className="fixed inset-0 z-20 flex bg-white">
       {divisions.map((division) => (
         <WaitingList key={division} division={division} />
       ))}

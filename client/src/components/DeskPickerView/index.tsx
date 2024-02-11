@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 
 const DUMMY_DIVISIONS = [
-  { name: 'Motor Vehicle', availableDesks: [1, 2, 3, 4] },
-  { name: 'Driver License', availableDesks: [1, 2] }
+  { name: 'Motor Vehicle', availableDeskNums: [1, 2, 3, 4] },
+  { name: 'Driver License', availableDeskNums: [1, 2] }
 ];
 
 export default function DeskPickerView() {
@@ -11,9 +11,9 @@ export default function DeskPickerView() {
       {DUMMY_DIVISIONS.map((division) => (
         <div key={division.name}>
           <h2>{division.name}</h2>
-          {division.availableDesks.map((desk) => (
+          {division.availableDeskNums.map((desk) => (
             <Link
-              to={`${division.name.toLowerCase().split(' ').join('-')}-customers`}
+              to={`${division.name.toLowerCase().split(' ').join('-')}-desk-${desk}`}
               className="bg-onyx block p-3 text-white"
               key={desk}
             >

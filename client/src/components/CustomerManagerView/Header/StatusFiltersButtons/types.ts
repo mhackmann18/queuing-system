@@ -1,4 +1,4 @@
-import { ReactEventHandler } from 'react';
+import React, { ReactEventHandler } from 'react';
 import { CustomerFilters, StatusFilters } from 'utils/types';
 
 export interface StatusFiltersButtonsProps {
@@ -10,6 +10,6 @@ export interface StatusFiltersButtonsProps {
 export interface FilterButtonComponent {
   active?: boolean;
   onClick: ReactEventHandler;
-  text: string;
+  text: React.ReactNode;
   disabled?: boolean;
 }
