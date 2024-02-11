@@ -9,7 +9,7 @@ export default function DashboardView() {
   return (
     <div className="flex h-full items-center justify-center">
       <div className="flex flex-col">
-        <h2>Employee Utilities</h2>
+        <h2 className="mb-2 text-lg font-medium">Employee Utilities</h2>
         <Link
           to="customer-manager"
           className="bg-onyx hover:bg-outer_space mb-2 flex items-center rounded-md p-3 text-white"
@@ -24,13 +24,13 @@ export default function DashboardView() {
           <LuListChecks className="mr-2" />
           Service History
         </Link>
-        <h2>Customer Facing</h2>
+        <h2 className="mb-2 text-lg font-medium">Customer Facing</h2>
         <Link
           to="check-in-kiosk"
           className="bg-onyx hover:bg-outer_space mb-2 flex items-center rounded-md p-3 text-white"
         >
           <FaTabletScreenButton className="mr-2" />
-          Check In Kiosk
+          Display Check In Kiosk
         </Link>
         <Link
           to="waiting-list"

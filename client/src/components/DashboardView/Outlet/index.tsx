@@ -5,7 +5,7 @@ export default function DashboardOutlet() {
   return (
     <>
       <DashboardHeader />
-      <div className="mx-auto mt-16 h-[calc(100vh-4rem)] max-w-5xl">
+      <div className="relative mx-auto mt-16 h-[calc(100vh-4rem)] max-w-5xl">
         <Outlet />
       </div>
     </>
