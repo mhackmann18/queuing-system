@@ -64,6 +64,7 @@ namespace CustomerApi.Controllers
 
             if (division == null)
             {
+                Console.WriteLine("Division not found");
                 return NotFound();
             }
 
