@@ -6,7 +6,7 @@ export default function UserSignInView() {
   const [userType, setUserType] = useState<'root' | 'general'>('general');
 
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex h-screen items-center justify-center">
       <div className="flex max-w-96 flex-col p-4 text-left">
         {/* Heading */}
         <h2 className=" text-onyx mb-4 text-2xl font-semibold">Sign In</h2>
