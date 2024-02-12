@@ -14,10 +14,3 @@ public class Customer
 
     public required DateTime checkInTime { get; set; }
 }
-
-public class PostedCustomer
-{
-    public required string fullName { get; set; }
-    public required string officeId { get; set; }
-    public required string[] divisions { get; set; }
-};
