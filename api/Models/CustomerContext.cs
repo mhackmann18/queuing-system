@@ -2,14 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-public class CustomerContext : DbContext
+public class CustomerContext(DbContextOptions<CustomerContext> options) : DbContext(options)
 {
-    public CustomerContext(DbContextOptions<CustomerContext> options)
-        : base(options)
-    {
-    }
-
-    public DbSet<Customer> CUSTOMER { get; set; } = null!;
-    public DbSet<Division> DIVISION { get; set; } = null!;
-    public DbSet<CustomerDivision> CUSTOMERDIVISION { get; set; } = null!;
+    public DbSet<Customer> Customer { get; set; } = null!;
+    public DbSet<Division> Division { get; set; } = null!;
+    public DbSet<CustomerDivision> CustomerDivision { get; set; } = null!;
 }
