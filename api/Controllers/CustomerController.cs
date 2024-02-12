@@ -85,7 +85,7 @@ public class CustomerController : ControllerBase
     // PUT: api/Customers/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("customers/{id}")]
-    public async Task<IActionResult> PutCustomer(string id, Customer customer)
+    public async Task<IActionResult> PutCustomer(Guid id, Customer customer)
     {
         if (id != customer.customerId)
         {
@@ -122,7 +122,7 @@ public class CustomerController : ControllerBase
     {
         
         Guid uuid = Guid.NewGuid();
-        string customerId = uuid.ToString();
+        Guid customerId = uuid;
         string fullName = postedCustomer.fullName;
         string[] divisions = postedCustomer.divisions;
         DateTime checkInTime = DateTime.Now;
@@ -142,7 +142,7 @@ public class CustomerController : ControllerBase
                 customerDivision = new CustomerDivision
                 {
                     customerId = customerId,
-                    divisionId = division,
+                    divisionId = Guid.NewGuid(), // Fix this
                     Status = CustomerStatus.Waiting
                 };
 
@@ -211,7 +211,7 @@ public class CustomerController : ControllerBase
         return NoContent();
     }
 
-    private bool CustomerExists(string id)
+    private bool CustomerExists(Guid id)
     {
         return _context.Customer.Any(e => e.customerId == id);
     }

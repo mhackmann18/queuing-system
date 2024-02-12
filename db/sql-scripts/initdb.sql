@@ -2,25 +2,25 @@
 USE queuing_system;
 
 CREATE TABLE Division (
-	divisionId VARCHAR(36) NOT NULL,
+	divisionId CHAR(36) NOT NULL,
 	divisionName VARCHAR(50) NOT NULL,
     
   PRIMARY KEY(divisionId)
 );
 
 CREATE TABLE Customer (
-	customerId VARCHAR(36) NOT NULL,
-	fullName VARCHAR(50) NOT NULL,
+	customerId CHAR(36) NOT NULL,
+	fullName VARCHAR(100) NOT NULL,
 	checkInTime DATETIME NOT NULL,
 
 	PRIMARY KEY(customerId)
 );
 
 CREATE TABLE CustomerDivision (
-	customerId VARCHAR(36) NOT NULL,
-	divisionId VARCHAR(36) NOT NULL,
-	status ENUM('Waiting', 'Serving', 'Served', 'No Show') NOT NULL,
+	customerId CHAR(36) NOT NULL,
+	divisionId CHAR(36) NOT NULL,
 	waitingListIndex INT,
+	status ENUM('Waiting', 'Serving', 'Served', 'No Show') NOT NULL,
     
 	PRIMARY KEY(customerId, divisionId),
 	FOREIGN KEY(customerId) REFERENCES Customer(customerId),
@@ -28,9 +28,9 @@ CREATE TABLE CustomerDivision (
 );
 
 CREATE TABLE CustomerDivisionTimeCalled (
-	customerId VARCHAR(36) NOT NULL,
-	divisionId VARCHAR(36) NOT NULL,
-    timeCalled DATETIME NOT NULL,
+	customerId CHAR(36) NOT NULL,
+	divisionId CHAR(36) NOT NULL,
+  timeCalled DATETIME NOT NULL,
     
 	PRIMARY KEY(customerId, divisionId, timeCalled),
 	FOREIGN KEY(customerId) REFERENCES Customer(customerId),

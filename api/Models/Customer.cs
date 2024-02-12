@@ -6,10 +6,10 @@ namespace CustomerApi.Models;
 [PrimaryKey(nameof(customerId))]
 public class Customer
 {
-    [Column(TypeName = "varchar(36)")]
-    public required string customerId { get; set; }
+    [Column(TypeName = "char(36)")]
+    public required Guid customerId { get; set; }
 
-    [Column(TypeName = "varchar(50)")]
+    [Column(TypeName = "varchar(100)")]
     public required string fullName { get; set; }
 
     public required DateTime checkInTime { get; set; }
