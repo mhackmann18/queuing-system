@@ -19,13 +19,15 @@ namespace CustomerApi.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly CustomerContext _context;
+        private readonly ILogger<CustomerController> _logger;
 
         // private readonly IConfiguration _configuration;
 
 
-        public CustomerController(CustomerContext context)
+        public CustomerController(CustomerContext context, ILogger<CustomerController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Customers
@@ -33,6 +35,7 @@ namespace CustomerApi.Controllers
         [HttpGet("customers")]
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
+            _logger.LogInformation("called /customers");
             return await _context.CUSTOMER.ToListAsync();
         }
 
