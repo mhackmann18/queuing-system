@@ -3,12 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-[PrimaryKey(nameof(divisionId))]
 public class Division
 {
     [Column(TypeName = "char(36)")]
-    public required Guid divisionId { get; set; }
+    public required Guid DivisionId { get; set; }
 
     [Column(TypeName = "varchar(50)")]
-    public required string divisionName { get; set; }
+    public required string DivisionName { get; set; }
 }

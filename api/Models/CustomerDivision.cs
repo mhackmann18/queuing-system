@@ -3,16 +3,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-[PrimaryKey(nameof(customerId), nameof(divisionId))]
+[PrimaryKey(nameof(CustomerId), nameof(DivisionId))]
 public class CustomerDivision
 {
     [Column(TypeName = "char(36)")]
-    public required Guid customerId { get; set; }
+    public required Guid CustomerId { get; set; }
 
     [Column(TypeName = "char(36)")]
-    public required Guid divisionId { get; set; }
+    public required Guid DivisionId { get; set; }
 
     public required CustomerStatus Status { get; set; }
 
-    public int waitingListIndex { get; set; }
+    public int? WaitingListIndex { get; set; }
 }

@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-[PrimaryKey(nameof(customerId), nameof(divisionId), nameof(timeCalled))]
+[PrimaryKey(nameof(CustomerId), nameof(DivisionId), nameof(TimeCalled))]
 public class CustomerDivisionTimeCalled
 {
     [Column(TypeName = "char(36)")]
-    public required Guid customerId { get; set; }
+    public required Guid CustomerId { get; set; }
 
     [Column(TypeName = "char(36)")]
-    public required Guid divisionId { get; set; }
+    public required Guid DivisionId { get; set; }
 
-    public required DateTime timeCalled { get; set; }
+    public required DateTime TimeCalled { get; set; }
 }

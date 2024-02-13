@@ -22,6 +22,8 @@ public class CustomerController : ControllerBase
     {
         _context = context;
         _logger = logger;
+        var debugString = _context.Model.ToDebugString();
+        _logger.LogInformation("Context Model Debug String: {DebugString}", debugString);
     }
 
     // GET: api/Customers
@@ -87,7 +89,7 @@ public class CustomerController : ControllerBase
     [HttpPut("customers/{id}")]
     public async Task<IActionResult> PutCustomer(Guid id, Customer customer)
     {
-        if (id != customer.customerId)
+        if (id != customer.CustomerId)
         {
             return BadRequest();
         }
@@ -129,9 +131,9 @@ public class CustomerController : ControllerBase
 
         Customer customer = new Customer
         {
-            fullName = fullName,
-            customerId = customerId,
-            checkInTime = checkInTime
+            FullName = fullName,
+            CustomerId = customerId,
+            CheckInTime = checkInTime
         };
 
         if (divisions.Length > 0)
@@ -141,8 +143,8 @@ public class CustomerController : ControllerBase
             {
                 customerDivision = new CustomerDivision
                 {
-                    customerId = customerId,
-                    divisionId = Guid.NewGuid(), // Fix this
+                    CustomerId = customerId,
+                    DivisionId = Guid.NewGuid(), // Fix this
                     Status = CustomerStatus.Waiting
                 };
 
@@ -162,7 +164,7 @@ public class CustomerController : ControllerBase
         await _context.SaveChangesAsync();
 
         //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-        return CreatedAtAction(nameof(GetCustomer), new { id = customer.customerId }, customer);
+        return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, customer);
     }
     // [HttpPost]
     // public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
@@ -180,7 +182,7 @@ public class CustomerController : ControllerBase
         await _context.SaveChangesAsync();
 
         //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-        return CreatedAtAction(nameof(GetDivision), new { id = division.divisionId }, division);
+        return CreatedAtAction(nameof(GetDivision), new { id = division.DivisionId }, division);
     }
 
 
@@ -191,7 +193,7 @@ public class CustomerController : ControllerBase
         await _context.SaveChangesAsync();
 
         //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-        return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.divisionId }, customerDivision);
+        return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.DivisionId }, customerDivision);
     }
 
 
@@ -213,7 +215,7 @@ public class CustomerController : ControllerBase
 
     private bool CustomerExists(Guid id)
     {
-        return _context.Customer.Any(e => e.customerId == id);
+        return _context.Customer.Any(e => e.CustomerId == id);
     }
 }
 
