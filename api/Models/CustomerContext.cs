@@ -10,10 +10,11 @@ public class CustomerContext(DbContextOptions<CustomerContext> options) : DbCont
 
     // If this method gets too big, see 'grouping configuration' 
     // in https://learn.microsoft.com/en-us/ef/core/modeling/
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Customer>()
-            .Property(c => c.FullName)
-            .IsRequired();
-    }
+    // protected override void OnModelCreating(ModelBuilder modelBuilder)
+    // {
+    //     modelBuilder.Entity<Customer>()
+    //         .Property(c => c.CheckInTime)
+    //         .HasDefaultValue(DateTime.Now)
+    //         .IsRequired();
+    // }
 }

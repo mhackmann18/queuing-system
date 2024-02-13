@@ -42,8 +42,8 @@ SHOW TABLES IN queuing_system;
 
 -- Inserting dummy values into Division table
 INSERT INTO Division (divisionId, divisionName) VALUES 
-(UUID(), 'Motor Vehicle'),
-(UUID(), 'Drivers License');
+('3056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle'),
+('2056cc0c-c844-11ee-851b-4529fd7b70be', 'Drivers License');
 
 -- Inserting dummy values into Customer table
 INSERT INTO Customer (customerId, fullName, checkInTime) VALUES

@@ -6,10 +6,12 @@ namespace CustomerApi.Models;
 public class Customer
 {
     [Column(TypeName = "char(36)")]
-    public required Guid CustomerId { get; set; }
+    public Guid CustomerId { get; set; }
 
     [Column(TypeName = "varchar(100)")]
     public required string FullName { get; set; }
 
-    public required DateTime CheckInTime { get; set; }
+    public DateTime CheckInTime { get; set; }
+
+    public ICollection<CustomerDivision> Divisions { get; set; } = null!;
 }

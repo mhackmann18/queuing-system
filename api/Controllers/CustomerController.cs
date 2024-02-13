@@ -117,23 +117,87 @@ public class CustomerController : ControllerBase
 
     // POST: api/Customers
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
+    [HttpPost("offices/{officeId}/customers")]
+    public async Task<ActionResult<ApiSingleResponse>> PostCustomerToOffice(
+        Guid officeId, 
+        [FromBody] CustomerPostedInOffice postedCustomer)
+    {
+        Guid customerId = Guid.NewGuid();
+        DateTime checkInTime = DateTime.Now;
+
+        // Check for errors in request body
+        if(postedCustomer.divisions.Length == 0)
+        {
+            return new ApiSingleResponse
+            {
+                error = "please include at least one division"
+            };
+        }
+
+        Customer customer = new Customer
+        {
+            CustomerId = customerId,
+            FullName = postedCustomer.fullName,
+            CheckInTime = checkInTime
+        };
+
+        await _context.Customer.AddAsync(customer);
+
+        // For each divisionName in divisions, find Division with officeId and divisionName. return error any division isn't found
+        foreach(string divisionName in postedCustomer.divisions)
+        {
+            List<Division> division = 
+            _context.Division
+            .Where(d => d.DivisionName == divisionName)
+            .ToList();
+            // _logger.LogInformation(division.Count.ToString());
+
+            if(division.Count == 0)
+            {
+                return new ApiSingleResponse
+                {
+                    error = $"Invalid division '{divisionName}' provided"
+                };
+            } else {
+                Division div = division[0];
+
+                // Insert into CustomerDivision
+                CustomerDivision cd = new CustomerDivision
+                {
+                    CustomerId = customerId,
+                    DivisionId = div.DivisionId,
+                    Status = "Waiting"
+                };
+
+                await _context.CustomerDivision.AddAsync(cd);
+            }
+        }
+        
+        await _context.SaveChangesAsync();
+
+        return new ApiSingleResponse
+        {
+            customer = customer
+        };
+    }
     
     [HttpPost("customers")]
     // public async Task<ActionResult<Customer>> PostCustomer([FromBody] JObject postedCustomer)
     public async Task<ActionResult<Customer>> PostCustomer([FromBody] PostedCustomer postedCustomer)
     {
         
-        Guid uuid = Guid.NewGuid();
-        Guid customerId = uuid;
+        // Guid uuid = Guid.NewGuid();
+        // Guid customerId = uuid;
         string fullName = postedCustomer.fullName;
         string[] divisions = postedCustomer.divisions;
-        DateTime checkInTime = DateTime.Now;
+        // DateTime checkInTime = DateTime.Now;
 
         Customer customer = new Customer
         {
             FullName = fullName,
-            CustomerId = customerId,
-            CheckInTime = checkInTime
+            // CustomerId = customerId,
+            // CheckInTime = checkInTime
         };
 
         if (divisions.Length > 0)
@@ -143,38 +207,25 @@ public class CustomerController : ControllerBase
             {
                 customerDivision = new CustomerDivision
                 {
-                    CustomerId = customerId,
+                    CustomerId = customer.CustomerId,
                     DivisionId = Guid.NewGuid(), // Fix this
-                    Status = CustomerStatus.Waiting
+                    Status = "Waiting"
                 };
 
                 await PostCustomerDivision(customerDivision);
             }
         }
-        
-        //  Customer customer = new Customer
-        // {
-        //     fullName = "js",
-        //     customerId = "ks",
-        //     checkInTime = DateTime.Now
-        // };
-
 
         _context.Customer.Add(customer);
         await _context.SaveChangesAsync();
 
-        //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-        return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, customer);
+        return CreatedAtAction(
+            nameof(GetCustomer), 
+            new { id = customer.CustomerId }, 
+            customer
+        );
     }
-    // [HttpPost]
-    // public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
-    // {
-    //     _context.Customer.Add(customer);
-    //     await _context.SaveChangesAsync();
 
-    //     //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-    //     return CreatedAtAction(nameof(GetCustomer), new { id = customer.customerId }, customer);
-    // }
     [HttpPost("divisions")]
     public async Task<ActionResult<Division>> PostDivision(Division division)
     {
@@ -225,3 +276,15 @@ public class PostedCustomer
     public required string officeId { get; set; }
     public required string[] divisions { get; set; }
 };
+
+public class CustomerPostedInOffice 
+{
+    public required string fullName { get; init; }
+    public required string[] divisions { get; init; }
+}
+
+public class ApiSingleResponse 
+{
+    public string? error { get; init; }
+    public Customer? customer { get; init; }
+}
