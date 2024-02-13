@@ -5,7 +5,8 @@ namespace CustomerApi.Models;
 
 [PrimaryKey(
     nameof(CustomerDivisionCustomerId), 
-    nameof(CustomerDivisionDivisionId), 
+    nameof(CustomerDivisionDivisionName), 
+    nameof(CustomerDivisionOfficeId),
     nameof(TimeCalled))
 ]
 public class CustomerDivisionTimeCalled
@@ -14,7 +15,10 @@ public class CustomerDivisionTimeCalled
 
     [Column(TypeName = "char(36)")]
     public required Guid CustomerDivisionCustomerId { get; set; }
-    
+
     [Column(TypeName = "char(36)")]
-    public required Guid CustomerDivisionDivisionId { get; set; }
+    public required Guid CustomerDivisionOfficeId { get; set; }
+
+    [Column(TypeName = "varchar(50)")]
+    public required string CustomerDivisionDivisionName { get; set; }
 }

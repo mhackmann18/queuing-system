@@ -131,27 +131,35 @@ public class CustomerController : ControllerBase
         {
             return new ApiSingleResponse
             {
-                error = "please include at least one division"
+                error = "Please include at least one division"
             };
         }
 
+        // Check that officeId is valid
+        Office? office = await _context.Office.FindAsync(officeId);
+        if(office == null)
+        {
+            return new ApiSingleResponse
+            {
+                error = "Invalid officeId provided"
+            };
+        }
+
+        // Insert into Customer
         Customer customer = new Customer
         {
             CustomerId = customerId,
             FullName = postedCustomer.fullName,
             CheckInTime = checkInTime
         };
-
         await _context.Customer.AddAsync(customer);
 
         // For each divisionName in divisions, find Division with officeId and divisionName. return error any division isn't found
         foreach(string divisionName in postedCustomer.divisions)
         {
-            List<Division> division = 
-            _context.Division
-            .Where(d => d.DivisionName == divisionName)
-            .ToList();
-            // _logger.LogInformation(division.Count.ToString());
+            List<Division> division = _context.Division
+                .Where(d => d.DivisionName == divisionName && d.OfficeId == officeId)
+                .ToList();
 
             if(division.Count == 0)
             {
@@ -166,8 +174,9 @@ public class CustomerController : ControllerBase
                 CustomerDivision cd = new CustomerDivision
                 {
                     CustomerId = customerId,
-                    DivisionId = div.DivisionId,
-                    Status = "Waiting"
+                    DivisionName = divisionName,
+                    Status = "Waiting",
+                    OfficeId = officeId
                 };
 
                 await _context.CustomerDivision.AddAsync(cd);
@@ -208,8 +217,9 @@ public class CustomerController : ControllerBase
                 customerDivision = new CustomerDivision
                 {
                     CustomerId = customer.CustomerId,
-                    DivisionId = Guid.NewGuid(), // Fix this
-                    Status = "Waiting"
+                    DivisionName = division, // Fix this
+                    Status = "Waiting",
+                    OfficeId = postedCustomer.officeId
                 };
 
                 await PostCustomerDivision(customerDivision);
@@ -233,7 +243,7 @@ public class CustomerController : ControllerBase
         await _context.SaveChangesAsync();
 
         //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-        return CreatedAtAction(nameof(GetDivision), new { id = division.DivisionId }, division);
+        return CreatedAtAction(nameof(GetDivision), new { id = division.DivisionName }, division);
     }
 
 
@@ -244,7 +254,7 @@ public class CustomerController : ControllerBase
         await _context.SaveChangesAsync();
 
         //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-        return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.DivisionId }, customerDivision);
+        return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.DivisionName }, customerDivision);
     }
 
 
@@ -273,7 +283,7 @@ public class CustomerController : ControllerBase
 public class PostedCustomer
 {
     public required string fullName { get; set; }
-    public required string officeId { get; set; }
+    public required Guid officeId { get; set; }
     public required string[] divisions { get; set; }
 };
 
