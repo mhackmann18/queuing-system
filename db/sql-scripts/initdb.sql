@@ -1,11 +1,17 @@
 -- CREATE DATABASE queuing_system;
 USE queuing_system;
 
+CREATE TABLE Office (
+	officeId CHAR(36),
+	officeName VARCHAR(70) NOT NULL,
+	PRIMARY KEY(officeId)
+);
+
 CREATE TABLE Division (
-	divisionId CHAR(36) NOT NULL,
 	divisionName VARCHAR(50) NOT NULL,
-    
-  PRIMARY KEY(divisionId)
+  officeId CHAR(36) NOT NULL,
+	FOREIGN KEY(officeId) REFERENCES Office(officeId),
+  PRIMARY KEY(divisionName, officeId)
 );
 
 CREATE TABLE Customer (
@@ -18,32 +24,43 @@ CREATE TABLE Customer (
 
 CREATE TABLE CustomerDivision (
 	customerId CHAR(36) NOT NULL,
-	divisionId CHAR(36) NOT NULL,
+	officeId CHAR(36) NOT NULL,
+	divisionName VARCHAR(50) NOT NULL,
 	waitingListIndex INT,
 	status ENUM('Waiting', 'Serving', 'Served', 'No Show') NOT NULL,
     
-	PRIMARY KEY(customerId, divisionId),
+	PRIMARY KEY(customerId, officeId, divisionName),
 	FOREIGN KEY(customerId) REFERENCES Customer(customerId),
-	FOREIGN KEY(divisionId) REFERENCES Division(divisionId)
+	FOREIGN KEY(divisionName) REFERENCES Division(divisionName),
+	FOREIGN KEY(officeId) REFERENCES Office(officeId)
 );
 
 CREATE TABLE CustomerDivisionTimeCalled (
 	customerId CHAR(36) NOT NULL,
-	divisionId CHAR(36) NOT NULL,
+	divisionName VARCHAR(50) NOT NULL,
+	officeId CHAR(36) NOT NULL,
   timeCalled DATETIME NOT NULL,
     
-	PRIMARY KEY(customerId, divisionId, timeCalled),
+	PRIMARY KEY(customerId, divisionName, timeCalled, officeId),
 	FOREIGN KEY(customerId) REFERENCES Customer(customerId),
-	FOREIGN KEY(divisionId) REFERENCES Division(divisionId)
+	FOREIGN KEY(officeId) REFERENCES Office(officeId),
+	FOREIGN KEY(divisionName) REFERENCES Division(divisionName)
 );
 
 SHOW TABLES IN queuing_system;
 -- SELECT c.customerId, c.checkInTime, c.divisionId, c.firstName, c.lastName FROM Customer AS c;
 
+-- Inserting dummy values into Office table
+INSERT INTO Office (officeId, officeName) VALUES 
+('1056cc0c-c844-11ee-851b-4529fd7b70be', 'DMV Office 1'),
+('1056d5d0-c844-11ee-851b-4529fd7b70be', 'DMV Office 2');
+
 -- Inserting dummy values into Division table
-INSERT INTO Division (divisionId, divisionName) VALUES 
-('3056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle'),
-('2056cc0c-c844-11ee-851b-4529fd7b70be', 'Drivers License');
+INSERT INTO Division (divisionName, officeId) VALUES 
+('Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be'),
+('Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be'),
+('Motor Vehicle', '1056d5d0-c844-11ee-851b-4529fd7b70be'),
+('Drivers License', '1056d5d0-c844-11ee-851b-4529fd7b70be');
 
 -- Inserting dummy values into Customer table
 INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
@@ -53,16 +70,16 @@ INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
 ('1056d904-c844-11ee-851b-4529fd7b70be', 'Emily Brown', NOW());
 
 -- Inserting dummy values into CustomerDivision table
-INSERT INTO CustomerDivision (customerId, divisionId, status, waitingListIndex) VALUES
-('1056cc0c-c844-11ee-851b-4529fd7b70be', (SELECT divisionId FROM Division WHERE divisionName = 'Motor Vehicle'), 'Waiting', 1),
-('1056d5d0-c844-11ee-851b-4529fd7b70be', (SELECT divisionId FROM Division WHERE divisionName = 'Motor Vehicle'), 'Serving', NULL),
-('1056d7a6-c844-11ee-851b-4529fd7b70be', (SELECT divisionId FROM Division WHERE divisionName = 'Drivers License'), 'Waiting', 1),
-('1056d904-c844-11ee-851b-4529fd7b70be', (SELECT divisionId FROM Division WHERE divisionName = 'Drivers License'), 'No Show', NULL);
+INSERT INTO CustomerDivision (customerId, divisionName, officeId, status, waitingListIndex) VALUES
+('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
+('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Serving', NULL),
+('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
+('1056d904-c844-11ee-851b-4529fd7b70be', 'Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'No Show', NULL);
 
--- Inserting dummy values into CustomerDivisionTIMECALLED table
-INSERT INTO CustomerDivisionTimeCalled (customerId, divisionId, timeCalled) VALUES
-('1056d5d0-c844-11ee-851b-4529fd7b70be', (SELECT divisionId FROM Division WHERE divisionName = 'Motor Vehicle'), NOW() - INTERVAL 5 MINUTE),
-('1056d7a6-c844-11ee-851b-4529fd7b70be', (SELECT divisionId FROM Division WHERE divisionName = 'Drivers License'), NOW() - INTERVAL 10 MINUTE);
+-- Inserting dummy values into CustomerDivisionTimeCalled table
+INSERT INTO CustomerDivisionTimeCalled (customerId, divisionName, officeId, timeCalled) VALUES
+('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW()),
+('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW());
 
 
 SELECT VERSION();
