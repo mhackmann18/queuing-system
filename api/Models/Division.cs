@@ -12,6 +12,7 @@ public class Division
 
     [Column(TypeName = "varchar(50)")]
     public required string DivisionName { get; set; }
+    public required int NumDesks { get; set; }
 
     // Dependent Navigation
     public ICollection<CustomerDivision>? Customers;
