@@ -22,8 +22,8 @@ public class CustomerController : ControllerBase
     {
         _context = context;
         _logger = logger;
-        var debugString = _context.Model.ToDebugString();
-        _logger.LogInformation("Context Model Debug String: {DebugString}", debugString);
+        // var debugString = _context.Model.ToDebugString();
+        // _logger.LogInformation("Context Model Debug String: {DebugString}", debugString);
     }
 
     // GET: api/Customers
@@ -32,7 +32,7 @@ public class CustomerController : ControllerBase
     public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
     {
         _logger.LogInformation("called /customers");
-        return await _context.Customer.ToListAsync();
+        return await _context.Customer.Include(c => c.Divisions).ToListAsync();
     }
 
     [HttpGet("divisions")]
@@ -115,9 +115,7 @@ public class CustomerController : ControllerBase
         return NoContent();
     }
 
-    // POST: api/Customers
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-
+    // POST: api/v1/offices/:officeId/customers
     [HttpPost("offices/{officeId}/customers")]
     public async Task<ActionResult<ApiSingleResponse>> PostCustomerToOffice(
         Guid officeId, 
@@ -154,22 +152,23 @@ public class CustomerController : ControllerBase
         };
         await _context.Customer.AddAsync(customer);
 
-        // For each divisionName in divisions, find Division with officeId and divisionName. return error any division isn't found
+        // Insert divisions into CustomerDivision
         foreach(string divisionName in postedCustomer.divisions)
         {
-            List<Division> division = _context.Division
-                .Where(d => d.DivisionName == divisionName && d.OfficeId == officeId)
-                .ToList();
+            // Find divisions with the given name and officeId
+            List<Division> divisions = _context.Division
+                .Where(d => d.DivisionName == divisionName && d.OfficeId == officeId).ToList();
 
-            if(division.Count == 0)
+            // If no divisions are found, return an error
+            if(divisions.Count == 0)
             {
                 return new ApiSingleResponse
                 {
                     error = $"Invalid division '{divisionName}' provided"
                 };
-            } else {
-                Division div = division[0];
-
+            } 
+            else 
+            {
                 // Insert into CustomerDivision
                 CustomerDivision cd = new CustomerDivision
                 {
@@ -190,7 +189,8 @@ public class CustomerController : ControllerBase
             customer = customer
         };
     }
-    
+
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost("customers")]
     // public async Task<ActionResult<Customer>> PostCustomer([FromBody] JObject postedCustomer)
     public async Task<ActionResult<Customer>> PostCustomer([FromBody] PostedCustomer postedCustomer)

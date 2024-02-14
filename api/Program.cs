@@ -11,8 +11,7 @@ using var connection = new MySqlConnection("Server=127.0.0.1;User ID=root;Passwo
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddDbContext<CustomerContext>(options =>
-    options.UseMySql(connection, new MySqlServerVersion(new Version(8, 0, 33)))
-        .LogTo(Console.WriteLine));
+    options.UseMySql(connection, new MySqlServerVersion(new Version(8, 0, 33))));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMySqlDataSource(builder.Configuration.GetConnectionString("Default")!);
