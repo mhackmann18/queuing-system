@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 
 namespace CustomerApi.Models;
 
@@ -8,12 +7,10 @@ namespace CustomerApi.Models;
 public class CustomerDivision
 {
     // Foreign Key
-    [JsonIgnore] 
     [Column(TypeName = "char(36)")]
     public Guid CustomerId { get; set; }
 
     // Foreign Key
-    [JsonIgnore]
     [Column(TypeName = "char(36)")]
     public Guid OfficeId { get; set; }
 

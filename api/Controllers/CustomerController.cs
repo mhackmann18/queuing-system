@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CustomerApi.Models;
@@ -26,13 +22,27 @@ public class CustomerController : ControllerBase
         // _logger.LogInformation("Context Model Debug String: {DebugString}", debugString);
     }
 
-    // GET: api/Customers
-
+    // GET: api/v1/customers
     [HttpGet("customers")]
-    public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
+    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers()
     {
-        _logger.LogInformation("called /customers");
-        return await _context.Customer.Include(c => c.Divisions).ToListAsync();
+        var customers = await _context.Customer
+            .Select(c => new CustomerDto
+            {
+                Id = c.CustomerId,
+                FullName = c.FullName,
+                CheckInTime = c.CheckInTime,
+                Divisions = c.Divisions.Select(d => new CustomerDivisionDto
+                {
+                    Name = d.DivisionName,
+                    Status = d.Status,
+                    WaitingListIndex = d.WaitingListIndex,
+                    TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return customers;
     }
 
     [HttpGet("divisions")]

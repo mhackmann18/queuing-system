@@ -14,9 +14,8 @@ public class CustomerContext(DbContextOptions<CustomerContext> options) : DbCont
     // in https://learn.microsoft.com/en-us/ef/core/modeling/
     // protected override void OnModelCreating(ModelBuilder modelBuilder)
     // {
-    //     modelBuilder.Entity<Customer>()
-    //         .Property(c => c.CheckInTime)
-    //         .HasDefaultValue(DateTime.Now)
-    //         .IsRequired();
+    //     // Fluent API
+    //     modelBuilder.Entity<CustomerDivision>()
+    //         .HasKey(cd => new { cd.CustomerId, cd.OfficeId, cd.DivisionName });
     // }
 }

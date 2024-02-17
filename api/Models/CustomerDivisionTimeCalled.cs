@@ -4,21 +4,24 @@ using Microsoft.EntityFrameworkCore;
 namespace CustomerApi.Models;
 
 [PrimaryKey(
-    nameof(CustomerDivisionCustomerId), 
-    nameof(CustomerDivisionDivisionName), 
-    nameof(CustomerDivisionOfficeId),
-    nameof(TimeCalled))
-]
+    nameof(CustomerId), 
+    nameof(DivisionName), 
+    nameof(OfficeId),
+    nameof(TimeCalled)
+)]
 public class CustomerDivisionTimeCalled
 {
     public required DateTime TimeCalled { get; set; }
 
+    // FK
     [Column(TypeName = "char(36)")]
-    public required Guid CustomerDivisionCustomerId { get; set; }
+    public required Guid CustomerId { get; set; }
 
+    // FK
     [Column(TypeName = "char(36)")]
-    public required Guid CustomerDivisionOfficeId { get; set; }
+    public required Guid OfficeId { get; set; }
 
+    // FK
     [Column(TypeName = "varchar(50)")]
-    public required string CustomerDivisionDivisionName { get; set; }
+    public required string DivisionName { get; set; }
 }
