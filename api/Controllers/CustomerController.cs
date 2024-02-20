@@ -48,10 +48,10 @@ public class CustomerController : ControllerBase
         Office? office = await _context.Office.FindAsync(officeId);
         if(office == null)
         {
-            return new Response
+            return BadRequest(new Response
             {
                 Error = "Invalid officeId provided"
-            };
+            });
         }
 
         // Check that division filters are valid
@@ -62,10 +62,10 @@ public class CustomerController : ControllerBase
                 // Check that each division has a name prop
                 if(division.Name == null)
                 {
-                    return new Response
+                    return BadRequest(new Response
                     {
                         Error = "Must provide a 'name' property for each division"
-                    };
+                    });
                 } else {    
                     // Check that office has a division with the provided name
                     var divisionFound = await _context.Office
@@ -77,10 +77,10 @@ public class CustomerController : ControllerBase
                     // Return error if division doesn't exist
                     if(divisionFound == null) 
                     {
-                        return new Response
+                        return BadRequest(new Response
                         {
                             Error = $"Office has no division '{division.Name}'"
-                        };
+                        });
                     }
                 }
                 // Check that the provided statuses are valid
@@ -94,7 +94,7 @@ public class CustomerController : ControllerBase
         // Check that request body has at least one required property
         if(filters.Divisions == null && filters.Dates == null)
         {
-            return new Response { Error = "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'" };
+            return BadRequest(new Response { Error = "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'" });
         }
 
         // Initialize an empty list to hold the customers
@@ -119,10 +119,10 @@ public class CustomerController : ControllerBase
 
             if(filteredCustomers.Count == 0)
             {
-                return new Response 
+                return NotFound(new Response 
                 { 
                     Error = "No customers found in any of the specified divisions" 
-                };
+                });
             }
         }
 
@@ -152,10 +152,10 @@ public class CustomerController : ControllerBase
 
             if(filteredCustomers.Count == 0)
             {
-                return new Response
+                return NotFound(new Response
                 {
                     Error = "No customers found whose check in time matched any of the specified dates"
-                };
+                });
             }
         }
 
