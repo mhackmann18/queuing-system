@@ -11,18 +11,12 @@ public class CustomerController : ControllerBase
     private readonly CustomerContext _context;
     private readonly ILogger<CustomerController> _logger;
 
-    // private readonly IConfiguration _configuration;
-
-
     public CustomerController(CustomerContext context, ILogger<CustomerController> logger)
     {
         _context = context;
         _logger = logger;
-        // var debugString = _context.Model.ToDebugString();
-        // _logger.LogInformation("Context Model Debug String: {DebugString}", debugString);
     }
 
-    // GET /customers
     [HttpGet("customers")]
     public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers()
     {
@@ -45,9 +39,8 @@ public class CustomerController : ControllerBase
         return customers;
     }
 
-    // POST /offices/:officeId/customers/query
     [HttpPost("offices/{officeId}/customers/query")]
-    public async Task<ActionResult<ApiResponse>> GetCustomersWithFilters(
+    public async Task<ActionResult<Response>> GetCustomersWithFilters(
         Guid officeId,
         [FromBody] CustomersQueryBody filters)
     {
@@ -55,7 +48,7 @@ public class CustomerController : ControllerBase
         Office? office = await _context.Office.FindAsync(officeId);
         if(office == null)
         {
-            return new ApiResponse
+            return new Response
             {
                 Error = "Invalid officeId provided"
             };
@@ -69,7 +62,7 @@ public class CustomerController : ControllerBase
                 // Check that each division has a name prop
                 if(division.Name == null)
                 {
-                    return new ApiResponse
+                    return new Response
                     {
                         Error = "Must provide a 'name' property for each division"
                     };
@@ -84,7 +77,7 @@ public class CustomerController : ControllerBase
                     // Return error if division doesn't exist
                     if(divisionFound == null) 
                     {
-                        return new ApiResponse
+                        return new Response
                         {
                             Error = $"Office has no division '{division.Name}'"
                         };
@@ -101,7 +94,7 @@ public class CustomerController : ControllerBase
         // Check that request body has at least one required property
         if(filters.Divisions == null && filters.Dates == null)
         {
-            return new ApiResponse { Error = "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'" };
+            return new Response { Error = "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'" };
         }
 
         // Initialize an empty list to hold the customers
@@ -126,7 +119,7 @@ public class CustomerController : ControllerBase
 
             if(filteredCustomers.Count == 0)
             {
-                return new ApiResponse 
+                return new Response 
                 { 
                     Error = "No customers found in any of the specified divisions" 
                 };
@@ -159,7 +152,7 @@ public class CustomerController : ControllerBase
 
             if(filteredCustomers.Count == 0)
             {
-                return new ApiResponse
+                return new Response
                 {
                     Error = "No customers found whose check in time matched any of the specified dates"
                 };
@@ -182,7 +175,7 @@ public class CustomerController : ControllerBase
             }
         ).ToList();
         
-        return new ApiResponse
+        return new Response
         {
             Data = customers
         };
@@ -194,58 +187,61 @@ public class CustomerController : ControllerBase
         return await _context.Division.ToListAsync();
     }
 
-    // GET /customers/:id
-    [HttpGet("customers/{id}")]
-    public async Task<ActionResult<Customer>> GetCustomer(string id)
+    [HttpGet("customers/{customerId}")]
+    public async Task<ActionResult<Response>> GetCustomer(Guid customerId)
     {
-        var customer = await _context.Customer.FindAsync(id);
+        var customer = await _context.Customer
+            .Where(c => c.CustomerId == customerId)
+            .Select(c => new CustomerDto
+            {
+                Id = c.CustomerId,
+                FullName = c.FullName,
+                CheckInTime = c.CheckInTime,
+                Divisions = c.Divisions.Select(d => new CustomerDivisionDto
+                {
+                    Name = d.DivisionName,
+                    Status = d.Status,
+                    WaitingListIndex = d.WaitingListIndex,
+                    TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
+                }).ToList()
+            })
+            .ToListAsync();
 
-        if (customer == null)
+        if (customer.Count == 0)
         {
-            return NotFound();
+            return NotFound(new Response
+            {
+                Error = $"No customer found with id {customerId}"
+            });
         }
 
-        return customer;
+        return new Response {
+            Data = customer[0]
+        };
     }
 
-    [HttpGet("divisions/{id}")]
-    public async Task<ActionResult<Division>> GetDivision(string id)
+    // TODO: This should be offices/{officeId}/divisions/{divisionId}
+    [HttpGet("divisions/{divisionId}")]
+    public async Task<ActionResult<Division>> GetDivision(string divisionId)
     {
-        var division = await _context.Division.FindAsync(id);
-
+        var division = await _context.Division.FindAsync(divisionId);
 
         if (division == null)
         {
-            return NotFound();
+            return NotFound(new Response
+            {
+                Error = $"No division found with id {divisionId}"
+            });
         }
 
         return division;
     }
 
-    [HttpGet("customer-divisions/{id}")]
-    public async Task<ActionResult<CustomerDivision>> GetCustomerDivision(string id)
-    {
-        var customerDivision = await _context.CustomerDivision.FindAsync(id);
-
-
-        if (customerDivision == null)
-        {
-            return NotFound();
-        }
-
-        return customerDivision;
-    }
-
-    // PUT: api/Customers/5
+    // TODO: The customer body will not have an id, as that data is already in the route
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("customers/{id}")]
-    public async Task<IActionResult> PutCustomer(Guid id, Customer customer)
+    [HttpPut("customers/{customerId}")]
+    public async Task<IActionResult> PutCustomer(Guid customerId, Customer customer)
     {
-        if (id != customer.CustomerId)
-        {
-            return BadRequest();
-        }
-
         _context.Entry(customer).State = EntityState.Modified;
 
         try
@@ -254,7 +250,7 @@ public class CustomerController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!CustomerExists(id))
+            if (!CustomerExists(customerId))
             {
                 return NotFound();
             }
@@ -267,9 +263,8 @@ public class CustomerController : ControllerBase
         return NoContent();
     }
 
-    // POST: offices/:officeId/customers
     [HttpPost("offices/{officeId}/customers")]
-    public async Task<ActionResult<ApiSingleResponse>> PostCustomerToOffice(
+    public async Task<ActionResult<Response>> PostCustomerToOffice(
         Guid officeId, 
         [FromBody] CustomerPostedInOffice postedCustomer)
     {
@@ -279,20 +274,20 @@ public class CustomerController : ControllerBase
         // Check for errors in request body
         if(postedCustomer.divisions.Length == 0)
         {
-            return new ApiSingleResponse
+            return BadRequest(new Response
             {
-                error = "Please include at least one division"
-            };
+                Error = "Please include at least one division"
+            });
         }
 
         // Check that officeId is valid
         Office? office = await _context.Office.FindAsync(officeId);
         if(office == null)
         {
-            return new ApiSingleResponse
+            return BadRequest(new Response
             {
-                error = "Invalid officeId provided"
-            };
+                Error = "Invalid officeId provided"
+            });
         }
 
         // Insert into Customer
@@ -314,10 +309,10 @@ public class CustomerController : ControllerBase
             // If no divisions are found, return an error
             if(divisions.Count == 0)
             {
-                return new ApiSingleResponse
+                return BadRequest(new Response
                 {
-                    error = $"Invalid division '{divisionName}' provided"
-                };
+                    Error = $"Invalid division '{divisionName}' provided"
+                });
             } 
             else 
             {
@@ -336,85 +331,33 @@ public class CustomerController : ControllerBase
         
         await _context.SaveChangesAsync();
 
-        return new ApiSingleResponse
-        {
-            customer = customer
-        };
+        return await GetCustomer(customerId);
     }
 
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost("customers")]
-    // public async Task<ActionResult<Customer>> PostCustomer([FromBody] JObject postedCustomer)
-    public async Task<ActionResult<Customer>> PostCustomer([FromBody] PostedCustomer postedCustomer)
-    {
-        
-        // Guid uuid = Guid.NewGuid();
-        // Guid customerId = uuid;
-        string fullName = postedCustomer.fullName;
-        string[] divisions = postedCustomer.divisions;
-        // DateTime checkInTime = DateTime.Now;
-
-        Customer customer = new Customer
-        {
-            FullName = fullName,
-            // CustomerId = customerId,
-            // CheckInTime = checkInTime
-        };
-
-        if (divisions.Length > 0)
-        {
-            CustomerDivision customerDivision;
-            foreach (string division in divisions)
-            {
-                customerDivision = new CustomerDivision
-                {
-                    CustomerId = customer.CustomerId,
-                    DivisionName = division, // Fix this
-                    Status = "Waiting",
-                    OfficeId = postedCustomer.officeId
-                };
-
-                await PostCustomerDivision(customerDivision);
-            }
-        }
-
-        _context.Customer.Add(customer);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(
-            nameof(GetCustomer), 
-            new { id = customer.CustomerId }, 
-            customer
-        );
-    }
-
+    // TODO: Create division in office; POST office/{officeId}/divisions
     [HttpPost("divisions")]
     public async Task<ActionResult<Division>> PostDivision(Division division)
     {
         _context.Division.Add(division);
         await _context.SaveChangesAsync();
 
-        //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
         return CreatedAtAction(nameof(GetDivision), new { id = division.DivisionName }, division);
     }
 
+    // [HttpPost("customer-divisions")]
+    // public async Task<ActionResult<CustomerDivision>> PostCustomerDivision(CustomerDivision customerDivision)
+    // {
+    //     _context.CustomerDivision.Add(customerDivision);
+    //     await _context.SaveChangesAsync();
 
-    [HttpPost("customer-divisions")]
-    public async Task<ActionResult<CustomerDivision>> PostCustomerDivision(CustomerDivision customerDivision)
+    //     //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
+    //     return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.DivisionName }, customerDivision);
+    // }
+
+    [HttpDelete("customers/{customerId}")]
+    public async Task<IActionResult> DeleteCustomer(string customerId)
     {
-        _context.CustomerDivision.Add(customerDivision);
-        await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-        return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.DivisionName }, customerDivision);
-    }
-
-
-    // DELETE: api/Customers/5
-    [HttpDelete("customers/{id}")]
-    public async Task<IActionResult> DeleteCustomer(string id)
-    {
-        var customer = await _context.Customer.FindAsync(id);
+        var customer = await _context.Customer.FindAsync(customerId);
         if (customer == null)
         {
             return NotFound();
@@ -445,13 +388,7 @@ public class CustomerPostedInOffice
     public required string[] divisions { get; init; }
 }
 
-public class ApiSingleResponse 
-{
-    public string? error { get; init; }
-    public Customer? customer { get; init; }
-}
-
-public class ApiResponse
+public class Response
 {
     public string? Error { get; init; }
     public dynamic? Data { get; init; }
