@@ -15,5 +15,5 @@ public class Division
     public required int NumDesks { get; set; }
 
     // Dependent Navigation
-    public ICollection<CustomerDivision>? Customers;
+    public ICollection<CustomerDivision>? Customers { get; set; }
 }

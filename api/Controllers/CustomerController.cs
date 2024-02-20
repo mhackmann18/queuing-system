@@ -22,7 +22,7 @@ public class CustomerController : ControllerBase
         // _logger.LogInformation("Context Model Debug String: {DebugString}", debugString);
     }
 
-    // GET: api/v1/customers
+    // GET /customers
     [HttpGet("customers")]
     public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers()
     {
@@ -45,18 +45,160 @@ public class CustomerController : ControllerBase
         return customers;
     }
 
+    // POST /offices/:officeId/customers/query
+    [HttpPost("offices/{officeId}/customers/query")]
+    public async Task<ActionResult<ApiResponse>> GetCustomersWithFilters(
+        Guid officeId,
+        [FromBody] CustomersQueryBody filters)
+    {
+        // Check that officeId is valid
+        Office? office = await _context.Office.FindAsync(officeId);
+        if(office == null)
+        {
+            return new ApiResponse
+            {
+                Error = "Invalid officeId provided"
+            };
+        }
+
+        // Check that division filters are valid
+        if(filters.Divisions != null)
+        {
+            foreach(CustomersQueryBody.Division division in filters.Divisions)
+            {
+                // Check that each division has a name prop
+                if(division.Name == null)
+                {
+                    return new ApiResponse
+                    {
+                        Error = "Must provide a 'name' property for each division"
+                    };
+                } else {    
+                    // Check that office has a division with the provided name
+                    var divisionFound = await _context.Office
+                        .Where(o => o.OfficeId == officeId && o.Divisions != null && 
+                            o.Divisions.Any(d => d.DivisionName == division.Name))
+                        .Include(o => o.Divisions)
+                        .FirstOrDefaultAsync();
+
+                    // Return error if division doesn't exist
+                    if(divisionFound == null) 
+                    {
+                        return new ApiResponse
+                        {
+                            Error = $"Office has no division '{division.Name}'"
+                        };
+                    }
+                }
+                // Check that the provided statuses are valid
+                if(division.Statuses != null)
+                {
+                    // TODO: Validate each status
+                }
+            }
+        }
+
+        // Check that request body has at least one required property
+        if(filters.Divisions == null && filters.Dates == null)
+        {
+            return new ApiResponse { Error = "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'" };
+        }
+
+        // Initialize an empty list to hold the customers
+        List<Customer> filteredCustomers = new List<Customer>();
+
+        // Filter by divisions ...
+        if(filters.Divisions != null){
+            foreach (var filter in filters.Divisions)
+            {
+                var customersWithCurrentFilter = await _context.Customer
+                    .Where(c => c.Divisions.Any(d => 
+                        d.OfficeId == officeId &&
+                        d.DivisionName == filter.Name && 
+                        (filter.Statuses == null || filter.Statuses.Contains(d.Status))))
+                    .Include(c => c.Divisions)
+                    .ThenInclude(d => d.TimesCalled)
+                    .ToListAsync();
+
+                filteredCustomers.AddRange(customersWithCurrentFilter);
+            }
+            
+
+            if(filteredCustomers.Count == 0)
+            {
+                return new ApiResponse 
+                { 
+                    Error = "No customers found in any of the specified divisions" 
+                };
+            }
+        }
+
+        // Filter by dates
+        if(filters.Dates != null)
+        {
+            if(filteredCustomers.Count == 0)
+            {
+                foreach (var dateFilter in filters.Dates)
+                {
+                    var customersWithCurrentFilter = await _context.Customer
+                        .Where(c => c.CheckInTime.Date == dateFilter.Date
+                        && c.Divisions.Any(d => d.OfficeId == officeId))
+                        .Include(c => c.Divisions)
+                        .ThenInclude(d => d.TimesCalled)
+                        .ToListAsync();
+
+                    filteredCustomers.AddRange(customersWithCurrentFilter);
+                }
+            } else {
+                foreach(DateTime dateFilter in filters.Dates)
+                {
+                    filteredCustomers = 
+                        filteredCustomers.Where(c => c.CheckInTime.Date == dateFilter.Date).ToList();
+                }
+            }
+
+            if(filteredCustomers.Count == 0)
+            {
+                return new ApiResponse
+                {
+                    Error = "No customers found whose check in time matched any of the specified dates"
+                };
+            }
+        }
+
+        // Sanitize customers
+        var customers = filteredCustomers.Select(c => new CustomerDto
+            {
+                Id = c.CustomerId,
+                FullName = c.FullName,
+                CheckInTime = c.CheckInTime,
+                Divisions = c.Divisions.Select(d => new CustomerDivisionDto
+                {
+                    Name = d.DivisionName,
+                    Status = d.Status,
+                    WaitingListIndex = d.WaitingListIndex,
+                    TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
+                }).ToList()
+            }
+        ).ToList();
+        
+        return new ApiResponse
+        {
+            Data = customers
+        };
+    }
+
     [HttpGet("divisions")]
     public async Task<ActionResult<IEnumerable<Division>>> GetDivisions()
     {
         return await _context.Division.ToListAsync();
     }
 
-    // GET: api/Customers/5
+    // GET /customers/:id
     [HttpGet("customers/{id}")]
     public async Task<ActionResult<Customer>> GetCustomer(string id)
     {
         var customer = await _context.Customer.FindAsync(id);
-
 
         if (customer == null)
         {
@@ -125,7 +267,7 @@ public class CustomerController : ControllerBase
         return NoContent();
     }
 
-    // POST: api/v1/offices/:officeId/customers
+    // POST: offices/:officeId/customers
     [HttpPost("offices/{officeId}/customers")]
     public async Task<ActionResult<ApiSingleResponse>> PostCustomerToOffice(
         Guid officeId, 
@@ -307,4 +449,22 @@ public class ApiSingleResponse
 {
     public string? error { get; init; }
     public Customer? customer { get; init; }
+}
+
+public class ApiResponse
+{
+    public string? Error { get; init; }
+    public dynamic? Data { get; init; }
+}
+
+public class CustomersQueryBody
+{
+    public List<Division>? Divisions { get; set; }
+    public List<DateTime>? Dates { get; set; }
+
+    public class Division
+    {
+        public required string Name { get; init; }
+        public string[]? Statuses { get; init; } 
+    }
 }

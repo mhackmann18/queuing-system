@@ -10,5 +10,5 @@ public class Office
   [Column(TypeName = "varchar(70)")]
   public required string OfficeName { get; set; }
 
-  public ICollection<Division>? Divisions;
+  public ICollection<Division>? Divisions { get; set; }
 }
