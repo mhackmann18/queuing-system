@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CustomerApi.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CustomerApi.Controllers;
 
@@ -9,12 +10,14 @@ namespace CustomerApi.Controllers;
 public class CustomerController : ControllerBase
 {
     private readonly CustomerContext _context;
+    private readonly IHubContext<SignalrHub> _hubContext;
     private readonly ILogger<CustomerController> _logger;
 
-    public CustomerController(CustomerContext context, ILogger<CustomerController> logger)
+    public CustomerController(CustomerContext context, IHubContext<SignalrHub> hubContext, ILogger<CustomerController> logger)
     {
         _context = context;
         _logger = logger;
+        _hubContext = hubContext;
     }
 
     [HttpGet("customers")]
@@ -175,10 +178,10 @@ public class CustomerController : ControllerBase
             }
         ).ToList();
         
-        return new Response
+        return Ok(new Response
         {
             Data = customers
-        };
+        });
     }
 
     [HttpGet("divisions")]
@@ -328,10 +331,27 @@ public class CustomerController : ControllerBase
                 await _context.CustomerDivision.AddAsync(cd);
             }
         }
+
+        // TODO: Fix this shit
         
         await _context.SaveChangesAsync();
+        DateTime today = DateTime.Now;
+        ActionResult<Response> res = await GetCustomersWithFilters(
+            officeId, 
+            new CustomersQueryBody{ Dates = new List<DateTime> { today } }
+        );
 
-        return await GetCustomer(customerId);
+        // Check if the result is a success
+        if (res.Result is OkObjectResult okObjectResult)
+        {
+            Response response = okObjectResult.Value as Response;
+
+            List<CustomerDto> c = response.Data;
+            await _hubContext.Clients.All.SendAsync("customersUpdated", c);
+            return await GetCustomer(customerId);
+        } else {
+            return res;
+        }
     }
 
     // TODO: Create division in office; POST office/{officeId}/divisions

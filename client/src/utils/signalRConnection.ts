@@ -1,12 +1,17 @@
 import * as signalR from '@microsoft/signalr';
+import { Customer } from './types';
 
-const URL = 'http://localhost:5005/hub'; //or whatever your backend port is
+const URL = 'http://localhost:5274/hub'; //or whatever your backend port is
 
 class Connector {
   private connection: signalR.HubConnection;
-  public events: (
-    onMessageReceived: (username: string, message: string) => void
-  ) => void;
+  public events: ({
+    onMessageReceived,
+    onCustomersUpdated
+  }: {
+    onMessageReceived?: (username: string, message: string) => void;
+    onCustomersUpdated?: (customers: Customer[]) => void;
+  }) => void;
   static instance: Connector;
 
   constructor() {
@@ -15,10 +20,17 @@ class Connector {
       .withAutomaticReconnect()
       .build();
     this.connection.start().catch((err) => console.log(err));
-    this.events = (onMessageReceived) => {
-      this.connection.on('messageReceived', (username, message) => {
-        onMessageReceived(username, message);
-      });
+    this.events = ({ onMessageReceived, onCustomersUpdated }) => {
+      if (onMessageReceived) {
+        this.connection.on('messageReceived', (username, message) => {
+          onMessageReceived(username, message);
+        });
+      }
+      if (onCustomersUpdated) {
+        this.connection.on('customersUpdated', (customers) => {
+          onCustomersUpdated(customers);
+        });
+      }
     };
   }
 
