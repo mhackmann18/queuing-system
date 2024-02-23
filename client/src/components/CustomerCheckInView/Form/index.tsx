@@ -3,10 +3,9 @@ import Error from 'components/Error';
 import { CheckInFormProps, CheckInFormValues } from './types';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FULL_NAME_MAX_LENGTH, REQUIRED_FIELD_ERROR } from 'utils/constants';
-import CustomerController from 'utils/CustomerController';
 import SubmitBtn from 'components/Form/SubmitBtn';
 
-const DUMMY_OFFICE_ID = 1;
+const DUMMY_OFFICE_ID = '1056cc0c-c844-11ee-851b-4529fd7b70be';
 
 export default function CustomerCheckInViewForm({
   divisions,
@@ -23,11 +22,28 @@ export default function CustomerCheckInViewForm({
     fullName,
     reasonForVisit
   }) => {
-    const { error, data } = await CustomerController.create({
-      fullName,
-      divisions: reasonForVisit,
-      officeId: DUMMY_OFFICE_ID
-    });
+    const res = await fetch(
+      `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fullName,
+          divisionNames: reasonForVisit
+        })
+      }
+    );
+
+    if (res.status !== 200) {
+      setSubmitError(
+        "There's been a problem with the server. Please see a clerk for assistance."
+      );
+      return;
+    }
+
+    const { data, error } = await res.json();
 
     if (error) {
       setSubmitError(error);

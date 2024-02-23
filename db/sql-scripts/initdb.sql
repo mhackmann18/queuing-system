@@ -59,9 +59,9 @@ INSERT INTO Office (officeId, officeName) VALUES
 -- Inserting dummy values into Division table
 INSERT INTO Division (divisionName, officeId, numDesks) VALUES 
 ('Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 4),
-('Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 2),
+('Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 2),
 ('Motor Vehicle', '1056d5d0-c844-11ee-851b-4529fd7b70be', 4),
-('Drivers License', '1056d5d0-c844-11ee-851b-4529fd7b70be', 2);
+('Driver License', '1056d5d0-c844-11ee-851b-4529fd7b70be', 2);
 
 -- Inserting dummy values into Customer table
 INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
@@ -74,13 +74,13 @@ INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
 INSERT INTO CustomerDivision (customerId, divisionName, officeId, status, waitingListIndex) VALUES
 ('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
 ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Serving', NULL),
-('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
-('1056d904-c844-11ee-851b-4529fd7b70be', 'Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'No Show', NULL);
+('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
+('1056d904-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'No Show', NULL);
 
 -- Inserting dummy values into CustomerDivisionTimeCalled table
 INSERT INTO CustomerDivisionTimeCalled (customerId, divisionName, officeId, timeCalled) VALUES
 ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW()),
-('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Drivers License', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW());
+('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW());
 
 
 SELECT VERSION();
