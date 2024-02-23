@@ -272,7 +272,7 @@ public class CustomerController : ControllerBase
         DateTime checkInTime = DateTime.Now;
 
         // Check for errors in request body
-        if(postedCustomer.divisions.Length == 0)
+        if(postedCustomer.divisionNames.Length == 0)
         {
             return BadRequest(new Response
             {
@@ -300,7 +300,7 @@ public class CustomerController : ControllerBase
         await _context.Customer.AddAsync(customer);
 
         // Insert divisions into CustomerDivision
-        foreach(string divisionName in postedCustomer.divisions)
+        foreach(string divisionName in postedCustomer.divisionNames)
         {
             // Find divisions with the given name and officeId
             List<Division> divisions = _context.Division
@@ -385,7 +385,7 @@ public class PostedCustomer
 public class CustomerPostedInOffice 
 {
     public required string fullName { get; init; }
-    public required string[] divisions { get; init; }
+    public required string[] divisionNames { get; init; }
 }
 
 public class Response
