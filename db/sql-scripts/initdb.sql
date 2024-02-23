@@ -31,7 +31,7 @@ CREATE TABLE CustomerDivision (
 	status ENUM('Waiting', 'Serving', 'Served', 'No Show') NOT NULL,
     
 	PRIMARY KEY(customerId, officeId, divisionName),
-	FOREIGN KEY(customerId) REFERENCES Customer(customerId),
+	FOREIGN KEY(customerId) REFERENCES Customer(customerId) ON DELETE CASCADE,
 	FOREIGN KEY(divisionName) REFERENCES Division(divisionName),
 	FOREIGN KEY(officeId) REFERENCES Office(officeId)
 );
@@ -43,7 +43,7 @@ CREATE TABLE CustomerDivisionTimeCalled (
   timeCalled DATETIME NOT NULL,
     
 	PRIMARY KEY(customerId, divisionName, timeCalled, officeId),
-	FOREIGN KEY(customerId) REFERENCES Customer(customerId),
+	FOREIGN KEY(customerId) REFERENCES Customer(customerId) ON DELETE CASCADE,
 	FOREIGN KEY(officeId) REFERENCES Office(officeId),
 	FOREIGN KEY(divisionName) REFERENCES Division(divisionName)
 );

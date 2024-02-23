@@ -112,6 +112,7 @@ public class CustomerController : ControllerBase
                         d.OfficeId == officeId &&
                         d.DivisionName == filter.Name && 
                         (filter.Statuses == null || filter.Statuses.Contains(d.Status))))
+                    // .OrderBy(c => c.CheckInTime)
                     .Include(c => c.Divisions)
                     .ThenInclude(d => d.TimesCalled)
                     .ToListAsync();
@@ -139,6 +140,7 @@ public class CustomerController : ControllerBase
                     var customersWithCurrentFilter = await _context.Customer
                         .Where(c => c.CheckInTime.Date == dateFilter.Date
                         && c.Divisions.Any(d => d.OfficeId == officeId))
+                        // .OrderBy(c => c.CheckInTime)
                         .Include(c => c.Divisions)
                         .ThenInclude(d => d.TimesCalled)
                         .ToListAsync();
@@ -176,7 +178,9 @@ public class CustomerController : ControllerBase
                     TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
                 }).ToList()
             }
-        ).ToList();
+        )
+                        .OrderBy(c => c.CheckInTime)
+        .ToList();
         
         return Ok(new Response
         {

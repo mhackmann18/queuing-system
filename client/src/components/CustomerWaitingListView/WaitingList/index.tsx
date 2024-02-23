@@ -1,6 +1,8 @@
 import useCustomers from 'hooks/useCustomers';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { WaitingListProps } from './types';
+import Connector from 'utils/signalRConnection';
+import { Customer } from 'utils/types';
 
 export default function WaitingList({ division }: WaitingListProps) {
   const filters = useMemo(
@@ -11,8 +13,29 @@ export default function WaitingList({ division }: WaitingListProps) {
     }),
     [division]
   );
+  const { customers: initialCustomers } = useCustomers(filters);
+  const [customers, setCustomers] = useState<Customer[] | null>(null);
+  const { events } = Connector();
 
-  const { customers } = useCustomers(filters);
+  useEffect(() => {
+    setCustomers(initialCustomers);
+  }, [initialCustomers]);
+
+  useEffect(() => {
+    events({
+      onCustomersUpdated: (customers) =>
+        setCustomers(
+          customers.filter((c) => {
+            for (const { name } of c.divisions) {
+              if (name === division) {
+                return true;
+              }
+            }
+            return false;
+          })
+        )
+    });
+  });
 
   return (
     <div key={division} className="flex-1 border-r-4 last:border-r-0">
@@ -30,16 +53,18 @@ export default function WaitingList({ division }: WaitingListProps) {
             Waiting List
           </h3>
           {/* Waiting List */}
-          <ul className="text-3xl 2xl:text-4xl">
-            {customers.map((customer) => (
-              <li
-                className="mb-2 flex items-center overflow-hidden rounded-lg border-4 p-4 2xl:p-6"
-                key={customer.id}
-              >
-                {customer.name}
-              </li>
-            ))}
-          </ul>
+          {customers && (
+            <ul className="text-3xl 2xl:text-4xl">
+              {customers.map((customer) => (
+                <li
+                  className="mb-2 flex items-center overflow-hidden rounded-lg border-4 p-4 2xl:p-6"
+                  key={customer.id}
+                >
+                  {customer.fullName}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
