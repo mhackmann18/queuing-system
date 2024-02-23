@@ -3,8 +3,35 @@ import {
   Customer,
   ManageCustomerAction,
   Division,
-  StatusFilter
+  StatusFilter,
+  CustomerDto,
+  CustomerStatus
 } from './types';
+
+const sanitizeRawCustomer = (customer: CustomerDto, division: string): Customer => {
+  const { id, fullName: name, checkInTime, divisions } = customer;
+
+  let status = 'Waiting' as CustomerStatus;
+  const timesCalled = [];
+  const reasonsForVisit = [];
+
+  for (const d of divisions) {
+    reasonsForVisit.push(d.name);
+    if (d.name === division) {
+      status = d.status;
+      timesCalled.push(...d.timesCalled.map((d) => new Date(d)));
+    }
+  }
+
+  return {
+    id,
+    status,
+    name,
+    checkInTime: new Date(checkInTime),
+    timesCalled,
+    reasonsForVisit
+  };
+};
 
 const formatString = (input: string, lineLength: number) => {
   const words = input.split(' ');
@@ -209,5 +236,6 @@ export {
   getNextElement,
   getDeskName,
   getNextSelectedCustomer,
-  formatString
+  formatString,
+  sanitizeRawCustomer
 };

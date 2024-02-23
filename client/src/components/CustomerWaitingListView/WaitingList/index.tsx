@@ -1,7 +1,6 @@
 import useCustomers from 'hooks/useCustomers';
 import { useMemo, useEffect, useState } from 'react';
 import { WaitingListProps } from './types';
-import Connector from 'utils/signalRConnection';
 import { Customer } from 'utils/types';
 
 export default function WaitingList({ division }: WaitingListProps) {
@@ -15,27 +14,10 @@ export default function WaitingList({ division }: WaitingListProps) {
   );
   const { customers: initialCustomers } = useCustomers(filters);
   const [customers, setCustomers] = useState<Customer[] | null>(null);
-  const { events } = Connector();
 
   useEffect(() => {
     setCustomers(initialCustomers);
   }, [initialCustomers]);
-
-  useEffect(() => {
-    events({
-      onCustomersUpdated: (customers) =>
-        setCustomers(
-          customers.filter((c) => {
-            for (const { name } of c.divisions) {
-              if (name === division) {
-                return true;
-              }
-            }
-            return false;
-          })
-        )
-    });
-  });
 
   return (
     <div key={division} className="flex-1 border-r-4 last:border-r-0">
@@ -60,7 +42,7 @@ export default function WaitingList({ division }: WaitingListProps) {
                   className="mb-2 flex items-center overflow-hidden rounded-lg border-4 p-4 2xl:p-6"
                   key={customer.id}
                 >
-                  {customer.fullName}
+                  {customer.name}
                 </li>
               ))}
             </ul>

@@ -31,13 +31,25 @@ export interface CustomerFilters {
 }
 
 export interface Customer {
-  id: number; // TODO: uuid
+  id: string; // TODO: uuid
   status: CustomerStatus;
   name: string; // TODO: first and last name
   checkInTime: Date;
   timesCalled: Date[];
   reasonsForVisit: Division[];
   atOtherDivision?: Division;
+}
+
+export interface CustomerDto {
+  id: string;
+  fullName: string;
+  checkInTime: Date;
+  divisions: {
+    name: string;
+    status: CustomerStatus;
+    waitingListIndex?: number;
+    timesCalled: Date[];
+  }[];
 }
 
 export type StatusFilters = Partial<Record<StatusFilter, boolean>>;
