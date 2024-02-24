@@ -570,19 +570,68 @@ public partial class CustomerController : ControllerBase
     //     return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.DivisionName }, customerDivision);
     // }
 
-    [HttpDelete("customers/{customerId}")]
-    public async Task<IActionResult> DeleteCustomer(string customerId)
+    [HttpDelete("offices/{officeId}/customers/{customerId}")]
+    public async Task<ActionResult<CustomerDto>> DeleteCustomer(Guid officeId, Guid customerId)
     {
-        var customer = await _context.Customer.FindAsync(customerId);
+        Customer? customer = await _context.Customer.FindAsync(customerId);
         if (customer == null)
         {
             return NotFound();
         }
 
+        List<CustomerDivision> cds = await _context.CustomerDivision
+            .Where(cd => cd.CustomerId == customerId).ToListAsync();
+
+        if(cds.Count != 0)
+        {
+            foreach(CustomerDivision cd in cds)
+            {
+                if(DeskRegex().IsMatch(cd.Status))
+                {
+                    // Update AtDesk table
+                }
+
+                // Update waitingListIndexes for division
+                if(cd.Status == "Waiting" && cd.WaitingListIndex != null)
+                {
+                    int wlIndex = (int)cd.WaitingListIndex;
+                    List<CustomerDivision> cdsToUpdate = await _context.CustomerDivision
+                        .Where(cdToUpdate => 
+                            cdToUpdate.CustomerId != customerId &&
+                            cdToUpdate.DivisionName == cd.DivisionName &&
+                            cdToUpdate.OfficeId == officeId &&
+                            cdToUpdate.WaitingListIndex > wlIndex).ToListAsync();
+                    foreach(CustomerDivision cdToUpdate in cdsToUpdate)
+                    {
+                        cdToUpdate.WaitingListIndex--;
+                    }
+                }
+            }
+        }
+
+        List<CustomerDto> customerToDelete = await _context.Customer
+            .Where(c => c.CustomerId == customerId)
+            .Select(c => new CustomerDto
+            {
+                Id = c.CustomerId,
+                FullName = c.FullName,
+                CheckInTime = c.CheckInTime,
+                Divisions = c.Divisions.Select(d => new CustomerDivisionDto
+                {
+                    Name = d.DivisionName,
+                    Status = d.Status,
+                    WaitingListIndex = d.WaitingListIndex,
+                    TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
+                }).ToList()
+            })
+            .ToListAsync();
+
         _context.Customer.Remove(customer);
         await _context.SaveChangesAsync();
 
-        return NoContent();
+        await _hubContext.Clients.All.SendAsync("customersUpdated");
+
+        return customerToDelete[0];
     }
 
     private bool CustomerExists(Guid id)
@@ -613,8 +662,6 @@ public class CustomerPatchBody
         public List<DateTime>? TimesCalled { get; set; }
     };
 };
-
-
 
 public class CustomerPostedInOffice 
 {
