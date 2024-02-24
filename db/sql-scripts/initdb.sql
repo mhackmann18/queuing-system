@@ -1,6 +1,34 @@
 -- CREATE DATABASE queuing_system;
 USE queuing_system;
 
+CREATE TABLE User (
+	userId CHAR(36),
+	username VARCHAR(50) NOT NULL UNIQUE,
+	password 
+	firstName VARCHAR(50) NOT NULL,
+	lastName VARCHAR(50) NOT NULL,
+	PRIMARY KEY(userId)
+);
+
+CREATE TABLE UserOffice (
+	userId CHAR(36) NOT NULL,
+	officeId CHAR(36) NOT NULL,
+	PRIMARY KEY(userId, officeId),
+	FOREIGN KEY(userId) REFERENCES User(userId) ON DELETE CASCADE,
+	FOREIGN KEY(officeId) REFERENCES Office(officeId) ON DELETE CASCADE,
+);
+
+CREATE TABLE AtDesk (
+	userId CHAR(36) NOT NULL UNIQUE,
+	officeId CHAR(36) NOT NULL,
+	divisionName VARCHAR(50) NOT NULL,
+	deskNumber INT NOT NULL,
+	PRIMARY KEY(officeId, divisionName, deskNumber),
+	FOREIGN KEY(userId) REFERENCES User(userId) ON DELETE CASCADE,
+	FOREIGN KEY(officeId) REFERENCES Office(officeId) ON DELETE CASCADE,
+	FOREIGN KEY(divisionName) REFERENCES Division(divisionName) ON DELETE CASCADE
+);
+
 CREATE TABLE Office (
 	officeId CHAR(36),
 	officeName VARCHAR(70) NOT NULL,
