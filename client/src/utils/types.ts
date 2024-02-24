@@ -38,6 +38,7 @@ export interface Customer {
   timesCalled: Date[];
   reasonsForVisit: Division[];
   atOtherDivision?: Division;
+  waitingListIndex?: number;
 }
 
 export interface CustomerDto {

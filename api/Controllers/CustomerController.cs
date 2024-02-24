@@ -74,13 +74,123 @@ public class CustomerController : ControllerBase
                 if(cd == null)
                 {
                     return BadRequest(new Response {
-                        Error = "dfsdfs"
+                        Error = $"This customer does not belong to any divisions with the name '{div.Name}'"
                     });
                 }
 
                 if(div.Status != null)
                 {
+                    if(div.Status == "Waiting" && 
+                        cd.Status != "Waiting" && 
+                        div.WaitingListIndex == null)
+                    {
+                        return BadRequest(new Response {
+                            Error = $"Customers whose status is being updated to 'Waiting' must have a 'waitingListIndex' property"
+                        });
+                    }
+
+                    // If a customer is transitioning from 'Waiting' to any other status, their waitingListIndex should be null, and the existing customers need their indexes updated to fill the gap
+                    if(cd.Status == "Waiting" && 
+                        div.Status != "Waiting" && 
+                        cd.WaitingListIndex != null)
+                    {
+                        int wlIndex = (int)cd.WaitingListIndex;
+                        
+                        // Select all customers that appear after this one in the WL
+                        IQueryable<CustomerDivision> cdsToUpdate = _context.CustomerDivision
+                            .Where(cd => cd.WaitingListIndex > wlIndex);
+                        
+                        // Move selected customers up one position in WL
+                        foreach (CustomerDivision cdToUpdate in cdsToUpdate)
+                        {
+                            cdToUpdate.WaitingListIndex--;
+                        }
+
+                        // Clear this customers WL index
+                        cd.WaitingListIndex = null;
+                    }
+
                     cd.Status = div.Status;
+                }
+
+                if(div.WaitingListIndex != null && cd.Status != "Waiting")
+                {
+                    return BadRequest(new Response {
+                        Error = "Cannot set the 'waitingListIndex' property on a customer whose status is not equal to 'Waiting'."
+                    });
+                }
+
+                // Update waitingListIndex
+                if(div.WaitingListIndex != null)
+                {
+                    // Check that waiting list index is valid
+                    if(div.WaitingListIndex < 1)
+                    {
+                        return BadRequest(new Response {
+                            Error = $"'waitingListIndex' property must be a positive non-zero integer."
+                        });
+                    }
+
+                    int? maxPossibleIndex = _context.CustomerDivision
+                        .Where(cd => cd.OfficeId == officeId && cd.DivisionName == div.Name)
+                        .Max(cd => cd.WaitingListIndex);
+                    int? currentIndex = cd.WaitingListIndex;
+                    int newIndex = (int)div.WaitingListIndex;
+
+                    // If this customer does not have a waiting list index, it's possible to place them at the max wl index + 1
+                    if(currentIndex == null && maxPossibleIndex != null)
+                    {
+                        maxPossibleIndex++;
+                    }
+
+                    maxPossibleIndex ??= 1;
+                    
+                    if(div.WaitingListIndex > maxPossibleIndex)
+                    {
+                        return BadRequest(new Response
+                        {
+                            Error = $"The waitingListIndex property for division '{div.Name}' is out of bounds. The maximum possible value is {maxPossibleIndex}."
+                        });
+                    }  
+
+                    IQueryable<CustomerDivision> cdsToUpdate;
+
+                    if(currentIndex == null){
+                        cdsToUpdate = _context.CustomerDivision
+                            .Where(cd => cd.WaitingListIndex >= newIndex);
+                        
+                        foreach (CustomerDivision cdToUpdate in cdsToUpdate)
+                        {
+                            cdToUpdate.WaitingListIndex++;
+                        }
+
+                        cd.WaitingListIndex = newIndex;
+                    } else if(newIndex < currentIndex)
+                    {
+                        cdsToUpdate = _context.CustomerDivision
+                            .Where(cd => 
+                                cd.WaitingListIndex < currentIndex &&
+                                cd.WaitingListIndex >= newIndex);
+
+                        foreach (CustomerDivision cdToUpdate in cdsToUpdate)
+                        {
+                            cdToUpdate.WaitingListIndex++;
+                        }
+
+                        // Update customer's WL index
+                        cd.WaitingListIndex = newIndex;
+                    } else if(newIndex > currentIndex) {
+                        cdsToUpdate = _context.CustomerDivision
+                            .Where(cd => cd.WaitingListIndex <= newIndex &&
+                                cd.WaitingListIndex > currentIndex);
+
+                        foreach (CustomerDivision cdToUpdate in cdsToUpdate)
+                        {
+                            cdToUpdate.WaitingListIndex--;
+                        }
+
+                        cd.WaitingListIndex = newIndex;
+                    }
                 }
             }
         }
@@ -175,7 +285,6 @@ public class CustomerController : ControllerBase
                         d.OfficeId == officeId &&
                         d.DivisionName == filter.Name && 
                         (filter.Statuses == null || filter.Statuses.Contains(d.Status))))
-                    // .OrderBy(c => c.CheckInTime)
                     .Include(c => c.Divisions)
                     .ThenInclude(d => d.TimesCalled)
                     .ToListAsync();
@@ -386,13 +495,19 @@ public class CustomerController : ControllerBase
             } 
             else 
             {
+                int? maxWLIndex = _context.CustomerDivision
+                    .Where(cd => cd.OfficeId == officeId && cd.DivisionName == divisionName)
+                    .Max(cd => cd.WaitingListIndex);
+                maxWLIndex ??= 0;
+                
                 // Insert into CustomerDivision
                 CustomerDivision cd = new CustomerDivision
                 {
                     CustomerId = customerId,
                     DivisionName = divisionName,
                     Status = "Waiting",
-                    OfficeId = officeId
+                    OfficeId = officeId,
+                    WaitingListIndex = maxWLIndex + 1
                 };
 
                 await _context.CustomerDivision.AddAsync(cd);

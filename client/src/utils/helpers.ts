@@ -26,8 +26,8 @@ const sortCustomers = (customers: Customer[]): Customer[] => {
       } else if (a.status.startsWith('Desk')) {
         return parseInt(b.status.split(' ')[1]) - parseInt(a.status.split(' ')[1]);
       } else if (a.status === 'Waiting') {
-        return new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime();
-        // return a.waitingListIndex - b.waitingListIndex;
+        // return new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime();
+        return a.waitingListIndex! - b.waitingListIndex!;
       }
     }
 
@@ -41,12 +41,14 @@ const sanitizeRawCustomer = (customer: CustomerDto, division: string): Customer 
   let status = 'Waiting' as CustomerStatus;
   const timesCalled = [];
   const reasonsForVisit = [];
+  let waitingListIndex: number | undefined;
 
   for (const d of divisions) {
     reasonsForVisit.push(d.name);
     if (d.name === division) {
       status = d.status;
       timesCalled.push(...d.timesCalled.map((d) => new Date(d)));
+      waitingListIndex = d.waitingListIndex;
     }
   }
 
@@ -56,7 +58,8 @@ const sanitizeRawCustomer = (customer: CustomerDto, division: string): Customer 
     name,
     checkInTime: new Date(checkInTime),
     timesCalled,
-    reasonsForVisit
+    reasonsForVisit,
+    waitingListIndex
   };
 };
 
