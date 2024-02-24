@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CustomerApi.Models;
 using Microsoft.AspNetCore.SignalR;
+using System.Text.RegularExpressions;
 
 namespace CustomerApi.Controllers;
 
 [Route("api/v1/")]
 [ApiController]
-public class CustomerController : ControllerBase
+public partial class CustomerController : ControllerBase
 {
     private readonly CustomerContext _context;
     private readonly IHubContext<SignalrHub> _hubContext;
@@ -89,13 +90,26 @@ public class CustomerController : ControllerBase
                         });
                     }
 
+                    // If a customer is transitioning from 'Waiting' to 'Desk X', the current time should be added to their timesCalled.
+                    if(cd.Status == "Waiting" && DeskRegex().IsMatch(div.Status))
+                    {
+                        CustomerDivisionTimeCalled cdtc = new CustomerDivisionTimeCalled
+                        {
+                            TimeCalled = DateTime.Now,
+                            CustomerId = customerId,
+                            DivisionName = div.Name,
+                            OfficeId = officeId
+                        };
+                        await _context.CustomerDivisionTimeCalled.AddAsync(cdtc);
+                    }
+
                     // If a customer is transitioning from 'Waiting' to any other status, their waitingListIndex should be null, and the existing customers need their indexes updated to fill the gap
                     if(cd.Status == "Waiting" && 
                         div.Status != "Waiting" && 
                         cd.WaitingListIndex != null)
                     {
                         int wlIndex = (int)cd.WaitingListIndex;
-                        
+
                         // Select all customers that appear after this one in the WL
                         IQueryable<CustomerDivision> cdsToUpdate = _context.CustomerDivision
                             .Where(cd => cd.WaitingListIndex > wlIndex);
@@ -575,6 +589,9 @@ public class CustomerController : ControllerBase
     {
         return _context.Customer.Any(e => e.CustomerId == id);
     }
+
+    [GeneratedRegex(@"^Desk\s\d+$")]
+    private static partial Regex DeskRegex();
 }
 
 public class PostedCustomer

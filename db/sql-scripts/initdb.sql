@@ -28,7 +28,17 @@ CREATE TABLE CustomerDivision (
 	officeId CHAR(36) NOT NULL,
 	divisionName VARCHAR(50) NOT NULL,
 	waitingListIndex INT,
-	status ENUM('Waiting', 'Serving', 'Served', 'No Show') NOT NULL,
+	status ENUM(
+		'Waiting', 
+		'Serving', 
+		'Served', 
+		'No Show', 
+		'Desk 1', 
+		'Desk 2',
+		'Desk 3',
+		'Desk 4',
+		'Desk 5'
+	) NOT NULL,
     
 	PRIMARY KEY(customerId, officeId, divisionName),
 	FOREIGN KEY(customerId) REFERENCES Customer(customerId) ON DELETE CASCADE,
