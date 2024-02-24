@@ -42,6 +42,69 @@ public class CustomerController : ControllerBase
         return customers;
     }
 
+    [HttpPatch("offices/{officeId}/customers/{customerId}")]
+    public async Task<ActionResult<Response>> PatchCustomer(
+        Guid officeId,
+        Guid customerId, 
+        [FromBody] CustomerPatchBody customerFields
+    )
+    {
+        // Check that customer exists
+        Customer? customer = await _context.Customer.FindAsync(customerId);
+        if(customer == null)
+        {
+            return NotFound();
+        }
+
+        if(customerFields.Divisions != null)
+        {
+            foreach(CustomerPatchBody.Division div in customerFields.Divisions)
+            {
+                if(div.Name == null)
+                {
+                    return BadRequest();
+                }
+
+                CustomerDivision? cd = await _context.CustomerDivision.FindAsync(
+                    customerId, 
+                    officeId, 
+                    div.Name
+                );
+
+                if(cd == null)
+                {
+                    return BadRequest(new Response {
+                        Error = "dfsdfs"
+                    });
+                }
+
+                if(div.Status != null)
+                {
+                    cd.Status = div.Status;
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        // DateTime today = DateTime.Now;
+        // ActionResult<Response> res = await GetCustomersWithFilters(
+        //     officeId, 
+        //     new CustomersQueryBody{ Dates = new List<DateTime> { today } }
+        // );
+
+        // Check if the result is a success
+        // if (res.Result is OkObjectResult okObjectResult)
+        // {
+        //     Response response = okObjectResult.Value as Response;
+
+        //     List<CustomerDto> c = response.Data;
+        await _hubContext.Clients.All.SendAsync("customersUpdated");
+        return await GetCustomer(customerId);
+        // } else {
+        //     return res;
+        // }
+    }
+
     [HttpPost("offices/{officeId}/customers/query")]
     public async Task<ActionResult<Response>> GetCustomersWithFilters(
         Guid officeId,
@@ -179,7 +242,7 @@ public class CustomerController : ControllerBase
                 }).ToList()
             }
         )
-                        .OrderBy(c => c.CheckInTime)
+        .OrderBy(c => c.CheckInTime)
         .ToList();
         
         return Ok(new Response
@@ -339,23 +402,23 @@ public class CustomerController : ControllerBase
         // TODO: Fix this shit
         
         await _context.SaveChangesAsync();
-        DateTime today = DateTime.Now;
-        ActionResult<Response> res = await GetCustomersWithFilters(
-            officeId, 
-            new CustomersQueryBody{ Dates = new List<DateTime> { today } }
-        );
+        // DateTime today = DateTime.Now;
+        // ActionResult<Response> res = await GetCustomersWithFilters(
+        //     officeId, 
+        //     new CustomersQueryBody{ Dates = new List<DateTime> { today } }
+        // );
 
         // Check if the result is a success
-        if (res.Result is OkObjectResult okObjectResult)
-        {
-            Response response = okObjectResult.Value as Response;
+        // if (res.Result is OkObjectResult okObjectResult)
+        // {
+        //     Response response = okObjectResult.Value as Response;
 
-            List<CustomerDto> c = response.Data;
-            await _hubContext.Clients.All.SendAsync("customersUpdated", c);
+        //     List<CustomerDto> c = response.Data;
+            await _hubContext.Clients.All.SendAsync("customersUpdated");
             return await GetCustomer(customerId);
-        } else {
-            return res;
-        }
+        // } else {
+        //     return res;
+        // }
     }
 
     // TODO: Create division in office; POST office/{officeId}/divisions
@@ -405,6 +468,21 @@ public class PostedCustomer
     public required Guid officeId { get; set; }
     public required string[] divisions { get; set; }
 };
+
+public class CustomerPatchBody
+{
+    public List<Division>? Divisions { get; set; }
+
+    public class Division 
+    {
+        public required string Name {get; set;}
+        public string? Status { get; set; }
+        public int? WaitingListIndex { get; set; }
+        public List<DateTime>? TimesCalled { get; set; }
+    };
+};
+
+
 
 public class CustomerPostedInOffice 
 {

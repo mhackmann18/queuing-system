@@ -8,6 +8,33 @@ import {
   CustomerStatus
 } from './types';
 
+const sortCustomers = (customers: Customer[]): Customer[] => {
+  return customers.sort((a, b) => {
+    const order = [['Served', 'No Show'], 'Serving', 'Waiting'];
+    const aStatusIndex = order.findIndex((status) =>
+      Array.isArray(status) ? status.includes(a.status) : status === a.status
+    );
+    const bStatusIndex = order.findIndex((status) =>
+      Array.isArray(status) ? status.includes(b.status) : status === b.status
+    );
+
+    if (aStatusIndex !== bStatusIndex) {
+      return aStatusIndex - bStatusIndex;
+    } else {
+      if (a.status === 'Served' || a.status === 'No Show') {
+        return new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime();
+      } else if (a.status.startsWith('Desk')) {
+        return parseInt(b.status.split(' ')[1]) - parseInt(a.status.split(' ')[1]);
+      } else if (a.status === 'Waiting') {
+        return new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime();
+        // return a.waitingListIndex - b.waitingListIndex;
+      }
+    }
+
+    return new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime();
+  });
+};
+
 const sanitizeRawCustomer = (customer: CustomerDto, division: string): Customer => {
   const { id, fullName: name, checkInTime, divisions } = customer;
 
@@ -237,5 +264,6 @@ export {
   getDeskName,
   getNextSelectedCustomer,
   formatString,
-  sanitizeRawCustomer
+  sanitizeRawCustomer,
+  sortCustomers
 };

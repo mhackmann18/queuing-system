@@ -1,5 +1,4 @@
 import * as signalR from '@microsoft/signalr';
-import { CustomerDto } from './types';
 
 const URL = 'http://localhost:5274/hub'; //or whatever your backend port is
 
@@ -10,7 +9,7 @@ class Connector {
     onCustomersUpdated
   }: {
     onMessageReceived?: (username: string, message: string) => void;
-    onCustomersUpdated?: (customers: CustomerDto[]) => void;
+    onCustomersUpdated?: () => void;
   }) => void;
   static instance: Connector;
 
@@ -27,9 +26,7 @@ class Connector {
         });
       }
       if (onCustomersUpdated) {
-        this.connection.on('customersUpdated', (customers) => {
-          onCustomersUpdated(customers);
-        });
+        this.connection.on('customersUpdated', onCustomersUpdated);
       }
     };
   }

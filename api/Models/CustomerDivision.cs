@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-[PrimaryKey(nameof(CustomerId), nameof(DivisionName), nameof(OfficeId))]
+[PrimaryKey(nameof(CustomerId), nameof(OfficeId), nameof(DivisionName))]
 public class CustomerDivision
 {
     // Foreign Key
