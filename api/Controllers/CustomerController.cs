@@ -661,35 +661,35 @@ public partial class CustomerController : ControllerBase
         [FromBody] PostUserBody user)
     {
 
-        if (user.Password == null)
-        {
-            return BadRequest();
-        }
-        if (user.Username == null)
-        {
-            return BadRequest();
-        }
-        if (user.FirstName == null)
-        {
-            return BadRequest();
-        }
-        if (user.LastName == null)
-        {
-            return BadRequest();
-        }
+        // if (user.Password == null)
+        // {
+        //     return BadRequest();
+        // }
+        // if (user.Username == null)
+        // {
+        //     return BadRequest();
+        // }
+        // if (user.FirstName == null)
+        // {
+        //     return BadRequest();
+        // }
+        // if (user.LastName == null)
+        // {
+        //     return BadRequest("");
+        // }
         if (user.Username.Length < 8)
         {
-            return BadRequest();
+            return BadRequest("Username must be at least 8 characters long");
         }
         if (user.Password.Length < 8)
         {
-            return BadRequest();
+            return BadRequest("Password must be at least 8 characters long");
         }
 
         List<User> existingUser = await _context.User.Where(u => u.Username == user.Username).ToListAsync();
         if (existingUser.Count >= 1)
         {
-            return BadRequest();
+            return BadRequest("Username already exists");
         }
 
         // Generate a potential Guid for the user
@@ -703,7 +703,7 @@ public partial class CustomerController : ControllerBase
             if (existingOffice == null)
             {
                 // If the office doesn't exist, bad request
-                return BadRequest(); 
+                return BadRequest("Office with ID " + officeId + " does not exist"); 
             }
 
             // Create new userOffice entry
@@ -715,7 +715,6 @@ public partial class CustomerController : ControllerBase
 
             // Add userOffice entry to context
             await _context.UserOffice.AddAsync(userOffice);
-
         }
 
         // Encrypt password before storing on server
@@ -746,9 +745,36 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    [HttpPost("users/login")]
+    public async Task<ActionResult<User>> LoginUser(
+        [FromBody] LoginUserBody user)
+    {
+        // Check if there is a user with the specific username
+        List<User> existingUser = await _context.User.Where(u => u.Username == user.Username).ToListAsync();
 
+        if (existingUser.Count == 0)
+        {
+            return BadRequest("Username does not exist");
+        }
+
+        // Check if the password is correct
+        if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser[0].Password))
+        {
+            return BadRequest("Password is incorrect");
+        }
+
+        return Ok(new Response
+        {
+            Data = existingUser[0]
+        });
+    }
 }
 
+public class LoginUserBody
+{
+    public required string Username { get; init; }
+    public required string Password { get; init; }
+}
 
 public class PostedCustomer
 {

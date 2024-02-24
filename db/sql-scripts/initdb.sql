@@ -58,7 +58,6 @@ CREATE TABLE CustomerDivision (
 	waitingListIndex INT,
 	status ENUM(
 		'Waiting', 
-		'Serving', 
 		'Served', 
 		'No Show', 
 		'Desk 1', 
@@ -111,7 +110,7 @@ INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
 -- Inserting dummy values into CustomerDivision table
 INSERT INTO CustomerDivision (customerId, divisionName, officeId, status, waitingListIndex) VALUES
 ('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
-('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Serving', NULL),
+('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Desk 1', NULL),
 ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
 ('1056d904-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'No Show', NULL);
 

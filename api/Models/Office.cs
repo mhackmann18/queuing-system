@@ -11,4 +11,5 @@ public class Office
   public required string OfficeName { get; set; }
 
   public ICollection<Division>? Divisions { get; set; }
+  public ICollection<UserOffice>? Users { get; set; }
 }

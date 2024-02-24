@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-[PrimaryKey(nameof(UserId))]
 public class User
 {
     // Foreign Key
@@ -23,5 +22,7 @@ public class User
     public required string LastName { get; set; }
 
     // Dependent Navigation
-    public ICollection<CustomerDivision>? Customers { get; set; }
+    public AtDesk? Desk { get; set; }
+
+    public ICollection<UserOffice> Offices { get; set; } = null!;
 }
