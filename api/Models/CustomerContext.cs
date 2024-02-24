@@ -9,6 +9,10 @@ public class CustomerContext(DbContextOptions<CustomerContext> options) : DbCont
     public DbSet<CustomerDivision> CustomerDivision { get; set; } = null!;
     public DbSet<CustomerDivisionTimeCalled> CustomerDivisionTimeCalled { get; set; } = null!;
     public DbSet<Office> Office { get; set; } = null!;
+    public DbSet<User> User { get; set; } = null!;
+    public DbSet<UserOffice> UserOffice { get; set; } = null!;
+    public DbSet<AtDesk> AtDesk { get; set; } = null!;
+
 
     // If this method gets too big, see 'grouping configuration' 
     // in https://learn.microsoft.com/en-us/ef/core/modeling/

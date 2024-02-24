@@ -46,52 +46,54 @@ public partial class CustomerController : ControllerBase
     [HttpPatch("offices/{officeId}/customers/{customerId}")]
     public async Task<ActionResult<Response>> PatchCustomer(
         Guid officeId,
-        Guid customerId, 
+        Guid customerId,
         [FromBody] CustomerPatchBody customerFields
     )
     {
         // Check that customer exists
         Customer? customer = await _context.Customer.FindAsync(customerId);
-        if(customer == null)
+        if (customer == null)
         {
             return NotFound();
         }
 
-        if(customerFields.Divisions != null)
+        if (customerFields.CustomerPatchBodyDivisions != null)
         {
-            foreach(CustomerPatchBody.Division div in customerFields.Divisions)
+            foreach (CustomerPatchBody.CustomerPatchBodyDivision div in customerFields.CustomerPatchBodyDivisions)
             {
-                if(div.Name == null)
+                if (div.Name == null)
                 {
                     return BadRequest();
                 }
 
                 CustomerDivision? cd = await _context.CustomerDivision.FindAsync(
-                    customerId, 
-                    officeId, 
+                    customerId,
+                    officeId,
                     div.Name
                 );
 
-                if(cd == null)
+                if (cd == null)
                 {
-                    return BadRequest(new Response {
+                    return BadRequest(new Response
+                    {
                         Error = $"This customer does not belong to any divisions with the name '{div.Name}'"
                     });
                 }
 
-                if(div.Status != null)
+                if (div.Status != null)
                 {
-                    if(div.Status == "Waiting" && 
-                        cd.Status != "Waiting" && 
+                    if (div.Status == "Waiting" &&
+                        cd.Status != "Waiting" &&
                         div.WaitingListIndex == null)
                     {
-                        return BadRequest(new Response {
+                        return BadRequest(new Response
+                        {
                             Error = $"Customers whose status is being updated to 'Waiting' must have a 'waitingListIndex' property"
                         });
                     }
 
                     // If a customer is transitioning from 'Waiting' to 'Desk X', the current time should be added to their timesCalled.
-                    if(cd.Status == "Waiting" && DeskRegex().IsMatch(div.Status))
+                    if (cd.Status == "Waiting" && DeskRegex().IsMatch(div.Status))
                     {
                         CustomerDivisionTimeCalled cdtc = new CustomerDivisionTimeCalled
                         {
@@ -104,8 +106,8 @@ public partial class CustomerController : ControllerBase
                     }
 
                     // If a customer is transitioning from 'Waiting' to any other status, their waitingListIndex should be null, and the existing customers need their indexes updated to fill the gap
-                    if(cd.Status == "Waiting" && 
-                        div.Status != "Waiting" && 
+                    if (cd.Status == "Waiting" &&
+                        div.Status != "Waiting" &&
                         cd.WaitingListIndex != null)
                     {
                         int wlIndex = (int)cd.WaitingListIndex;
@@ -113,7 +115,7 @@ public partial class CustomerController : ControllerBase
                         // Select all customers that appear after this one in the WL
                         IQueryable<CustomerDivision> cdsToUpdate = _context.CustomerDivision
                             .Where(cd => cd.WaitingListIndex > wlIndex);
-                        
+
                         // Move selected customers up one position in WL
                         foreach (CustomerDivision cdToUpdate in cdsToUpdate)
                         {
@@ -127,20 +129,22 @@ public partial class CustomerController : ControllerBase
                     cd.Status = div.Status;
                 }
 
-                if(div.WaitingListIndex != null && cd.Status != "Waiting")
+                if (div.WaitingListIndex != null && cd.Status != "Waiting")
                 {
-                    return BadRequest(new Response {
+                    return BadRequest(new Response
+                    {
                         Error = "Cannot set the 'waitingListIndex' property on a customer whose status is not equal to 'Waiting'."
                     });
                 }
 
                 // Update waitingListIndex
-                if(div.WaitingListIndex != null)
+                if (div.WaitingListIndex != null)
                 {
                     // Check that waiting list index is valid
-                    if(div.WaitingListIndex < 1)
+                    if (div.WaitingListIndex < 1)
                     {
-                        return BadRequest(new Response {
+                        return BadRequest(new Response
+                        {
                             Error = $"'waitingListIndex' property must be a positive non-zero integer."
                         });
                     }
@@ -152,37 +156,39 @@ public partial class CustomerController : ControllerBase
                     int newIndex = (int)div.WaitingListIndex;
 
                     // If this customer does not have a waiting list index, it's possible to place them at the max wl index + 1
-                    if(currentIndex == null && maxPossibleIndex != null)
+                    if (currentIndex == null && maxPossibleIndex != null)
                     {
                         maxPossibleIndex++;
                     }
 
                     maxPossibleIndex ??= 1;
-                    
-                    if(div.WaitingListIndex > maxPossibleIndex)
+
+                    if (div.WaitingListIndex > maxPossibleIndex)
                     {
                         return BadRequest(new Response
                         {
                             Error = $"The waitingListIndex property for division '{div.Name}' is out of bounds. The maximum possible value is {maxPossibleIndex}."
                         });
-                    }  
+                    }
 
                     IQueryable<CustomerDivision> cdsToUpdate;
 
-                    if(currentIndex == null){
+                    if (currentIndex == null)
+                    {
                         cdsToUpdate = _context.CustomerDivision
                             .Where(cd => cd.WaitingListIndex >= newIndex);
-                        
+
                         foreach (CustomerDivision cdToUpdate in cdsToUpdate)
                         {
                             cdToUpdate.WaitingListIndex++;
                         }
 
                         cd.WaitingListIndex = newIndex;
-                    } else if(newIndex < currentIndex)
+                    }
+                    else if (newIndex < currentIndex)
                     {
                         cdsToUpdate = _context.CustomerDivision
-                            .Where(cd => 
+                            .Where(cd =>
                                 cd.WaitingListIndex < currentIndex &&
                                 cd.WaitingListIndex >= newIndex);
 
@@ -193,7 +199,9 @@ public partial class CustomerController : ControllerBase
 
                         // Update customer's WL index
                         cd.WaitingListIndex = newIndex;
-                    } else if(newIndex > currentIndex) {
+                    }
+                    else if (newIndex > currentIndex)
+                    {
                         cdsToUpdate = _context.CustomerDivision
                             .Where(cd => cd.WaitingListIndex <= newIndex &&
                                 cd.WaitingListIndex > currentIndex);
@@ -236,7 +244,7 @@ public partial class CustomerController : ControllerBase
     {
         // Check that officeId is valid
         Office? office = await _context.Office.FindAsync(officeId);
-        if(office == null)
+        if (office == null)
         {
             return BadRequest(new Response
             {
@@ -245,27 +253,29 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that division filters are valid
-        if(filters.Divisions != null)
+        if (filters.CustomersQueryBodyDivisions != null)
         {
-            foreach(CustomersQueryBody.Division division in filters.Divisions)
+            foreach (CustomersQueryBody.CustomersQueryBodyDivision division in filters.CustomersQueryBodyDivisions)
             {
                 // Check that each division has a name prop
-                if(division.Name == null)
+                if (division.Name == null)
                 {
                     return BadRequest(new Response
                     {
                         Error = "Must provide a 'name' property for each division"
                     });
-                } else {    
+                }
+                else
+                {
                     // Check that office has a division with the provided name
                     var divisionFound = await _context.Office
-                        .Where(o => o.OfficeId == officeId && o.Divisions != null && 
+                        .Where(o => o.OfficeId == officeId && o.Divisions != null &&
                             o.Divisions.Any(d => d.DivisionName == division.Name))
                         .Include(o => o.Divisions)
                         .FirstOrDefaultAsync();
 
                     // Return error if division doesn't exist
-                    if(divisionFound == null) 
+                    if (divisionFound == null)
                     {
                         return BadRequest(new Response
                         {
@@ -274,7 +284,7 @@ public partial class CustomerController : ControllerBase
                     }
                 }
                 // Check that the provided statuses are valid
-                if(division.Statuses != null)
+                if (division.Statuses != null)
                 {
                     // TODO: Validate each status
                 }
@@ -282,7 +292,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that request body has at least one required property
-        if(filters.Divisions == null && filters.Dates == null)
+        if (filters.CustomersQueryBodyDivisions == null && filters.Dates == null)
         {
             return BadRequest(new Response { Error = "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'" });
         }
@@ -291,13 +301,14 @@ public partial class CustomerController : ControllerBase
         List<Customer> filteredCustomers = new List<Customer>();
 
         // Filter by divisions ...
-        if(filters.Divisions != null){
-            foreach (var filter in filters.Divisions)
+        if (filters.CustomersQueryBodyDivisions != null)
+        {
+            foreach (var filter in filters.CustomersQueryBodyDivisions)
             {
                 var customersWithCurrentFilter = await _context.Customer
-                    .Where(c => c.Divisions.Any(d => 
+                    .Where(c => c.Divisions.Any(d =>
                         d.OfficeId == officeId &&
-                        d.DivisionName == filter.Name && 
+                        d.DivisionName == filter.Name &&
                         (filter.Statuses == null || filter.Statuses.Contains(d.Status))))
                     .Include(c => c.Divisions)
                     .ThenInclude(d => d.TimesCalled)
@@ -305,21 +316,21 @@ public partial class CustomerController : ControllerBase
 
                 filteredCustomers.AddRange(customersWithCurrentFilter);
             }
-            
 
-            if(filteredCustomers.Count == 0)
+
+            if (filteredCustomers.Count == 0)
             {
-                return NotFound(new Response 
-                { 
-                    Error = "No customers found in any of the specified divisions" 
+                return NotFound(new Response
+                {
+                    Error = "No customers found in any of the specified divisions"
                 });
             }
         }
 
         // Filter by dates
-        if(filters.Dates != null)
+        if (filters.Dates != null)
         {
-            if(filteredCustomers.Count == 0)
+            if (filteredCustomers.Count == 0)
             {
                 foreach (var dateFilter in filters.Dates)
                 {
@@ -333,15 +344,17 @@ public partial class CustomerController : ControllerBase
 
                     filteredCustomers.AddRange(customersWithCurrentFilter);
                 }
-            } else {
-                foreach(DateTime dateFilter in filters.Dates)
+            }
+            else
+            {
+                foreach (DateTime dateFilter in filters.Dates)
                 {
-                    filteredCustomers = 
+                    filteredCustomers =
                         filteredCustomers.Where(c => c.CheckInTime.Date == dateFilter.Date).ToList();
                 }
             }
 
-            if(filteredCustomers.Count == 0)
+            if (filteredCustomers.Count == 0)
             {
                 return NotFound(new Response
                 {
@@ -352,22 +365,22 @@ public partial class CustomerController : ControllerBase
 
         // Sanitize customers
         var customers = filteredCustomers.Select(c => new CustomerDto
+        {
+            Id = c.CustomerId,
+            FullName = c.FullName,
+            CheckInTime = c.CheckInTime,
+            Divisions = c.Divisions.Select(d => new CustomerDivisionDto
             {
-                Id = c.CustomerId,
-                FullName = c.FullName,
-                CheckInTime = c.CheckInTime,
-                Divisions = c.Divisions.Select(d => new CustomerDivisionDto
-                {
-                    Name = d.DivisionName,
-                    Status = d.Status,
-                    WaitingListIndex = d.WaitingListIndex,
-                    TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
-                }).ToList()
-            }
+                Name = d.DivisionName,
+                Status = d.Status,
+                WaitingListIndex = d.WaitingListIndex,
+                TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
+            }).ToList()
+        }
         )
         .OrderBy(c => c.CheckInTime)
         .ToList();
-        
+
         return Ok(new Response
         {
             Data = customers
@@ -408,7 +421,8 @@ public partial class CustomerController : ControllerBase
             });
         }
 
-        return new Response {
+        return new Response
+        {
             Data = customer[0]
         };
     }
@@ -458,14 +472,14 @@ public partial class CustomerController : ControllerBase
 
     [HttpPost("offices/{officeId}/customers")]
     public async Task<ActionResult<Response>> PostCustomerToOffice(
-        Guid officeId, 
+        Guid officeId,
         [FromBody] CustomerPostedInOffice postedCustomer)
     {
         Guid customerId = Guid.NewGuid();
         DateTime checkInTime = DateTime.Now;
 
         // Check for errors in request body
-        if(postedCustomer.divisionNames.Length == 0)
+        if (postedCustomer.divisionNames.Length == 0)
         {
             return BadRequest(new Response
             {
@@ -475,7 +489,7 @@ public partial class CustomerController : ControllerBase
 
         // Check that officeId is valid
         Office? office = await _context.Office.FindAsync(officeId);
-        if(office == null)
+        if (office == null)
         {
             return BadRequest(new Response
             {
@@ -493,27 +507,27 @@ public partial class CustomerController : ControllerBase
         await _context.Customer.AddAsync(customer);
 
         // Insert divisions into CustomerDivision
-        foreach(string divisionName in postedCustomer.divisionNames)
+        foreach (string divisionName in postedCustomer.divisionNames)
         {
             // Find divisions with the given name and officeId
             List<Division> divisions = _context.Division
                 .Where(d => d.DivisionName == divisionName && d.OfficeId == officeId).ToList();
 
             // If no divisions are found, return an error
-            if(divisions.Count == 0)
+            if (divisions.Count == 0)
             {
                 return BadRequest(new Response
                 {
                     Error = $"Invalid division '{divisionName}' provided"
                 });
-            } 
-            else 
+            }
+            else
             {
                 int? maxWLIndex = _context.CustomerDivision
                     .Where(cd => cd.OfficeId == officeId && cd.DivisionName == divisionName)
                     .Max(cd => cd.WaitingListIndex);
                 maxWLIndex ??= 0;
-                
+
                 // Insert into CustomerDivision
                 CustomerDivision cd = new CustomerDivision
                 {
@@ -529,7 +543,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // TODO: Fix this shit
-        
+
         await _context.SaveChangesAsync();
         // DateTime today = DateTime.Now;
         // ActionResult<Response> res = await GetCustomersWithFilters(
@@ -543,8 +557,8 @@ public partial class CustomerController : ControllerBase
         //     Response response = okObjectResult.Value as Response;
 
         //     List<CustomerDto> c = response.Data;
-            await _hubContext.Clients.All.SendAsync("customersUpdated");
-            return await GetCustomer(customerId);
+        await _hubContext.Clients.All.SendAsync("customersUpdated");
+        return await GetCustomer(customerId);
         // } else {
         //     return res;
         // }
@@ -582,26 +596,26 @@ public partial class CustomerController : ControllerBase
         List<CustomerDivision> cds = await _context.CustomerDivision
             .Where(cd => cd.CustomerId == customerId).ToListAsync();
 
-        if(cds.Count != 0)
+        if (cds.Count != 0)
         {
-            foreach(CustomerDivision cd in cds)
+            foreach (CustomerDivision cd in cds)
             {
-                if(DeskRegex().IsMatch(cd.Status))
+                if (DeskRegex().IsMatch(cd.Status))
                 {
                     // Update AtDesk table
                 }
 
                 // Update waitingListIndexes for division
-                if(cd.Status == "Waiting" && cd.WaitingListIndex != null)
+                if (cd.Status == "Waiting" && cd.WaitingListIndex != null)
                 {
                     int wlIndex = (int)cd.WaitingListIndex;
                     List<CustomerDivision> cdsToUpdate = await _context.CustomerDivision
-                        .Where(cdToUpdate => 
+                        .Where(cdToUpdate =>
                             cdToUpdate.CustomerId != customerId &&
                             cdToUpdate.DivisionName == cd.DivisionName &&
                             cdToUpdate.OfficeId == officeId &&
                             cdToUpdate.WaitingListIndex > wlIndex).ToListAsync();
-                    foreach(CustomerDivision cdToUpdate in cdsToUpdate)
+                    foreach (CustomerDivision cdToUpdate in cdsToUpdate)
                     {
                         cdToUpdate.WaitingListIndex--;
                     }
@@ -641,7 +655,100 @@ public partial class CustomerController : ControllerBase
 
     [GeneratedRegex(@"^Desk\s\d+$")]
     private static partial Regex DeskRegex();
+
+    [HttpPost("users")]
+    public async Task<ActionResult<User>> AddUser(
+        [FromBody] PostUserBody user)
+    {
+
+        if (user.Password == null)
+        {
+            return BadRequest();
+        }
+        if (user.Username == null)
+        {
+            return BadRequest();
+        }
+        if (user.FirstName == null)
+        {
+            return BadRequest();
+        }
+        if (user.LastName == null)
+        {
+            return BadRequest();
+        }
+        if (user.Username.Length < 8)
+        {
+            return BadRequest();
+        }
+        if (user.Password.Length < 8)
+        {
+            return BadRequest();
+        }
+
+        List<User> existingUser = await _context.User.Where(u => u.Username == user.Username).ToListAsync();
+        if (existingUser.Count >= 1)
+        {
+            return BadRequest();
+        }
+
+        // Generate a potential Guid for the user
+        Guid potentialUserId = Guid.NewGuid(); 
+
+        foreach (Guid officeId in user.OfficeIds)
+        {
+            // Check if there is an office with specific ID
+            Office? existingOffice = await _context.Office.FindAsync(officeId); 
+
+            if (existingOffice == null)
+            {
+                // If the office doesn't exist, bad request
+                return BadRequest(); 
+            }
+
+            // Create new userOffice entry
+            UserOffice userOffice = new UserOffice
+            {
+                UserId = potentialUserId,
+                OfficeId = officeId
+            };
+
+            // Add userOffice entry to context
+            await _context.UserOffice.AddAsync(userOffice);
+
+        }
+
+        // Encrypt password before storing on server
+        string passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(user.Password, 13); 
+
+        // Console.WriteLine(passwordHash);
+        // Console.WriteLine(BCrypt.Net.BCrypt.EnhancedVerify(user.Password, passwordHash));
+
+
+        // Create user model
+        User newUser = new() 
+        {
+            UserId = potentialUserId,
+            Username = user.Username,
+            Password = passwordHash,
+            FirstName = user.FirstName,
+            LastName = user.LastName
+        };
+
+        await _context.User.AddAsync(newUser);
+
+        await _context.SaveChangesAsync();
+        
+        // Return created user to client
+        return Ok(new Response
+        {
+            Data = newUser
+        });
+    }
+
+
 }
+
 
 public class PostedCustomer
 {
@@ -652,18 +759,18 @@ public class PostedCustomer
 
 public class CustomerPatchBody
 {
-    public List<Division>? Divisions { get; set; }
+    public List<CustomerPatchBodyDivision>? CustomerPatchBodyDivisions { get; set; }
 
-    public class Division 
+    public class CustomerPatchBodyDivision
     {
-        public required string Name {get; set;}
+        public required string Name { get; set; }
         public string? Status { get; set; }
         public int? WaitingListIndex { get; set; }
         public List<DateTime>? TimesCalled { get; set; }
     };
 };
 
-public class CustomerPostedInOffice 
+public class CustomerPostedInOffice
 {
     public required string fullName { get; init; }
     public required string[] divisionNames { get; init; }
@@ -677,12 +784,22 @@ public class Response
 
 public class CustomersQueryBody
 {
-    public List<Division>? Divisions { get; set; }
+    public List<CustomersQueryBodyDivision>? CustomersQueryBodyDivisions { get; set; }
     public List<DateTime>? Dates { get; set; }
 
-    public class Division
+    public class CustomersQueryBodyDivision
     {
         public required string Name { get; init; }
-        public string[]? Statuses { get; init; } 
+        public string[]? Statuses { get; init; }
     }
 }
+public class PostUserBody
+{
+    public required string Username { get; init; }
+    public required string Password { get; init; }
+    public required string FirstName { get; init; }
+    public required string LastName { get; init; }
+
+    public required List<Guid> OfficeIds { get; init; }
+}
+

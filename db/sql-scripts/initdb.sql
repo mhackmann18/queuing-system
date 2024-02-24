@@ -4,10 +4,16 @@ USE queuing_system;
 CREATE TABLE User (
 	userId CHAR(36),
 	username VARCHAR(50) NOT NULL UNIQUE,
-	password 
+	password VARCHAR(72) NOT NULL,
 	firstName VARCHAR(50) NOT NULL,
 	lastName VARCHAR(50) NOT NULL,
 	PRIMARY KEY(userId)
+);
+
+CREATE TABLE Office (
+	officeId CHAR(36),
+	officeName VARCHAR(70) NOT NULL,
+	PRIMARY KEY(officeId)
 );
 
 CREATE TABLE UserOffice (
@@ -15,7 +21,15 @@ CREATE TABLE UserOffice (
 	officeId CHAR(36) NOT NULL,
 	PRIMARY KEY(userId, officeId),
 	FOREIGN KEY(userId) REFERENCES User(userId) ON DELETE CASCADE,
-	FOREIGN KEY(officeId) REFERENCES Office(officeId) ON DELETE CASCADE,
+	FOREIGN KEY(officeId) REFERENCES Office(officeId) ON DELETE CASCADE
+);
+
+CREATE TABLE Division (
+	divisionName VARCHAR(50) NOT NULL,
+  officeId CHAR(36) NOT NULL,
+	numDesks INT NOT NULL,
+	FOREIGN KEY(officeId) REFERENCES Office(officeId),
+  PRIMARY KEY(divisionName, officeId)
 );
 
 CREATE TABLE AtDesk (
@@ -27,20 +41,6 @@ CREATE TABLE AtDesk (
 	FOREIGN KEY(userId) REFERENCES User(userId) ON DELETE CASCADE,
 	FOREIGN KEY(officeId) REFERENCES Office(officeId) ON DELETE CASCADE,
 	FOREIGN KEY(divisionName) REFERENCES Division(divisionName) ON DELETE CASCADE
-);
-
-CREATE TABLE Office (
-	officeId CHAR(36),
-	officeName VARCHAR(70) NOT NULL,
-	PRIMARY KEY(officeId)
-);
-
-CREATE TABLE Division (
-	divisionName VARCHAR(50) NOT NULL,
-  officeId CHAR(36) NOT NULL,
-	numDesks INT NOT NULL,
-	FOREIGN KEY(officeId) REFERENCES Office(officeId),
-  PRIMARY KEY(divisionName, officeId)
 );
 
 CREATE TABLE Customer (
