@@ -675,6 +675,62 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    // Remove user from desk
+    [HttpDelete("offices/{officeId}/users/{userId}/desk")]
+    public async Task<ActionResult<Response>> RemoveUserFromDesk(
+        Guid officeId,
+        Guid userId)
+    {
+        // Check that officeId is valid
+        Office? office = await _context.Office.FindAsync(officeId);
+        if (office == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "Invalid officeId provided"
+            });
+        }
+
+        // Check that userId is valid
+        User? user = await _context.User.FindAsync(userId);
+        if (user == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "Invalid userId provided"
+            });
+        }
+
+        // Check that the user is a member of the office
+        UserOffice? userOffice = await _context.UserOffice.FindAsync(userId, officeId);
+        if (userOffice == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "User is not a member of the office"
+            });
+        }
+
+        // Check that the user is at a desk
+        AtDesk? atDesk = await _context.AtDesk.Where(at => at.UserId == userId).FirstOrDefaultAsync();
+        if (atDesk == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "User is not at a desk"
+            });
+        }
+
+        // Remove user from desk
+        _context.AtDesk.Remove(atDesk);
+        await _context.SaveChangesAsync();
+
+        return Ok(new Response
+        {
+            Data = atDesk
+        });
+    }
+
     [HttpPost("offices/{officeId}/users/{userId}/desk")]
     public async Task<ActionResult<Response>> PostUserToDesk(
         Guid officeId,
