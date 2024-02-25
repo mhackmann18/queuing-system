@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import 'tailwindcss/tailwind.css';
 import App from 'App';
-import UserContextProvider from 'components/UserContextProvider';
+import UserContextProvider from 'components/ContextProviders/UserContextProvider';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import UserSignInView from 'components/UserSignInView';
 import DashboardView from 'components/DashboardView';
@@ -12,6 +12,7 @@ import ServiceHistoryView from 'components/ServiceHistoryView';
 import DashboardOutlet from 'components/DashboardView/Outlet';
 import DeskPickerView from 'components/DeskPickerView';
 import { Outlet } from 'react-router-dom';
+import PrivateRoute from 'components/PrivateRoute';
 
 const container = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(container);
@@ -28,9 +29,11 @@ const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: (
-          <UserContextProvider>
-            <DashboardOutlet />
-          </UserContextProvider>
+          <PrivateRoute>
+            <UserContextProvider>
+              <DashboardOutlet />
+            </UserContextProvider>
+          </PrivateRoute>
         ),
         children: [
           {

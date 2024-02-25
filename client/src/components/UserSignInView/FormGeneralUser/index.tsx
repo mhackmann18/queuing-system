@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import UserController from 'utils/UserController';
 import Error from 'components/Error';
 import TextInputLabel from 'components/Form/TextInputLabel';
 import SubmitBtn from 'components/Form/SubmitBtn';
 import TextInput from 'components/Form/TextInput';
+import useAuth from 'hooks/useAuth';
 
 interface FormGeneralUserProps {
   onSubmitSuccess: (data: unknown) => void;
@@ -17,6 +17,7 @@ type FormData = {
 
 export default function FormGeneralUser({ onSubmitSuccess }: FormGeneralUserProps) {
   const [submitError, setSubmitError] = useState<string>('');
+  const { login } = useAuth();
   const {
     register,
     handleSubmit,
@@ -24,13 +25,8 @@ export default function FormGeneralUser({ onSubmitSuccess }: FormGeneralUserProp
   } = useForm<FormData>();
 
   const onSubmit = async ({ username, password }: FormData) => {
-    const { data, error } = await UserController.signIn({ username, password });
-
-    if (error) {
-      setSubmitError(error);
-    } else if (data) {
-      onSubmitSuccess(data);
-    }
+    login({ username, password });
+    console.log(onSubmitSuccess);
   };
 
   return (

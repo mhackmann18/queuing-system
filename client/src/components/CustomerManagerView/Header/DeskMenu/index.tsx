@@ -1,5 +1,5 @@
 import { useEffect, useRef, useContext } from 'react';
-import { UserContext } from 'components/UserContextProvider/context';
+import { UserContext } from 'components/ContextProviders/UserContextProvider/context';
 import { DeskMenuProps } from './types';
 
 export default function DeskMenu({

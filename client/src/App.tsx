@@ -1,9 +1,12 @@
 import { Outlet } from 'react-router-dom';
+import AuthContextProvider from 'components/ContextProviders/AuthContextProvider';
 
 function App() {
   return (
     <div className="text-eerie_black relative bg-white">
-      <Outlet />
+      <AuthContextProvider>
+        <Outlet />
+      </AuthContextProvider>
     </div>
   );
 }

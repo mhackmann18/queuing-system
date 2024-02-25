@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import DeskIcon from '.';
-import { UserContext } from 'components/UserContextProvider/context';
+import { UserContext } from 'components/ContextProviders/UserContextProvider/context';
 import { User } from 'utils/types';
 import { getDeskName } from 'utils/helpers';
 

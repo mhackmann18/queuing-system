@@ -1,4 +1,5 @@
 import { useRef, RefObject, useEffect } from 'react';
+import useAuth from 'hooks/useAuth';
 
 interface ProfileMenuProps {
   open: boolean;
@@ -13,6 +14,7 @@ export default function ProfileMenu({
   buttonRef,
   containerStyles = ''
 }: ProfileMenuProps) {
+  const { logOut } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside of menu
@@ -49,6 +51,7 @@ export default function ProfileMenu({
         Settings
       </button>
       <button
+        onClick={logOut}
         className="bg-french_gray_1-700 hover:bg-french_gray_1 block w-full rounded-md px-3
        py-2 text-left"
       >

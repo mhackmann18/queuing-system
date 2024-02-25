@@ -1,6 +1,6 @@
 import { DeskIconProps } from './types';
 import { useContext } from 'react';
-import { UserContext } from 'components/UserContextProvider/context';
+import { UserContext } from 'components/ContextProviders/UserContextProvider/context';
 import { getDeskName } from 'utils/helpers';
 import './styles.css';
 

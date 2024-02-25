@@ -2,7 +2,7 @@ import CurrentTime from 'components/CurrentTime';
 import { useContext, useState, useRef } from 'react';
 import Breadcrumbs from './Breadcrumbs';
 import { MdAccountCircle } from 'react-icons/md';
-import { UserContext } from 'components/UserContextProvider/context';
+import { UserContext } from 'components/ContextProviders/UserContextProvider/context';
 import ProfileMenu from './ProfileMenu';
 
 export default function DashboardHeader() {
