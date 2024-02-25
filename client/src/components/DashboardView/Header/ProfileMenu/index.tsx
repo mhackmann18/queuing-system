@@ -38,6 +38,10 @@ export default function ProfileMenu({
     };
   }, [open, setOpen, buttonRef]);
 
+  const handleSignOutClick = async () => {
+    logOut();
+  };
+
   return (
     <div
       ref={menuRef}
@@ -51,7 +55,7 @@ export default function ProfileMenu({
         Settings
       </button>
       <button
-        onClick={logOut}
+        onClick={handleSignOutClick}
         className="bg-french_gray_1-700 hover:bg-french_gray_1 block w-full rounded-md px-3
        py-2 text-left"
       >

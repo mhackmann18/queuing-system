@@ -57,9 +57,9 @@ public partial class CustomerController : ControllerBase
             return NotFound();
         }
 
-        if (customerFields.CustomerPatchBodyDivisions != null)
+        if (customerFields.Divisions != null)
         {
-            foreach (CustomerPatchBody.CustomerPatchBodyDivision div in customerFields.CustomerPatchBodyDivisions)
+            foreach (CustomerPatchBody.CustomerPatchBodyDivision div in customerFields.Divisions)
             {
                 if (div.Name == null)
                 {
@@ -92,7 +92,7 @@ public partial class CustomerController : ControllerBase
                         });
                     }
 
-                    // If a customer is transitioning from 'Waiting' to 'Desk X', the current time should be added to their timesCalled.
+                    // If a customer is transitioning from 'Waiting' to 'Desk X', the current time should be added to their timesCalled
                     if (cd.Status == "Waiting" && DeskRegex().IsMatch(div.Status))
                     {
                         CustomerDivisionTimeCalled cdtc = new CustomerDivisionTimeCalled
@@ -114,7 +114,9 @@ public partial class CustomerController : ControllerBase
 
                         // Select all customers that appear after this one in the WL
                         IQueryable<CustomerDivision> cdsToUpdate = _context.CustomerDivision
-                            .Where(cd => cd.WaitingListIndex > wlIndex);
+                            .Where(cd => cd.OfficeId == officeId
+                             && cd.DivisionName == div.Name
+                             && cd.WaitingListIndex > wlIndex);
 
                         // Move selected customers up one position in WL
                         foreach (CustomerDivision cdToUpdate in cdsToUpdate)
@@ -253,9 +255,9 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that division filters are valid
-        if (filters.CustomersQueryBodyDivisions != null)
+        if (filters.Divisions != null)
         {
-            foreach (CustomersQueryBody.CustomersQueryBodyDivision division in filters.CustomersQueryBodyDivisions)
+            foreach (CustomersQueryBody.CustomersQueryBodyDivision division in filters.Divisions)
             {
                 // Check that each division has a name prop
                 if (division.Name == null)
@@ -292,7 +294,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that request body has at least one required property
-        if (filters.CustomersQueryBodyDivisions == null && filters.Dates == null)
+        if (filters.Divisions == null && filters.Dates == null)
         {
             return BadRequest(new Response { Error = "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'" });
         }
@@ -301,9 +303,9 @@ public partial class CustomerController : ControllerBase
         List<Customer> filteredCustomers = new List<Customer>();
 
         // Filter by divisions ...
-        if (filters.CustomersQueryBodyDivisions != null)
+        if (filters.Divisions != null)
         {
-            foreach (var filter in filters.CustomersQueryBodyDivisions)
+            foreach (var filter in filters.Divisions)
             {
                 var customersWithCurrentFilter = await _context.Customer
                     .Where(c => c.Divisions.Any(d =>
@@ -725,6 +727,9 @@ public partial class CustomerController : ControllerBase
         _context.AtDesk.Remove(atDesk);
         await _context.SaveChangesAsync();
 
+        await _hubContext.Clients.All.SendAsync("desksUpdated");
+
+
         return Ok(new Response
         {
             Data = atDesk
@@ -820,6 +825,8 @@ public partial class CustomerController : ControllerBase
         await _context.AtDesk.AddAsync(newAtDesk);
 
         await _context.SaveChangesAsync();
+
+        await _hubContext.Clients.All.SendAsync("desksUpdated");
 
         return Ok(new Response
         {
@@ -956,7 +963,7 @@ public class PostedCustomer
 
 public class CustomerPatchBody
 {
-    public List<CustomerPatchBodyDivision>? CustomerPatchBodyDivisions { get; set; }
+    public List<CustomerPatchBodyDivision>? Divisions { get; set; }
 
     public class CustomerPatchBodyDivision
     {
@@ -987,7 +994,7 @@ public class Response
 
 public class CustomersQueryBody
 {
-    public List<CustomersQueryBodyDivision>? CustomersQueryBodyDivisions { get; set; }
+    public List<CustomersQueryBodyDivision>? Divisions { get; set; }
     public List<DateTime>? Dates { get; set; }
 
     public class CustomersQueryBodyDivision

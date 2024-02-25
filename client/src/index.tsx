@@ -13,6 +13,7 @@ import DashboardOutlet from 'components/DashboardView/Outlet';
 import DeskPickerView from 'components/DeskPickerView';
 import { Outlet } from 'react-router-dom';
 import PrivateRoute from 'components/PrivateRoute';
+import DeskRequired from 'components/DeskRequired';
 
 const container = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(container);
@@ -50,7 +51,11 @@ const router = createBrowserRouter([
               },
               {
                 path: ':divisionName-desk-deskNum',
-                element: <CustomerManagerView />
+                element: (
+                  <DeskRequired>
+                    <CustomerManagerView />
+                  </DeskRequired>
+                )
               }
             ]
           },

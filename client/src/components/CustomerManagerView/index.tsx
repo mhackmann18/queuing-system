@@ -9,7 +9,6 @@ import Error from 'components/Error';
 import { sameDay, getNextSelectedCustomer } from 'utils/helpers';
 import { WaitingListPositionPickerState } from 'utils/types';
 import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
-import DummyApi from 'utils/CustomerController/DummyApi';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
 import StatusFiltersButtons from './Header/StatusFiltersButtons';
@@ -21,7 +20,7 @@ export default function CustomerManagerView() {
     useState<WaitingListPositionPickerState>(null);
   const [error, setError] = useState<string>('');
   const { filters, ...filterUtils } = useCustomerFilters();
-  const { customers, fetchCustomers, controller } = useCustomers(filters);
+  const { customers } = useCustomers(filters);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const nextSelectedCustomerCandidateId = useNextCustomerId(
     selectedCustomer,
@@ -30,25 +29,11 @@ export default function CustomerManagerView() {
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useCustomerPanelActionEventHandlers(
       selectedCustomer,
-      controller,
       customers,
       wlPosPicker,
       setWlPosPicker,
-      setError,
-      fetchCustomers
+      setError
     );
-
-  // Load initial customers
-  useEffect(() => {
-    localStorage.clear();
-    DummyApi.init();
-    // const { events } = signalRConnection();
-    // events((username: string, message: string) => {
-    //   console.log(username, message);
-    // });
-    fetchCustomers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Ensure selected customer is always up to date.
   useEffect(() => {
@@ -70,6 +55,12 @@ export default function CustomerManagerView() {
       updatedSelectedCustomer || getNextSelectedCustomer(customers)
     );
   }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
+
+  useEffect(() => {
+    return () => {
+      console.log('unmounting');
+    };
+  });
 
   return (
     <div className="h-full">

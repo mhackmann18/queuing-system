@@ -34,7 +34,7 @@ const sortCustomers = (customers: Customer[]): Customer[] => {
     return new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime();
   });
 };
-
+const CURRENT_DESK_NUM = 1;
 const sanitizeRawCustomer = (customer: CustomerDto, division: string): Customer => {
   const { id, fullName: name, checkInTime, divisions } = customer;
 
@@ -47,6 +47,9 @@ const sanitizeRawCustomer = (customer: CustomerDto, division: string): Customer 
     reasonsForVisit.push(d.name);
     if (d.name === division) {
       status = d.status;
+      if (status === `Desk ${CURRENT_DESK_NUM}`) {
+        status = 'Serving';
+      }
       timesCalled.push(...d.timesCalled.map((d) => new Date(d)));
       waitingListIndex = d.waitingListIndex;
     }

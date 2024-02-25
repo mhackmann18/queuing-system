@@ -11,13 +11,13 @@ import { Customer } from 'utils/types';
 export default function useNextCustomerId(
   selectedCustomer: Customer | null,
   customers: Customer[]
-): number {
-  const candidateIdRef = useRef<number>(0);
+): string {
+  const candidateIdRef = useRef<string>('');
 
   useEffect(() => {
     // If there's zero customers or one customer there can be no next customer
     if (!customers || customers.length <= 1) {
-      candidateIdRef.current = 0;
+      candidateIdRef.current = '';
       return;
     }
 

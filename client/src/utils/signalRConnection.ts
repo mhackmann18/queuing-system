@@ -6,10 +6,12 @@ class Connector {
   private connection: signalR.HubConnection;
   public events: ({
     onMessageReceived,
-    onCustomersUpdated
+    onCustomersUpdated,
+    onDesksUpdated
   }: {
     onMessageReceived?: (username: string, message: string) => void;
     onCustomersUpdated?: () => void;
+    onDesksUpdated?: () => void;
   }) => void;
   static instance: Connector;
 
@@ -19,7 +21,7 @@ class Connector {
       .withAutomaticReconnect()
       .build();
     this.connection.start().catch((err) => console.log(err));
-    this.events = ({ onMessageReceived, onCustomersUpdated }) => {
+    this.events = ({ onMessageReceived, onCustomersUpdated, onDesksUpdated }) => {
       if (onMessageReceived) {
         this.connection.on('messageReceived', (username, message) => {
           onMessageReceived(username, message);
@@ -27,6 +29,9 @@ class Connector {
       }
       if (onCustomersUpdated) {
         this.connection.on('customersUpdated', onCustomersUpdated);
+      }
+      if (onDesksUpdated) {
+        this.connection.on('desksUpdated', onDesksUpdated);
       }
     };
   }

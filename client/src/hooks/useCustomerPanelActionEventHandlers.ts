@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
 import { CustomerPanelActionEventHandlers } from 'components/CustomerManagerView/CustomerPanel/types';
 import { Customer } from 'utils/types';
-import CustomerController from 'utils/CustomerController';
+import { DUMMY_OFFICE_ID } from 'utils/constants';
+const DUMMY_DESK_NUM = 1;
+const DUMMY_DIVISION = 'Motor Vehicle';
 
 export default function usePanelComponentActionBtnHandlers(
   selectedCustomer: Customer | null,
-  controller: CustomerController,
   customers: Customer[],
   wlPosPicker: { index: number; locked: boolean } | null,
   setWlPosPicker: (pos: { index: number; locked: boolean } | null) => void,
-  setError: (error: string) => void,
-  fetchCustomers: () => void
+  setError: (error: string) => void
 ): CustomerPanelActionEventHandlers | null {
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useMemo(
@@ -20,13 +20,20 @@ export default function usePanelComponentActionBtnHandlers(
             onClick: () => null,
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
-              const res = await controller.delete(selectedCustomer.id);
+              const res = await fetch(
+                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                {
+                  method: 'DELETE'
+                }
+              );
 
-              if (res.error) {
-                setError(res.error);
-              } else {
+              const { data, error } = await res.json();
+
+              if (error) {
+                setError(error);
+              } else if (data) {
                 onSuccess();
-                fetchCustomers();
+                // fetchCustomers();
               }
             }
           },
@@ -36,15 +43,34 @@ export default function usePanelComponentActionBtnHandlers(
             },
             onCancel: () => setWlPosPicker(null),
             onConfirm: async ({ onSuccess }) => {
-              const res = await controller.update(selectedCustomer.id, {
-                status: 'Waiting',
-                waitingListIndex: wlPosPicker!.index
-              });
-              if (res.error) {
-                setError(res.error);
-              } else {
+              const res = await fetch(
+                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    divisions: [
+                      {
+                        name: DUMMY_DIVISION,
+                        status: 'Waiting',
+                        waitingListIndex: wlPosPicker!.index + 1
+                      }
+                    ]
+                  })
+                }
+              );
+
+              const { data, error } = await res.json();
+
+              console.log(wlPosPicker?.index);
+
+              if (error) {
+                setError(error);
+              } else if (data) {
                 onSuccess();
-                fetchCustomers();
+                // fetchCustomers();
                 setWlPosPicker(null);
               }
             },
@@ -57,24 +83,60 @@ export default function usePanelComponentActionBtnHandlers(
               } else if (selectedCustomer.atOtherDivision) {
                 setError('Customer is being served at another division.');
               } else {
-                const res = await controller.callToStation(selectedCustomer.id);
-                if (res.error) {
-                  setError(res.error);
-                } else {
-                  fetchCustomers();
+                const res = await fetch(
+                  `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                  {
+                    method: 'PATCH',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      divisions: [
+                        {
+                          name: DUMMY_DIVISION,
+                          status: `Desk ${DUMMY_DESK_NUM}`
+                        }
+                      ]
+                    })
+                  }
+                );
+
+                const { data, error } = await res.json();
+
+                if (error) {
+                  setError(error);
+                } else if (data) {
+                  console.log(data);
                 }
               }
             }
           },
           finishServing: {
             onClick: async () => {
-              const res = await controller.update(selectedCustomer.id, {
-                status: 'Served'
-              });
-              if (res.error) {
-                setError(res.error);
-              } else {
-                fetchCustomers();
+              const res = await fetch(
+                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    divisions: [
+                      {
+                        name: DUMMY_DIVISION,
+                        status: 'Served'
+                      }
+                    ]
+                  })
+                }
+              );
+
+              const { data, error } = await res.json();
+
+              if (error) {
+                setError(error);
+              } else if (data) {
+                console.log(data);
               }
             }
           },
@@ -82,29 +144,36 @@ export default function usePanelComponentActionBtnHandlers(
             onClick: () => null,
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
-              const res = await controller.update(selectedCustomer.id, {
-                status: 'No Show'
-              });
+              const res = await fetch(
+                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    divisions: [
+                      {
+                        name: DUMMY_DIVISION,
+                        status: 'No Show'
+                      }
+                    ]
+                  })
+                }
+              );
 
-              if (res.error) {
-                setError(res.error);
-              } else {
+              const { data, error } = await res.json();
+
+              if (error) {
+                setError(error);
+              } else if (data) {
                 // TODO: Give success indication
-                fetchCustomers();
                 onSuccess();
               }
             }
           }
         },
-      [
-        selectedCustomer,
-        wlPosPicker,
-        controller,
-        setError,
-        fetchCustomers,
-        setWlPosPicker,
-        customers
-      ]
+      [selectedCustomer, wlPosPicker, setError, setWlPosPicker, customers]
     );
 
   return customerPanelActionEventHandlers;

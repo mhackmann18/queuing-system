@@ -8,14 +8,15 @@ import { Customer, CustomerFilters, CustomerDto } from 'utils/types';
 import { DUMMY_OFFICE_ID } from 'utils/constants';
 import Connector from 'utils/signalRConnection';
 
+const DUMMY_DESK_NUM = 1;
+
 export default function useCustomers(filters: CustomerFilters) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
 
-  console.log(customers);
-
   const fetchCustomers = useCallback(async () => {
     const statuses = [...statusFiltersToArr(filters.statuses)];
+    console.log(statuses);
     // TODO: Figure out whats going on here
     const utcDate = new Date(
       Date.UTC(
@@ -36,7 +37,14 @@ export default function useCustomers(filters: CustomerFilters) {
         },
         body: JSON.stringify({
           dates: [utcDate],
-          divisions: [{ name: filters.division, statuses }]
+          divisions: [
+            {
+              name: filters.division,
+              statuses: statuses.map((s) =>
+                s === 'Serving' ? `Desk ${DUMMY_DESK_NUM}` : s
+              )
+            }
+          ]
         })
       }
     );
@@ -45,6 +53,7 @@ export default function useCustomers(filters: CustomerFilters) {
       const { error, data } = await res.json();
 
       if (!error && data) {
+        console.log(data);
         setCustomers(
           sortCustomers(
             data.map((c: CustomerDto) => sanitizeRawCustomer(c, filters.division))
@@ -68,5 +77,5 @@ export default function useCustomers(filters: CustomerFilters) {
     });
   }, [events, filters.division, fetchCustomers]);
 
-  return { customers, fetchCustomers };
+  return { customers };
 }

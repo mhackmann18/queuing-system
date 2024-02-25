@@ -10,7 +10,7 @@ export type ManageCustomerAction =
   | 'Return to Waiting List';
 
 export interface User {
-  id: number;
+  id: string;
   division: Division;
   deskNum: number;
   firstName: string;

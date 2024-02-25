@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import DeskSelectorButton from './DeskSelectorButton';
 import { DUMMY_OFFICE_ID } from 'utils/constants';
 import { useNavigate } from 'react-router-dom';
-import useAuth from 'hooks/useAuth';
+import Connector from 'utils/signalRConnection';
 
 export default function DeskPickerView() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [deskAvailabilityByDivision, setDeskAvailabilityByDivision] = useState<
     { divisionName: string; numDesks: number; occupiedDeskNums: number[] }[]
   >([]);
+  const { events } = Connector();
 
   // Fetch desk availability on component mount
   useEffect(() => {
@@ -42,8 +42,11 @@ export default function DeskPickerView() {
         );
       }
     };
+    events({
+      onDesksUpdated: getDeskAvailabilty
+    });
     getDeskAvailabilty();
-  }, []);
+  }, [events]);
 
   // Convert division name and desk number to a link
   const getDeskNameLink = (divisionName: string, deskNum: number) =>
@@ -70,25 +73,25 @@ export default function DeskPickerView() {
                 const handleDeskClick = async () => {
                   const deskNameLink = getDeskNameLink(divisionName, deskNum);
                   // Sit user at desk
-                  console.log(user);
-                  const res = await fetch(
-                    `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/users/${user.userId}/desk`,
-                    {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({ divisionName, deskNumber: deskNum })
-                    }
-                  );
+                  // console.log(user);
+                  // const res = await fetch(
+                  //   `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/users/${user.userId}/desk`,
+                  //   {
+                  //     method: 'POST',
+                  //     headers: {
+                  //       'Content-Type': 'application/json'
+                  //     },
+                  //     body: JSON.stringify({ divisionName, deskNumber: deskNum })
+                  //   }
+                  // );
 
-                  const { error, data } = await res.json();
+                  // const { error, data } = await res.json();
 
-                  if (error) {
-                    console.error(error);
-                  } else if (data) {
-                    navigate(`${deskNameLink}`);
-                  }
+                  // if (error) {
+                  //   console.error(error);
+                  // } else if (data) {
+                  navigate(`${deskNameLink}`);
+                  // }
                 };
 
                 return (
