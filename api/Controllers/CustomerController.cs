@@ -656,6 +656,121 @@ public partial class CustomerController : ControllerBase
     [GeneratedRegex(@"^Desk\s\d+$")]
     private static partial Regex DeskRegex();
 
+    [HttpGet("offices/{officeId}/divisions")]
+    public async Task<ActionResult<IEnumerable<Division>>> GetDivisionsInOffice(Guid officeId)
+    {
+        var divisions = await _context.Division
+            .Where(d => d.OfficeId == officeId)
+            .Include(d => d.OccupiedDeskNums)
+            .Select(d => new {
+                Name = d.DivisionName,
+                NumDesks = d.NumDesks,
+                OccupiedDeskNums = d.OccupiedDeskNums.Select(odn => odn.DeskNumber).ToList()
+            })
+            .ToListAsync();
+
+        return Ok(new Response
+        {
+            Data = divisions
+        });
+    }
+
+    [HttpPost("offices/{officeId}/users/{userId}/desk")]
+    public async Task<ActionResult<Response>> PostUserToDesk(
+        Guid officeId,
+        Guid userId,
+        [FromBody] PostedDesk postedDesk)
+    {
+        // Check that officeId is valid
+        Office? office = await _context.Office.FindAsync(officeId);
+        if (office == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "Invalid officeId provided"
+            });
+        }
+
+        // Check that userId is valid
+        User? user = await _context.User.FindAsync(userId);
+        if (user == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "Invalid userId provided"
+            });
+        }
+
+        // Check that the user is a member of the office
+        UserOffice? userOffice = await _context.UserOffice.FindAsync(userId, officeId);
+        if (userOffice == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "User is not a member of the office"
+            });
+        }
+
+        // Check that the user is not already at a desk
+        AtDesk? atDesk = await _context.AtDesk.Where(at => at.UserId == userId).FirstOrDefaultAsync();
+        if (atDesk != null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "User is already at a desk"
+            });
+        }
+
+        // Check that the division name is valid
+        Division? division = await _context.Division.FindAsync(officeId, postedDesk.DivisionName);
+        if (division == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "Invalid division name provided"
+            });
+        }
+
+        // Check that the desk number is valid
+        if (postedDesk.DeskNumber < 1 || postedDesk.DeskNumber > division.NumDesks)
+        {
+            return BadRequest(new Response
+            {
+                Error = "Invalid desk number provided"
+            });
+        }
+
+        // Check that the desk is not already occupied
+        AtDesk? deskOccupied = await _context.AtDesk.FindAsync(
+            postedDesk.DeskNumber, 
+            officeId, 
+            postedDesk.DivisionName);
+        if (deskOccupied != null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "Desk is already occupied"
+            });
+        }
+
+        // Insert into AtDesk
+        AtDesk newAtDesk = new AtDesk
+        {
+            UserId = userId,
+            OfficeId = officeId,
+            DivisionName = postedDesk.DivisionName,
+            DeskNumber = postedDesk.DeskNumber
+        };
+        await _context.AtDesk.AddAsync(newAtDesk);
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new Response
+        {
+            Data = newAtDesk
+        });
+    }
+
     [HttpPost("users")]
     public async Task<ActionResult<User>> AddUser(
         [FromBody] PostUserBody user)
@@ -795,6 +910,12 @@ public class CustomerPatchBody
         public List<DateTime>? TimesCalled { get; set; }
     };
 };
+
+public class PostedDesk
+{
+    public required string DivisionName { get; init; }
+    public required int DeskNumber { get; init; }
+}
 
 public class CustomerPostedInOffice
 {

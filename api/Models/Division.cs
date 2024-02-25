@@ -16,4 +16,5 @@ public class Division
 
     // Dependent Navigation
     public ICollection<CustomerDivision>? Customers { get; set; }
+    public ICollection<AtDesk>? OccupiedDeskNums { get; set; }
 }

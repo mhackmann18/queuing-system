@@ -22,7 +22,8 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
       });
       const res = await response.json();
       if (res.data) {
-        setUser({ username: res.data.username });
+        console.log(res.data);
+        setUser({ username: res.data.username, userId: res.data.userId });
         setToken(res.data.username);
         localStorage.setItem('username', res.data.username);
         navigate('/dashboard');
