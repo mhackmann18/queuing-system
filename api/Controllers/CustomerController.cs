@@ -3,6 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using CustomerApi.Models;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace CustomerApi.Controllers;
 
@@ -13,12 +18,14 @@ public partial class CustomerController : ControllerBase
     private readonly CustomerContext _context;
     private readonly IHubContext<SignalrHub> _hubContext;
     private readonly ILogger<CustomerController> _logger;
+    private readonly IConfiguration _config;
 
-    public CustomerController(CustomerContext context, IHubContext<SignalrHub> hubContext, ILogger<CustomerController> logger)
+    public CustomerController(CustomerContext context, IHubContext<SignalrHub> hubContext, ILogger<CustomerController> logger, IConfiguration config)
     {
         _context = context;
         _logger = logger;
         _hubContext = hubContext;
+        _config = config;
     }
 
     [HttpGet("customers")]
@@ -982,13 +989,77 @@ public partial class CustomerController : ControllerBase
             return BadRequest("Password is incorrect");
         }
 
+        // TODO Rework this
+        // JWT token generation starts here
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        // Create a claim for the username
+        var claims = new[]
+        {
+            // new Claim(ClaimTypes.Name, existingUser.Username),
+            new Claim(ClaimTypes.NameIdentifier, existingUser.UserId.ToString())
+        };
+
+        var Sectoken = new JwtSecurityToken(
+            _config["Jwt:Issuer"],
+            _config["Jwt:Issuer"],
+            claims,
+            expires: DateTime.Now.AddMinutes(120),
+            signingCredentials: credentials);
+
+        var token =  new JwtSecurityTokenHandler().WriteToken(Sectoken);
+        // JWT token generation ends here
+
         return Ok(new Response
         {
             Data = new {
                 Id = existingUser.UserId,
                 existingUser.Username,
                 existingUser.FirstName,
-                existingUser.LastName
+                existingUser.LastName,
+                Token = token
+            }
+        });
+    }
+
+    [HttpGet("users/self")]
+    [Authorize]
+    public async Task<ActionResult<Response>> GetCurrentUser()
+    {
+        // Get the username from the User property
+        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        _logger.LogInformation(userId);
+
+        // If the username claim is not included in the JWT, return an error
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        Guid parsedId = Guid.Parse(userId);
+
+        // Fetch the user data from the database
+        User? user = await _context.User.FindAsync(parsedId);
+
+        // If the user does not exist in the database, return an error
+        if (user == null)
+        {
+            return NotFound(new Response
+            {
+                Error = "User not found"
+            });
+        }
+
+        // Return the user data
+        return Ok(new Response
+        {
+            Data = new {
+                Id = user.UserId,
+                user.Username,
+                user.FirstName,
+                user.LastName
             }
         });
     }
