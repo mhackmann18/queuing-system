@@ -29,7 +29,7 @@ public partial class CustomerController : ControllerBase
     }
 
     [HttpGet("customers")]
-    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers()
+    public async Task<ActionResult<Response>> GetCustomers()
     {
         var customers = await _context.Customer
             .Select(c => new CustomerDto
@@ -47,7 +47,10 @@ public partial class CustomerController : ControllerBase
             })
             .ToListAsync();
 
-        return customers;
+        return Ok(new Response
+        {
+            Data = customers
+        });
     }
 
     [HttpPatch("offices/{officeId}/customers/{customerId}")]
@@ -61,7 +64,10 @@ public partial class CustomerController : ControllerBase
         Customer? customer = await _context.Customer.FindAsync(customerId);
         if (customer == null)
         {
-            return NotFound();
+            return NotFound(new Response
+            {
+                Error = $"No customer found with id {customerId}"
+            });
         }
 
         if (customerFields.Divisions != null)
@@ -70,7 +76,10 @@ public partial class CustomerController : ControllerBase
             {
                 if (div.Name == null)
                 {
-                    return BadRequest();
+                    return BadRequest(new Response
+                    {
+                        Error = "Must provide a 'name' property for each division"
+                    });
                 }
 
                 CustomerDivision? cd = await _context.CustomerDivision.FindAsync(
@@ -242,6 +251,7 @@ public partial class CustomerController : ControllerBase
 
         //     List<CustomerDto> c = response.Data;
         await _hubContext.Clients.All.SendAsync("customersUpdated");
+
         return await GetCustomer(customerId);
         // } else {
         //     return res;
@@ -398,12 +408,6 @@ public partial class CustomerController : ControllerBase
         });
     }
 
-    [HttpGet("divisions")]
-    public async Task<ActionResult<IEnumerable<Division>>> GetDivisions()
-    {
-        return await _context.Division.ToListAsync();
-    }
-
     [HttpGet("customers/{customerId}")]
     public async Task<ActionResult<Response>> GetCustomer(Guid customerId)
     {
@@ -432,53 +436,10 @@ public partial class CustomerController : ControllerBase
             });
         }
 
-        return new Response
+        return Ok(new Response
         {
             Data = customer[0]
-        };
-    }
-
-    // TODO: This should be offices/{officeId}/divisions/{divisionId}
-    [HttpGet("divisions/{divisionId}")]
-    public async Task<ActionResult<Division>> GetDivision(string divisionId)
-    {
-        var division = await _context.Division.FindAsync(divisionId);
-
-        if (division == null)
-        {
-            return NotFound(new Response
-            {
-                Error = $"No division found with id {divisionId}"
-            });
-        }
-
-        return division;
-    }
-
-    // TODO: The customer body will not have an id, as that data is already in the route
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("customers/{customerId}")]
-    public async Task<IActionResult> PutCustomer(Guid customerId, Customer customer)
-    {
-        _context.Entry(customer).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!CustomerExists(customerId))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
+        });
     }
 
     [HttpPost("offices/{officeId}/customers")]
@@ -575,33 +536,16 @@ public partial class CustomerController : ControllerBase
         // }
     }
 
-    // TODO: Create division in office; POST office/{officeId}/divisions
-    [HttpPost("divisions")]
-    public async Task<ActionResult<Division>> PostDivision(Division division)
-    {
-        _context.Division.Add(division);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetDivision), new { id = division.DivisionName }, division);
-    }
-
-    // [HttpPost("customer-divisions")]
-    // public async Task<ActionResult<CustomerDivision>> PostCustomerDivision(CustomerDivision customerDivision)
-    // {
-    //     _context.CustomerDivision.Add(customerDivision);
-    //     await _context.SaveChangesAsync();
-
-    //     //    return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-    //     return CreatedAtAction(nameof(GetDivision), new { id = customerDivision.DivisionName }, customerDivision);
-    // }
-
     [HttpDelete("offices/{officeId}/customers/{customerId}")]
     public async Task<ActionResult<CustomerDto>> DeleteCustomer(Guid officeId, Guid customerId)
     {
         Customer? customer = await _context.Customer.FindAsync(customerId);
         if (customer == null)
         {
-            return NotFound();
+            return NotFound(new Response
+            {
+                Error = $"No customer found with id {customerId}"
+            });
         }
 
         List<CustomerDivision> cds = await _context.CustomerDivision
@@ -656,12 +600,10 @@ public partial class CustomerController : ControllerBase
 
         await _hubContext.Clients.All.SendAsync("customersUpdated");
 
-        return customerToDelete[0];
-    }
-
-    private bool CustomerExists(Guid id)
-    {
-        return _context.Customer.Any(e => e.CustomerId == id);
+        return Ok(new Response
+        {
+            Data = customerToDelete[0]
+        });
     }
 
     [GeneratedRegex(@"^Desk\s\d+$")]
@@ -868,17 +810,26 @@ public partial class CustomerController : ControllerBase
         // }
         if (user.Username.Length < 8)
         {
-            return BadRequest("Username must be at least 8 characters long");
+            return BadRequest(new Response
+            {
+                Error = "Username must be at least 8 characters long"
+            });
         }
         if (user.Password.Length < 8)
         {
-            return BadRequest("Password must be at least 8 characters long");
+            return BadRequest(new Response
+            {
+                Error = "Password must be at least 8 characters long"
+            });
         }
 
         List<User> existingUser = await _context.User.Where(u => u.Username == user.Username).ToListAsync();
         if (existingUser.Count >= 1)
         {
-            return BadRequest("Username already exists");
+            return BadRequest(new Response
+            {
+                Error = "Username already exists"
+            });
         }
 
         // Generate a potential Guid for the user
@@ -892,7 +843,10 @@ public partial class CustomerController : ControllerBase
             if (existingOffice == null)
             {
                 // If the office doesn't exist, bad request
-                return BadRequest("Office with ID " + officeId + " does not exist"); 
+                return BadRequest(new Response
+                {
+                    Error = $"No office found with id {officeId}"
+                }); 
             }
 
             // Create new userOffice entry
@@ -980,18 +934,42 @@ public partial class CustomerController : ControllerBase
 
         if (existingUser == null)
         {
-            return BadRequest("Username does not exist");
+            return BadRequest(new Response
+            {
+                Error = "Username not found"
+            });
         }
 
         // Check if the password is correct
-        if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.Password))
+        if (user.Password != null)
         {
-            return BadRequest("Password is incorrect");
+            if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.Password))
+            {
+                return BadRequest(new Response
+                {
+                    Error = "Incorrect password"
+                });
+            }
+        }
+        else
+        {
+            return BadRequest(new Response
+            {
+                Error = "Password cannot be null"
+            });
         }
 
-        // TODO Rework this
         // JWT token generation starts here
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var jwtKey = _config["Jwt:Key"];
+        if(jwtKey == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "JWT key not found"
+            });
+        }
+        
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         // Create a claim for the username
@@ -1030,12 +1008,13 @@ public partial class CustomerController : ControllerBase
         // Get the username from the User property
         string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        _logger.LogInformation(userId);
-
         // If the username claim is not included in the JWT, return an error
         if (userId == null)
         {
-            return Unauthorized();
+            return Unauthorized(new Response
+            {
+                Error = "Token does not contain a username claim"
+            });
         }
 
         Guid parsedId = Guid.Parse(userId);

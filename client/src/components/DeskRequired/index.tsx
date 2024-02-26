@@ -25,11 +25,12 @@ export default function DeskRequired({ children }: { children: ReactElement }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [desk, setDesk] = useState<DeskContextT | null>(null);
   const { deskId } = useParams();
+  const userId = user!.id;
 
   const getUpFromDesk = useCallback(async () => {
     // Get user up from desk
     const res = await fetch(
-      `http://localhost:5274/api/v1/offices/${officeId}/users/${user.id}/desk`,
+      `http://localhost:5274/api/v1/offices/${officeId}/users/${userId}/desk`,
       {
         method: 'DELETE'
       }
@@ -42,7 +43,7 @@ export default function DeskRequired({ children }: { children: ReactElement }) {
     } else if (data) {
       console.log(data);
     }
-  }, [user.id, officeId]);
+  }, [userId, officeId]);
 
   // Remove user from desk when they leave the page
   useBeforeUnload(
@@ -75,7 +76,7 @@ export default function DeskRequired({ children }: { children: ReactElement }) {
     const sitAtDesk = async () => {
       // Sit user at desk
       const res = await fetch(
-        `http://localhost:5274/api/v1/offices/${officeId}/users/${user.id}/desk`,
+        `http://localhost:5274/api/v1/offices/${officeId}/users/${userId}/desk`,
         {
           method: 'POST',
           headers: {
@@ -99,7 +100,7 @@ export default function DeskRequired({ children }: { children: ReactElement }) {
     };
 
     sitAtDesk();
-  }, [user, divisionName, deskNum, officeId]);
+  }, [userId, divisionName, deskNum, officeId]);
 
   if (loading) {
     return null;
