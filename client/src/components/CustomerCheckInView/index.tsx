@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import SuccessPage from './SuccessPage';
 import CheckIn from './CheckIn';
 
@@ -7,8 +7,7 @@ const SUCCESS_MESSAGE_DURATION = 5000;
 // TODO: responsive design. Kiosks could be a tablet, phone, or desktop
 export default function CustomerCheckInView() {
   const [displaySuccess, setDisplaySuccess] = useState(false);
-
-  // on first render, get the office name and divisions from the server
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close the success message after a few seconds
   useEffect(() => {
@@ -16,8 +15,9 @@ export default function CustomerCheckInView() {
       return;
     }
 
-    setTimeout(() => {
+    timeoutIdRef.current = setTimeout(() => {
       setDisplaySuccess(false);
+      timeoutIdRef.current = null;
     }, SUCCESS_MESSAGE_DURATION);
   }, [displaySuccess]);
 
@@ -26,14 +26,19 @@ export default function CustomerCheckInView() {
       {!displaySuccess ? (
         <div className="flex h-full">
           <CheckIn
-            onSubmitSuccess={(customer) => {
-              console.log(customer);
+            onSubmitSuccess={() => {
               setDisplaySuccess(true);
             }}
           />
         </div>
       ) : (
-        <SuccessPage onDoneBtnClick={() => setDisplaySuccess(false)} />
+        <SuccessPage
+          onDoneBtnClick={() => {
+            timeoutIdRef.current && clearTimeout(timeoutIdRef.current);
+            timeoutIdRef.current = null;
+            setDisplaySuccess(false);
+          }}
+        />
       )}
     </div>
   );
