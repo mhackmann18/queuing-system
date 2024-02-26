@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { CustomerPanelActionEventHandlers } from 'components/CustomerManagerView/CustomerPanel/types';
 import { Customer } from 'utils/types';
-import { DUMMY_OFFICE_ID } from 'utils/constants';
-const DUMMY_DESK_NUM = 1;
-const DUMMY_DIVISION = 'Motor Vehicle';
+import useDesk from './useDesk';
+import useOffice from './useOffice';
 
 export default function usePanelComponentActionBtnHandlers(
   selectedCustomer: Customer | null,
@@ -12,6 +11,8 @@ export default function usePanelComponentActionBtnHandlers(
   setWlPosPicker: (pos: { index: number; locked: boolean } | null) => void,
   setError: (error: string) => void
 ): CustomerPanelActionEventHandlers | null {
+  const { divisionName, deskNum } = useDesk();
+  const { id: officeId } = useOffice();
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useMemo(
       () =>
@@ -21,7 +22,7 @@ export default function usePanelComponentActionBtnHandlers(
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
               const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
                 {
                   method: 'DELETE'
                 }
@@ -44,7 +45,7 @@ export default function usePanelComponentActionBtnHandlers(
             onCancel: () => setWlPosPicker(null),
             onConfirm: async ({ onSuccess }) => {
               const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
                 {
                   method: 'PATCH',
                   headers: {
@@ -53,7 +54,7 @@ export default function usePanelComponentActionBtnHandlers(
                   body: JSON.stringify({
                     divisions: [
                       {
-                        name: DUMMY_DIVISION,
+                        name: divisionName,
                         status: 'Waiting',
                         waitingListIndex: wlPosPicker!.index + 1
                       }
@@ -84,7 +85,7 @@ export default function usePanelComponentActionBtnHandlers(
                 setError('Customer is being served at another division.');
               } else {
                 const res = await fetch(
-                  `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                  `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
                   {
                     method: 'PATCH',
                     headers: {
@@ -93,8 +94,8 @@ export default function usePanelComponentActionBtnHandlers(
                     body: JSON.stringify({
                       divisions: [
                         {
-                          name: DUMMY_DIVISION,
-                          status: `Desk ${DUMMY_DESK_NUM}`
+                          name: divisionName,
+                          status: `Desk ${deskNum}`
                         }
                       ]
                     })
@@ -114,7 +115,7 @@ export default function usePanelComponentActionBtnHandlers(
           finishServing: {
             onClick: async () => {
               const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
                 {
                   method: 'PATCH',
                   headers: {
@@ -123,7 +124,7 @@ export default function usePanelComponentActionBtnHandlers(
                   body: JSON.stringify({
                     divisions: [
                       {
-                        name: DUMMY_DIVISION,
+                        name: divisionName,
                         status: 'Served'
                       }
                     ]
@@ -145,7 +146,7 @@ export default function usePanelComponentActionBtnHandlers(
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
               const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/${selectedCustomer.id}`,
+                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
                 {
                   method: 'PATCH',
                   headers: {
@@ -154,7 +155,7 @@ export default function usePanelComponentActionBtnHandlers(
                   body: JSON.stringify({
                     divisions: [
                       {
-                        name: DUMMY_DIVISION,
+                        name: divisionName,
                         status: 'No Show'
                       }
                     ]
@@ -173,7 +174,16 @@ export default function usePanelComponentActionBtnHandlers(
             }
           }
         },
-      [selectedCustomer, wlPosPicker, setError, setWlPosPicker, customers]
+      [
+        selectedCustomer,
+        wlPosPicker,
+        setError,
+        setWlPosPicker,
+        customers,
+        deskNum,
+        divisionName,
+        officeId
+      ]
     );
 
   return customerPanelActionEventHandlers;

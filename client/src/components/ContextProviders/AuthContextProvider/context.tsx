@@ -1,4 +1,11 @@
 import { createContext } from 'react';
+import { User } from 'utils/types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const AuthContext = createContext<any>(null);
+interface AuthContextT {
+  user: User | null;
+  token: string;
+  login: (userCredentials: { username: string; password: string }) => void;
+  logOut: () => void;
+}
+
+export const AuthContext = createContext<AuthContextT | null>(null);

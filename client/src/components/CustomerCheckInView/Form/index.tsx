@@ -4,13 +4,13 @@ import { CheckInFormProps, CheckInFormValues } from './types';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FULL_NAME_MAX_LENGTH, REQUIRED_FIELD_ERROR } from 'utils/constants';
 import SubmitBtn from 'components/Form/SubmitBtn';
-
-const DUMMY_OFFICE_ID = '1056cc0c-c844-11ee-851b-4529fd7b70be';
+import useOffice from 'hooks/useOffice';
 
 export default function CustomerCheckInViewForm({
   divisions,
   onSubmitSuccess
 }: CheckInFormProps) {
+  const { id: officeId } = useOffice();
   const [submitError, setSubmitError] = useState<string>('');
   const {
     register,
@@ -23,7 +23,7 @@ export default function CustomerCheckInViewForm({
     reasonForVisit
   }) => {
     const res = await fetch(
-      `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers`,
+      `http://localhost:5274/api/v1/offices/${officeId}/customers`,
       {
         method: 'POST',
         headers: {

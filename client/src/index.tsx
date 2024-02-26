@@ -50,7 +50,7 @@ const router = createBrowserRouter([
                 element: <DeskPickerView />
               },
               {
-                path: ':divisionName-desk-deskNum',
+                path: ':deskId',
                 element: (
                   <DeskRequired>
                     <CustomerManagerView />

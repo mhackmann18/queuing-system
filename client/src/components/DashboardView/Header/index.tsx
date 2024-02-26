@@ -1,12 +1,14 @@
 import CurrentTime from 'components/CurrentTime';
-import { useContext, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import Breadcrumbs from './Breadcrumbs';
 import { MdAccountCircle } from 'react-icons/md';
-import { UserContext } from 'components/ContextProviders/UserContextProvider/context';
+// import { UserContext } from 'components/ContextProviders/UserContextProvider/context';
 import ProfileMenu from './ProfileMenu';
+import useAuth from 'hooks/useAuth';
 
 export default function DashboardHeader() {
-  const { username } = useContext(UserContext);
+  // const { username } = useContext(UserContext);
+  const { user } = useAuth();
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
@@ -25,7 +27,7 @@ export default function DashboardHeader() {
             type="button"
             className="text-french_gray_2 hover:text-french_gray_2-400 flex items-center"
           >
-            <span className="mr-1.5 font-medium">{username}</span>
+            <span className="mr-1.5 font-medium">{user.username}</span>
             <MdAccountCircle className="inline" size={26} />
           </button>
           {profileMenuOpen && (

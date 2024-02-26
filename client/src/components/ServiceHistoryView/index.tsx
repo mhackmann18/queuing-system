@@ -8,10 +8,10 @@ import CustomerPanel from 'components/CustomerManagerView/CustomerPanel';
 import FilterButton from 'components/CustomerManagerView/Header/StatusFiltersButtons/FilterButton';
 import { getDateString } from 'utils/helpers';
 import { FaRegCalendarAlt } from 'react-icons/fa';
-
-const DUMMY_DIVISIONS = ['Motor Vehicle', 'Driver License'];
+import useOffice from 'hooks/useOffice';
 
 export default function ServiceHistoryView() {
+  const { divisionNames } = useOffice();
   const [forDate] = useState<Date>(new Date());
   const filters = useMemo(
     () => ({
@@ -57,7 +57,7 @@ export default function ServiceHistoryView() {
               </div>
             }
           />
-          {DUMMY_DIVISIONS.map((division) => (
+          {divisionNames.map((division) => (
             <FilterButton onClick={() => null} text={division} key={division} />
           ))}
         </div>

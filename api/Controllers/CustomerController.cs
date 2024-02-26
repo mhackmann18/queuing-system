@@ -919,8 +919,45 @@ public partial class CustomerController : ControllerBase
         // Return created user to client
         return Ok(new Response
         {
-            Data = newUser
+            Data = new {
+                Id = newUser.UserId,
+                newUser.Username,
+                newUser.FirstName,
+                newUser.LastName
+            }
         });
+    }
+
+    [HttpGet("offices/{officeId}")]
+    public async Task<ActionResult<Response>> GetOffice(Guid officeId)
+    {
+        Office? office = await _context.Office
+            .Include(o => o.Divisions)
+            .FirstOrDefaultAsync(o => officeId == o.OfficeId);
+
+        if (office == null)
+        {
+            return NotFound(new Response
+            {
+                Error = $"No office found with id {officeId}"
+            });
+        }
+
+        if(office.Divisions == null)
+        {
+            return BadRequest(new Response
+            {
+                Error = "No divisions found for this office"
+            });
+        }
+
+        return new Response{
+            Data = new {
+                Id = office.OfficeId,
+                Name = office.OfficeName,
+                DivisionNames = office.Divisions.Select(d => d.DivisionName).ToList()
+            }
+        };
     }
 
     [HttpPost("users/login")]
@@ -928,22 +965,27 @@ public partial class CustomerController : ControllerBase
         [FromBody] LoginUserBody user)
     {
         // Check if there is a user with the specific username
-        List<User> existingUser = await _context.User.Where(u => u.Username == user.Username).ToListAsync();
+        User? existingUser = await _context.User.Where(u => u.Username == user.Username).FirstOrDefaultAsync(u => u.Username == user.Username);
 
-        if (existingUser.Count == 0)
+        if (existingUser == null)
         {
             return BadRequest("Username does not exist");
         }
 
         // Check if the password is correct
-        if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser[0].Password))
+        if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.Password))
         {
             return BadRequest("Password is incorrect");
         }
 
         return Ok(new Response
         {
-            Data = existingUser[0]
+            Data = new {
+                Id = existingUser.UserId,
+                existingUser.Username,
+                existingUser.FirstName,
+                existingUser.LastName
+            }
         });
     }
 }

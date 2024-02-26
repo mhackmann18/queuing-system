@@ -5,12 +5,13 @@ import {
   sortCustomers
 } from 'utils/helpers';
 import { Customer, CustomerFilters, CustomerDto } from 'utils/types';
-import { DUMMY_OFFICE_ID } from 'utils/constants';
 import Connector from 'utils/signalRConnection';
-
-const DUMMY_DESK_NUM = 1;
+import useDesk from 'hooks/useDesk';
+import useOffice from 'hooks/useOffice';
 
 export default function useCustomers(filters: CustomerFilters) {
+  const { id: officeId } = useOffice();
+  const { deskNum } = useDesk();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
 
@@ -29,7 +30,7 @@ export default function useCustomers(filters: CustomerFilters) {
     );
 
     const res = await fetch(
-      `http://localhost:5274/api/v1/offices/${DUMMY_OFFICE_ID}/customers/query`,
+      `http://localhost:5274/api/v1/offices/${officeId}/customers/query`,
       {
         method: 'POST',
         headers: {
@@ -41,7 +42,7 @@ export default function useCustomers(filters: CustomerFilters) {
             {
               name: filters.division,
               statuses: statuses.map((s) =>
-                s === 'Serving' ? `Desk ${DUMMY_DESK_NUM}` : s
+                s === 'Serving' ? `Desk ${deskNum}` : s
               )
             }
           ]
@@ -63,7 +64,7 @@ export default function useCustomers(filters: CustomerFilters) {
         // setError(res.error)
       }
     }
-  }, [filters]);
+  }, [filters, deskNum, officeId]);
 
   // Load new customers when filters change
   useEffect(() => {

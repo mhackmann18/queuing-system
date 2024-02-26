@@ -11,8 +11,6 @@ export type ManageCustomerAction =
 
 export interface User {
   id: string;
-  division: Division;
-  deskNum: number;
   firstName: string;
   lastName: string;
   username: string;
