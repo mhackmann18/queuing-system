@@ -1,6 +1,12 @@
-import { ReactElement, useEffect, useState, createContext } from 'react';
+import {
+  ReactElement,
+  useEffect,
+  useState,
+  createContext,
+  useCallback
+} from 'react';
 import useAuth from 'hooks/useAuth';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams, useBeforeUnload } from 'react-router-dom';
 import useOffice from 'hooks/useOffice';
 
 interface DeskContextT {
@@ -15,10 +21,35 @@ export const DeskContext = createContext<DeskContextT>({
 
 export default function DeskRequired({ children }: { children: ReactElement }) {
   const { id: officeId } = useOffice();
-  const { user } = useAuth()!;
+  const { user } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [desk, setDesk] = useState<DeskContextT | null>(null);
   const { deskId } = useParams();
+
+  const getUpFromDesk = useCallback(async () => {
+    // Get user up from desk
+    const res = await fetch(
+      `http://localhost:5274/api/v1/offices/${officeId}/users/${user.id}/desk`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    const { error, data } = await res.json();
+
+    if (error) {
+      console.error(error);
+    } else if (data) {
+      console.log(data);
+    }
+  }, [user.id, officeId]);
+
+  // Remove user from desk when they leave the page
+  useBeforeUnload(
+    useCallback(() => {
+      getUpFromDesk();
+    }, [getUpFromDesk])
+  );
 
   const getDeskInfoFromDeskIdParam = () => {
     const [divisionName, deskNum] = deskId!.split('-desk-');
@@ -31,37 +62,18 @@ export default function DeskRequired({ children }: { children: ReactElement }) {
 
   const { divisionName, deskNum } = getDeskInfoFromDeskIdParam();
 
+  // Remove user from desk when component unmounts
   useEffect(() => {
-    const getUpFromDesk = async () => {
-      // Get user up from desk
-      const res = await fetch(
-        `http://localhost:5274/api/v1/offices/${officeId}/users/${user.id}/desk`,
-        {
-          method: 'DELETE'
-        }
-      );
-
-      const { error, data } = await res.json();
-
-      if (error) {
-        console.error(error);
-      } else if (data) {
-        console.log(data);
-      }
-    };
-
     return () => {
-      console.log('cleanup');
       (async () => {
         await getUpFromDesk();
       })();
     };
-  }, [user.id, officeId]);
+  }, [getUpFromDesk]);
 
   useEffect(() => {
     const sitAtDesk = async () => {
       // Sit user at desk
-      console.log(user);
       const res = await fetch(
         `http://localhost:5274/api/v1/offices/${officeId}/users/${user.id}/desk`,
         {
@@ -81,7 +93,6 @@ export default function DeskRequired({ children }: { children: ReactElement }) {
       if (error) {
         console.error(error);
       } else if (data) {
-        console.log(data);
         setDesk({ divisionName: data.divisionName, deskNum: data.deskNumber });
         setLoading(false);
       }
@@ -89,9 +100,6 @@ export default function DeskRequired({ children }: { children: ReactElement }) {
 
     sitAtDesk();
   }, [user, divisionName, deskNum, officeId]);
-
-  console.log(loading);
-  console.log(desk);
 
   if (loading) {
     return null;

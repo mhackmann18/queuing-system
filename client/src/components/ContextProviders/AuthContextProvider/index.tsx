@@ -1,6 +1,6 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 import { AuthContext } from './context';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useBeforeUnload } from 'react-router-dom';
 import { User } from 'utils/types';
 
 export interface AuthContextProviderProps {
@@ -41,12 +41,14 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
     }
   };
 
-  const logOut = () => {
+  const logOut = useCallback(() => {
     setUser(null);
     setToken('');
     localStorage.removeItem('username');
     navigate('/sign-in');
-  };
+  }, [navigate]);
+
+  useBeforeUnload(logOut);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logOut }}>

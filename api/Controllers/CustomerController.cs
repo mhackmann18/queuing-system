@@ -92,6 +92,8 @@ public partial class CustomerController : ControllerBase
                         });
                     }
 
+                    // TODO: Validate Desk status
+
                     // If a customer is transitioning from 'Waiting' to 'Desk X', the current time should be added to their timesCalled
                     if (cd.Status == "Waiting" && DeskRegex().IsMatch(div.Status))
                     {
@@ -604,7 +606,7 @@ public partial class CustomerController : ControllerBase
             {
                 if (DeskRegex().IsMatch(cd.Status))
                 {
-                    // Update AtDesk table
+                    // TODO: Update AtDesk table
                 }
 
                 // Update waitingListIndexes for division
@@ -666,8 +668,10 @@ public partial class CustomerController : ControllerBase
             .Include(d => d.OccupiedDeskNums)
             .Select(d => new {
                 Name = d.DivisionName,
-                NumDesks = d.NumDesks,
-                OccupiedDeskNums = d.OccupiedDeskNums.Select(odn => odn.DeskNumber).ToList()
+                d.NumDesks,
+                OccupiedDeskNums = d.OccupiedDeskNums == null ? 
+                    new List<int>() 
+                    : d.OccupiedDeskNums.Select(odn => odn.DeskNumber).ToList() 
             })
             .ToListAsync();
 
