@@ -27,7 +27,7 @@ export default function DashboardHeader() {
             type="button"
             className="text-french_gray_2 hover:text-french_gray_2-400 flex items-center"
           >
-            <span className="mr-1.5 font-medium">{user.username}</span>
+            <span className="mr-1.5 font-medium">{user!.username}</span>
             <MdAccountCircle className="inline" size={26} />
           </button>
           {profileMenuOpen && (
@@ -35,7 +35,7 @@ export default function DashboardHeader() {
               open={profileMenuOpen}
               setOpen={setProfileMenuOpen}
               buttonRef={profileButtonRef}
-              containerStyles="absolute right-0 top-14"
+              containerStyles="absolute right-0 top-14 z-20"
             />
           )}
         </div>

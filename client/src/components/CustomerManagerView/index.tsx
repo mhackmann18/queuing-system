@@ -96,6 +96,7 @@ export default function CustomerManagerView() {
             <CustomerPanel
               customer={selectedCustomer}
               actionEventHandlers={customerPanelActionEventHandlers!}
+              styles={wlPosPicker ? 'z-10' : ''}
             />
           </div>
         </div>

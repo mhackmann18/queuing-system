@@ -6,7 +6,8 @@ import Actions from './Actions';
 
 export default function CustomerPanel({
   customer,
-  actionEventHandlers
+  actionEventHandlers,
+  styles = ''
 }: CustomerPanelProps) {
   const [state, setState] = useState<CustomerPanelState>('default');
   const { status } = customer;
@@ -18,9 +19,7 @@ export default function CustomerPanel({
 
   return (
     <div
-      className={
-        'border-french_gray_1 relative z-10 w-80 rounded-lg border bg-white px-8 py-4 shadow-md'
-      }
+      className={`border-french_gray_1 relative w-80 rounded-lg border bg-white px-8 py-4 shadow-md ${styles}`}
     >
       {/* Header */}
       <p className="text-french_gray_1-500">Selected</p>
