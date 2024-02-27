@@ -16,6 +16,8 @@ export interface User {
   username: string;
 }
 
+export type DBCustomerStatus = 'Waiting' | 'Served' | 'No Show' | `Desk ${number}`;
+
 export type CustomerStatusBase = 'Waiting' | 'Serving' | 'Served' | 'No Show';
 
 export type CustomerStatus = CustomerStatusBase | `Desk ${number}`;

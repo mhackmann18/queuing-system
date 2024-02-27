@@ -341,9 +341,9 @@ public partial class CustomerController : ControllerBase
 
             if (filteredCustomers.Count == 0)
             {
-                return NotFound(new Response
+                return Ok(new Response
                 {
-                    Error = "No customers found in any of the specified divisions"
+                    Data = new List<CustomerDto>()
                 });
             }
         }
@@ -377,9 +377,9 @@ public partial class CustomerController : ControllerBase
 
             if (filteredCustomers.Count == 0)
             {
-                return NotFound(new Response
+                return Ok(new Response
                 {
-                    Error = "No customers found whose check in time matched any of the specified dates"
+                    Data = new List<CustomerDto>()
                 });
             }
         }

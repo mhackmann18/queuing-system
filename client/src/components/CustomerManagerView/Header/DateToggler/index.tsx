@@ -1,12 +1,12 @@
 import { FaChevronRight, FaChevronLeft } from 'react-icons/fa6';
-import { MdCalendarToday } from 'react-icons/md';
+// import { MdCalendarToday } from 'react-icons/md';
 import { getDateString, sameDay } from 'utils/helpers';
 import { DateTogglerProps } from './types';
 
 export default function DateToggler({
   date,
   setDate,
-  setError,
+  // setError,
   containerStyles = ''
 }: DateTogglerProps) {
   return (
@@ -48,7 +48,7 @@ export default function DateToggler({
         <FaChevronRight size={15} />
       </button>
       {/* TODO */}
-      <button
+      {/* <button
         className="text-outer_space hover:text-slate_gray ml-4"
         onClick={() =>
           setError(
@@ -57,7 +57,7 @@ export default function DateToggler({
         }
       >
         <MdCalendarToday size={20} />
-      </button>
+      </button> */}
     </div>
   );
 }
