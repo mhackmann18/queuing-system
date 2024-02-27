@@ -101,8 +101,8 @@ export default function CustomerManagerView() {
           </div>
         </div>
       ) : (
-        <div className="text-french_gray_2 flex h-[calc(100%-8rem)] items-center justify-center">
-          No Customers to Show
+        <div className="text-french_gray_2 flex h-[calc(100%-3.5rem)] items-center justify-center">
+          No customers found
         </div>
       )}
       {error && (

@@ -247,7 +247,7 @@ const getDateString = (date: Date): string => {
   return `${weekday[date.getDay()]}, ${month[date.getMonth()]} ${date.getDate()}`;
 };
 
-const statusFiltersToArr = (statuses: StatusFilters) => {
+const statusFiltersToStatusArray = (statuses: StatusFilters) => {
   const statusesArr: StatusFilter[] = [];
   Object.entries(statuses).forEach(([status, active]) => {
     if (active) {
@@ -262,7 +262,7 @@ export {
   get12HourTimeString,
   sameDay,
   getDateString,
-  statusFiltersToArr,
+  statusFiltersToStatusArray,
   formatTimePassed,
   sortDatesDescending,
   getAvailableActions,

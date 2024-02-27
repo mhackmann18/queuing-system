@@ -3,9 +3,14 @@ import { MdCalendarToday } from 'react-icons/md';
 import { getDateString, sameDay } from 'utils/helpers';
 import { DateTogglerProps } from './types';
 
-export default function DateToggler({ date, setDate, setError }: DateTogglerProps) {
+export default function DateToggler({
+  date,
+  setDate,
+  setError,
+  containerStyles = ''
+}: DateTogglerProps) {
   return (
-    <div className="text-outer_space flex align-middle">
+    <div className={`flex align-middle ${containerStyles}`}>
       {/* Previous Date */}
       <button
         onClick={() => {
@@ -16,10 +21,10 @@ export default function DateToggler({ date, setDate, setError }: DateTogglerProp
         className="text-outer_space hover:text-slate_gray"
         type="button"
       >
-        <FaChevronLeft />
+        <FaChevronLeft size={15} />
       </button>
       {/* Display Date */}
-      <span className="text-slate_gray-500 mx-2 flex min-w-32 items-center justify-center text-lg font-medium">
+      <span className="mx-2 flex min-w-32 items-center justify-center  font-medium">
         {getDateString(date)}
       </span>
       {/* Next Date */}
@@ -40,7 +45,7 @@ export default function DateToggler({ date, setDate, setError }: DateTogglerProp
         }`}
         type="button"
       >
-        <FaChevronRight />
+        <FaChevronRight size={15} />
       </button>
       {/* TODO */}
       <button
@@ -51,7 +56,7 @@ export default function DateToggler({ date, setDate, setError }: DateTogglerProp
           )
         }
       >
-        <MdCalendarToday size={22} />
+        <MdCalendarToday size={20} />
       </button>
     </div>
   );

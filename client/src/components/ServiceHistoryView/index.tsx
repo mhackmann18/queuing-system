@@ -5,19 +5,20 @@ import useCustomers from 'hooks/useCustomers';
 import { Customer } from 'utils/types';
 import Error from 'components/Error';
 import CustomerPanel from 'components/CustomerManagerView/CustomerPanel';
-import FilterButton from 'components/CustomerManagerView/Header/StatusFiltersButtons/FilterButton';
-import { getDateString } from 'utils/helpers';
-import { FaRegCalendarAlt } from 'react-icons/fa';
+// import FilterButton from 'components/CustomerManagerView/Header/StatusFiltersButtons/FilterButton';
+// import { getDateString } from 'utils/helpers';
+// import { FaRegCalendarAlt } from 'react-icons/fa';
 import useOffice from 'hooks/useOffice';
+import DateToggler from 'components/CustomerManagerView/Header/DateToggler';
 
 export default function ServiceHistoryView() {
   const { divisionNames } = useOffice();
-  const [forDate] = useState<Date>(new Date());
+  const [forDate, setForDate] = useState<Date>(new Date());
   const filters = useMemo(
     () => ({
       statuses: { Served: true, 'No Show': true },
       date: forDate,
-      division: 'Motor Vehicle'
+      division: divisionNames[0]
     }),
     [forDate]
   );
@@ -26,7 +27,7 @@ export default function ServiceHistoryView() {
   const [error, setError] = useState<string>('');
 
   const averageWaitTime = useMemo(() => {
-    if (!customers) return 0;
+    if (!customers || !customers.length) return 0;
     let timeSpentWaiting = 0;
     let numServed = 0;
     for (const customer of customers) {
@@ -48,7 +49,12 @@ export default function ServiceHistoryView() {
     <div className="h-full">
       <div className="relative flex h-14 items-center justify-between">
         <div>
-          <FilterButton
+          <DateToggler
+            date={forDate}
+            setDate={(date) => setForDate(date)}
+            setError={setError}
+          />
+          {/* <FilterButton
             onClick={() => null}
             text={
               <div className="flex items-center">
@@ -59,35 +65,43 @@ export default function ServiceHistoryView() {
           />
           {divisionNames.map((division) => (
             <FilterButton onClick={() => null} text={division} key={division} />
-          ))}
+          ))} */}
         </div>
         <span className="font-medium">
           Average Wait Time:{' '}
           <span className="text-outer_space-500 font-normal">
-            {Math.floor(averageWaitTime / 1000 / 60)} min
+            {averageWaitTime
+              ? `${Math.floor(averageWaitTime / 1000 / 60)} min`
+              : '--'}
           </span>
         </span>
         <div className="border-platinum-700 absolute -left-[calc((100vw-64rem)/2)] bottom-0 w-screen border-b"></div>
       </div>
-      <div className="mx-auto flex h-[calc(100%-3.5rem)] max-w-5xl justify-between pt-4">
-        {selectedCustomer && (
-          <CustomerList
-            customers={customers}
-            selectedCustomer={selectedCustomer}
-            setSelectedCustomer={setSelectedCustomer}
-            isPastDate={true}
-            wlPosPicker={null}
-          />
-        )}
-        <div className={`ml-4 h-full`}>
+      {customers.length ? (
+        <div className="mx-auto flex h-[calc(100%-3.5rem)] max-w-5xl justify-between pt-4">
           {selectedCustomer && (
-            <CustomerPanel
-              customer={selectedCustomer}
-              // actionEventHandlers={customerPanelActionEventHandlers!}
+            <CustomerList
+              customers={customers}
+              selectedCustomer={selectedCustomer}
+              setSelectedCustomer={setSelectedCustomer}
+              isPastDate={true}
+              wlPosPicker={null}
             />
           )}
+          <div className={`ml-4 h-full`}>
+            {selectedCustomer && (
+              <CustomerPanel
+                customer={selectedCustomer}
+                // actionEventHandlers={customerPanelActionEventHandlers!}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="text-french_gray_2 flex h-[calc(100%-3.5rem)] items-center justify-center">
+          No customers found
+        </div>
+      )}
 
       {error && (
         <div className={`fixed bottom-10 right-10 z-20`}>
