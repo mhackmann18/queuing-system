@@ -27,14 +27,17 @@ export default function ServiceHistoryView() {
   const [error, setError] = useState<string>('');
 
   const averageWaitTime = useMemo(() => {
-    if (!customers || !customers.length) return 0;
+    if (!customers || !customers.length) {
+      return 0;
+    }
+
     let timeSpentWaiting = 0;
     let numServed = 0;
+
     for (const customer of customers) {
       if (customer.status === 'Served') {
         timeSpentWaiting +=
           customer.timesCalled[0].getTime() - customer.checkInTime.getTime();
-        console.log(timeSpentWaiting);
         numServed++;
       }
     }
