@@ -8,6 +8,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace CustomerApi.Controllers;
 
@@ -986,7 +988,7 @@ public partial class CustomerController : ControllerBase
             _config["Jwt:Issuer"],
             _config["Jwt:Issuer"],
             claims,
-            expires: DateTime.Now.AddMinutes(120),
+            expires: DateTime.UtcNow.AddMinutes(480),
             signingCredentials: credentials);
 
         var token =  new JwtSecurityTokenHandler().WriteToken(Sectoken);

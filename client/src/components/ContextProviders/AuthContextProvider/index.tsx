@@ -12,6 +12,13 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const navigate = useNavigate();
 
+  const logOut = useCallback(() => {
+    setUser(null);
+    setToken('');
+    localStorage.removeItem('token');
+    navigate('/sign-in');
+  }, [navigate]);
+
   useEffect(() => {
     const getUserFromToken = async () => {
       const res = await fetch('http://localhost:5274/api/v1/users/self', {
@@ -21,10 +28,16 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
         }
       });
 
+      if (res.status === 401) {
+        logOut();
+        return;
+      }
+
       const { data, error } = await res.json();
 
       if (data) {
         const { username, id, firstName, lastName } = data;
+        console.log(data);
 
         setUser({
           username,
@@ -40,7 +53,7 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
     if (token && !user) {
       getUserFromToken();
     }
-  }, [token, user]);
+  }, [token, user, logOut]);
 
   const login = async (userCredentials: { username: string; password: string }) => {
     const response = await fetch('http://localhost:5274/api/v1/users/login', {
@@ -70,15 +83,6 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
       console.error(error);
     }
   };
-
-  const logOut = useCallback(() => {
-    setUser(null);
-    setToken('');
-    localStorage.removeItem('token');
-    navigate('/sign-in');
-  }, [navigate]);
-
-  // useBeforeUnload(logOut);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logOut }}>
