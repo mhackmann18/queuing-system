@@ -74,6 +74,8 @@ public partial class CustomerController : ControllerBase
         {
             foreach (CustomerPatchBody.CustomerPatchBodyDivision div in customerFields.Divisions)
             {
+                string? newStatus = div.Status;
+
                 if (div.Name == null)
                 {
                     return BadRequest(new Response
@@ -96,9 +98,9 @@ public partial class CustomerController : ControllerBase
                     });
                 }
 
-                if (div.Status != null)
+                if (newStatus != null)
                 {
-                    if (div.Status == "Waiting" &&
+                    if (newStatus == "Waiting" &&
                         cd.Status != "Waiting" &&
                         div.WaitingListIndex == null)
                     {
@@ -111,7 +113,7 @@ public partial class CustomerController : ControllerBase
                     // TODO: Validate Desk status
 
                     // If a customer is transitioning from 'Waiting' to 'Desk X', the current time should be added to their timesCalled
-                    if (cd.Status == "Waiting" && DeskRegex().IsMatch(div.Status))
+                    if (cd.Status == "Waiting" && DeskRegex().IsMatch(newStatus))
                     {
                         CustomerDivisionTimeCalled cdtc = new CustomerDivisionTimeCalled
                         {
@@ -146,7 +148,7 @@ public partial class CustomerController : ControllerBase
                         cd.WaitingListIndex = null;
                     }
 
-                    cd.Status = div.Status;
+                    cd.Status = newStatus;
                 }
 
                 if (div.WaitingListIndex != null && cd.Status != "Waiting")
@@ -196,7 +198,7 @@ public partial class CustomerController : ControllerBase
                     if (currentIndex == null)
                     {
                         cdsToUpdate = _context.CustomerDivision
-                            .Where(cd => cd.WaitingListIndex >= newIndex);
+                            .Where(cd => cd.OfficeId == officeId && cd.DivisionName == div.Name && cd.WaitingListIndex >= newIndex);
 
                         foreach (CustomerDivision cdToUpdate in cdsToUpdate)
                         {
@@ -209,6 +211,7 @@ public partial class CustomerController : ControllerBase
                     {
                         cdsToUpdate = _context.CustomerDivision
                             .Where(cd =>
+                            cd.OfficeId == officeId && cd.DivisionName == div.Name &&
                                 cd.WaitingListIndex < currentIndex &&
                                 cd.WaitingListIndex >= newIndex);
 
@@ -223,7 +226,7 @@ public partial class CustomerController : ControllerBase
                     else if (newIndex > currentIndex)
                     {
                         cdsToUpdate = _context.CustomerDivision
-                            .Where(cd => cd.WaitingListIndex <= newIndex &&
+                            .Where(cd => cd.OfficeId == officeId && cd.DivisionName == div.Name && cd.WaitingListIndex <= newIndex &&
                                 cd.WaitingListIndex > currentIndex);
 
                         foreach (CustomerDivision cdToUpdate in cdsToUpdate)
