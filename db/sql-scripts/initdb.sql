@@ -1,6 +1,26 @@
 -- CREATE DATABASE queuing_system;
 USE queuing_system;
 
+CREATE TABLE Company (
+	companyId CHAR(36),
+	name VARCHAR(50) NOT NULL,
+	PRIMARY KEY(companyId)
+);
+
+CREATE TABLE Office (
+	officeId CHAR(36),
+	officeName VARCHAR(70) NOT NULL,
+	PRIMARY KEY(officeId)
+);
+
+CREATE TABLE CompanyOffice (
+	companyId CHAR(36) NOT NULL,
+	officeId CHAR(36) NOT NULL,
+	PRIMARY KEY(companyId, officeId),
+	FOREIGN KEY(companyId) REFERENCES Company(companyId) ON DELETE CASCADE,
+	FOREIGN KEY(officeId) REFERENCES Office(officeId) ON DELETE CASCADE
+);
+
 CREATE TABLE User (
 	userId CHAR(36),
 	username VARCHAR(50) NOT NULL UNIQUE,
@@ -8,12 +28,6 @@ CREATE TABLE User (
 	firstName VARCHAR(50) NOT NULL,
 	lastName VARCHAR(50) NOT NULL,
 	PRIMARY KEY(userId)
-);
-
-CREATE TABLE Office (
-	officeId CHAR(36),
-	officeName VARCHAR(70) NOT NULL,
-	PRIMARY KEY(officeId)
 );
 
 CREATE TABLE UserOffice (
@@ -32,22 +46,32 @@ CREATE TABLE Division (
   PRIMARY KEY(divisionName, officeId)
 );
 
-CREATE TABLE AtDesk (
-	userId CHAR(36) NOT NULL UNIQUE,
-	officeId CHAR(36) NOT NULL,
+CREATE TABLE DivisionDesk (
+	number INT NOT NULL,
 	divisionName VARCHAR(50) NOT NULL,
+	officeId CHAR(36) NOT NULL,
+	FOREIGN KEY(divisionName) REFERENCES Division(divisionName),
+	FOREIGN KEY(officeId) REFERENCES Office(officeId),
+	PRIMARY KEY(officeId, divisionName, number)
+);
+
+CREATE TABLE UserAtDivisionDesk(
+	userId CHAR(36) NOT NULL,
 	deskNumber INT NOT NULL,
-	PRIMARY KEY(officeId, divisionName, deskNumber),
+	divisionName VARCHAR(50) NOT NULL,
+	officeId CHAR(36) NOT NULL,
 	FOREIGN KEY(userId) REFERENCES User(userId) ON DELETE CASCADE,
-	FOREIGN KEY(officeId) REFERENCES Office(officeId) ON DELETE CASCADE,
-	FOREIGN KEY(divisionName) REFERENCES Division(divisionName) ON DELETE CASCADE
+	FOREIGN KEY(officeId, divisionName, deskNumber) 
+		REFERENCES DivisionDesk(officeId, divisionName, number) ON DELETE CASCADE,
+	PRIMARY KEY(userId, deskNumber, divisionName, officeId),
+	UNIQUE(userId), -- A user can only be at one desk at a time
+	UNIQUE(officeId, divisionName, deskNumber) -- A desk can only sit one user at a time
 );
 
 CREATE TABLE Customer (
 	customerId CHAR(36) NOT NULL,
 	fullName VARCHAR(100) NOT NULL,
 	checkInTime DATETIME NOT NULL,
-
 	PRIMARY KEY(customerId)
 );
 
@@ -59,18 +83,27 @@ CREATE TABLE CustomerDivision (
 	status ENUM(
 		'Waiting', 
 		'Served', 
-		'No Show', 
-		'Desk 1', 
-		'Desk 2',
-		'Desk 3',
-		'Desk 4',
-		'Desk 5'
+		'No Show',
+		'Serving' 
+		-- Serving status should only be possible if the customer is at a desk
 	) NOT NULL,
     
 	PRIMARY KEY(customerId, officeId, divisionName),
 	FOREIGN KEY(customerId) REFERENCES Customer(customerId) ON DELETE CASCADE,
-	FOREIGN KEY(divisionName) REFERENCES Division(divisionName),
-	FOREIGN KEY(officeId) REFERENCES Office(officeId)
+	FOREIGN KEY(officeId, divisionName) REFERENCES Division(officeId, divisionName)
+);
+
+CREATE TABLE CustomerAtDivisionDesk	(
+	customerId CHAR(36) NOT NULL,
+	officeId CHAR(36) NOT NULL,
+	divisionName VARCHAR(50) NOT NULL,
+	deskNumber INT NOT NULL,
+	FOREIGN KEY(customerId) REFERENCES Customer(customerId) ON DELETE CASCADE,
+	FOREIGN KEY(officeId, divisionName, deskNumber) 
+		REFERENCES DivisionDesk(officeId, divisionName, number),
+	PRIMARY KEY(customerId, officeId, divisionName, deskNumber),
+	UNIQUE(customerId), -- A customer can only be at one desk at a time
+	UNIQUE(officeId, divisionName, deskNumber) -- A desk can only sit one customer at a time
 );
 
 CREATE TABLE CustomerDivisionTimeCalled (
@@ -80,19 +113,24 @@ CREATE TABLE CustomerDivisionTimeCalled (
   timeCalled DATETIME NOT NULL,
     
 	PRIMARY KEY(customerId, divisionName, timeCalled, officeId),
-	FOREIGN KEY(customerId) REFERENCES Customer(customerId) ON DELETE CASCADE,
-	FOREIGN KEY(officeId) REFERENCES Office(officeId),
-	FOREIGN KEY(divisionName) REFERENCES Division(divisionName)
+	FOREIGN KEY(customerId, officeId, divisionName) 
+		REFERENCES CustomerDivision(customerId, officeId, divisionName) ON DELETE CASCADE
 );
 
 SHOW TABLES IN queuing_system;
 -- SELECT c.customerId, c.checkInTime, c.divisionId, c.firstName, c.lastName FROM Customer AS c;
 
+INSERT INTO Company (companyId, name) VALUES 
+('1056zz0c-c844-11ee-851b-4529fd7b70be', 'P&H MGMT LC');
+
 -- Inserting dummy values into Office table
 INSERT INTO Office (officeId, officeName) VALUES 
-('1056cc0c-c844-11ee-851b-4529fd7b70be', 'P&H MGMT LC Troy License Office');
+('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Troy License Office');
 -- P&H MGMT is the name of the company
 -- TODO: Should be in the company table once it's created
+
+INSERT INTO CompanyOffice (companyId, officeId) VALUES 
+('1056zz0c-c844-11ee-851b-4529fd7b70be', '1056cc0c-c844-11ee-851b-4529fd7b70be');
 
 -- Inserting dummy values into Division table
 INSERT INTO Division (divisionName, officeId, numDesks) VALUES 
@@ -117,6 +155,5 @@ INSERT INTO Division (divisionName, officeId, numDesks) VALUES
 -- INSERT INTO CustomerDivisionTimeCalled (customerId, divisionName, officeId, timeCalled) VALUES
 -- ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW()),
 -- ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW());
-
 
 SELECT VERSION();
