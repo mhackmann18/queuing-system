@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
+[PrimaryKey(nameof(CompanyId), nameof(OfficeId))]
 public class CompanyOffice 
 {
   [Column(TypeName = "char(36)")]

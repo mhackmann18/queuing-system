@@ -36,7 +36,7 @@ public partial class CustomerController : ControllerBase
         var customers = await _context.Customer
             .Select(c => new CustomerDto
             {
-                Id = c.CustomerId,
+                Id = c.Id,
                 FullName = c.FullName,
                 CheckInTime = c.CheckInTime,
                 Divisions = c.Divisions.Select(d => new CustomerDivisionDto
@@ -88,8 +88,8 @@ public partial class CustomerController : ControllerBase
 
                 CustomerDivision? cd = await _context.CustomerDivision.FindAsync(
                     customerId,
-                    officeId,
-                    div.Name
+                    div.Name,
+                    officeId
                 );
 
                 if (cd == null)
@@ -120,9 +120,9 @@ public partial class CustomerController : ControllerBase
                         CustomerDivisionTimeCalled cdtc = new CustomerDivisionTimeCalled
                         {
                             TimeCalled = DateTime.Now,
-                            CustomerId = customerId,
-                            DivisionName = div.Name,
-                            OfficeId = officeId
+                            CustomerDivisionCustomerId = customerId,
+                            CustomerDivisionDivisionName = div.Name,
+                            CustomerDivisionDivisionOfficeId = officeId
                         };
                         await _context.CustomerDivisionTimeCalled.AddAsync(cdtc);
                     }
@@ -136,7 +136,7 @@ public partial class CustomerController : ControllerBase
 
                         // Select all customers that appear after this one in the WL
                         IQueryable<CustomerDivision> cdsToUpdate = _context.CustomerDivision
-                            .Where(cd => cd.OfficeId == officeId
+                            .Where(cd => cd.DivisionOfficeId == officeId
                              && cd.DivisionName == div.Name
                              && cd.WaitingListIndex > wlIndex);
 
@@ -174,7 +174,7 @@ public partial class CustomerController : ControllerBase
                     }
 
                     int? maxPossibleIndex = _context.CustomerDivision
-                        .Where(cd => cd.OfficeId == officeId && cd.DivisionName == div.Name)
+                        .Where(cd => cd.DivisionOfficeId == officeId && cd.DivisionName == div.Name)
                         .Max(cd => cd.WaitingListIndex);
                     int? currentIndex = cd.WaitingListIndex;
                     int newIndex = (int)div.WaitingListIndex;
@@ -200,7 +200,7 @@ public partial class CustomerController : ControllerBase
                     if (currentIndex == null)
                     {
                         cdsToUpdate = _context.CustomerDivision
-                            .Where(cd => cd.OfficeId == officeId && cd.DivisionName == div.Name && cd.WaitingListIndex >= newIndex);
+                            .Where(cd => cd.DivisionOfficeId == officeId && cd.DivisionName == div.Name && cd.WaitingListIndex >= newIndex);
 
                         foreach (CustomerDivision cdToUpdate in cdsToUpdate)
                         {
@@ -213,7 +213,7 @@ public partial class CustomerController : ControllerBase
                     {
                         cdsToUpdate = _context.CustomerDivision
                             .Where(cd =>
-                            cd.OfficeId == officeId && cd.DivisionName == div.Name &&
+                            cd.DivisionOfficeId == officeId && cd.DivisionName == div.Name &&
                                 cd.WaitingListIndex < currentIndex &&
                                 cd.WaitingListIndex >= newIndex);
 
@@ -228,7 +228,7 @@ public partial class CustomerController : ControllerBase
                     else if (newIndex > currentIndex)
                     {
                         cdsToUpdate = _context.CustomerDivision
-                            .Where(cd => cd.OfficeId == officeId && cd.DivisionName == div.Name && cd.WaitingListIndex <= newIndex &&
+                            .Where(cd => cd.DivisionOfficeId == officeId && cd.DivisionName == div.Name && cd.WaitingListIndex <= newIndex &&
                                 cd.WaitingListIndex > currentIndex);
 
                         foreach (CustomerDivision cdToUpdate in cdsToUpdate)
@@ -295,8 +295,8 @@ public partial class CustomerController : ControllerBase
                 {
                     // Check that office has a division with the provided name
                     var divisionFound = await _context.Office
-                        .Where(o => o.OfficeId == officeId && o.Divisions != null &&
-                            o.Divisions.Any(d => d.DivisionName == division.Name))
+                        .Where(o => o.Id == officeId && o.Divisions != null &&
+                            o.Divisions.Any(d => d.Name == division.Name))
                         .Include(o => o.Divisions)
                         .FirstOrDefaultAsync();
 
@@ -333,7 +333,7 @@ public partial class CustomerController : ControllerBase
             {
                 var customersWithCurrentFilter = await _context.Customer
                     .Where(c => c.Divisions.Any(d =>
-                        d.OfficeId == officeId &&
+                        d.DivisionOfficeId == officeId &&
                         d.DivisionName == filter.Name &&
                         (filter.Statuses == null || filter.Statuses.Contains(d.Status))))
                     .Include(c => c.Divisions)
@@ -362,7 +362,7 @@ public partial class CustomerController : ControllerBase
                 {
                     var customersWithCurrentFilter = await _context.Customer
                         .Where(c => c.CheckInTime.Date == dateFilter.Date
-                        && c.Divisions.Any(d => d.OfficeId == officeId))
+                        && c.Divisions.Any(d => d.DivisionOfficeId == officeId))
                         // .OrderBy(c => c.CheckInTime)
                         .Include(c => c.Divisions)
                         .ThenInclude(d => d.TimesCalled)
@@ -392,7 +392,7 @@ public partial class CustomerController : ControllerBase
         // Sanitize customers
         var customers = filteredCustomers.Select(c => new CustomerDto
         {
-            Id = c.CustomerId,
+            Id = c.Id,
             FullName = c.FullName,
             CheckInTime = c.CheckInTime,
             Divisions = c.Divisions.Select(d => new CustomerDivisionDto
@@ -417,10 +417,10 @@ public partial class CustomerController : ControllerBase
     public async Task<ActionResult<Response>> GetCustomer(Guid customerId)
     {
         var customer = await _context.Customer
-            .Where(c => c.CustomerId == customerId)
+            .Where(c => c.Id == customerId)
             .Select(c => new CustomerDto
             {
-                Id = c.CustomerId,
+                Id = c.Id,
                 FullName = c.FullName,
                 CheckInTime = c.CheckInTime,
                 Divisions = c.Divisions.Select(d => new CustomerDivisionDto
@@ -477,7 +477,7 @@ public partial class CustomerController : ControllerBase
         // Insert into Customer
         Customer customer = new Customer
         {
-            CustomerId = customerId,
+            Id = customerId,
             FullName = postedCustomer.fullName,
             CheckInTime = checkInTime
         };
@@ -488,7 +488,7 @@ public partial class CustomerController : ControllerBase
         {
             // Find divisions with the given name and officeId
             List<Division> divisions = _context.Division
-                .Where(d => d.DivisionName == divisionName && d.OfficeId == officeId).ToList();
+                .Where(d => d.Name == divisionName && d.OfficeId == officeId).ToList();
 
             // If no divisions are found, return an error
             if (divisions.Count == 0)
@@ -501,7 +501,7 @@ public partial class CustomerController : ControllerBase
             else
             {
                 int? maxWLIndex = _context.CustomerDivision
-                    .Where(cd => cd.OfficeId == officeId && cd.DivisionName == divisionName)
+                    .Where(cd => cd.DivisionOfficeId == officeId && cd.DivisionName == divisionName)
                     .Max(cd => cd.WaitingListIndex);
                 maxWLIndex ??= 0;
 
@@ -511,7 +511,7 @@ public partial class CustomerController : ControllerBase
                     CustomerId = customerId,
                     DivisionName = divisionName,
                     Status = "Waiting",
-                    OfficeId = officeId,
+                    DivisionOfficeId = officeId,
                     WaitingListIndex = maxWLIndex + 1
                 };
 
@@ -562,7 +562,7 @@ public partial class CustomerController : ControllerBase
             {
                 if (DeskRegex().IsMatch(cd.Status))
                 {
-                    // TODO: Update AtDesk table
+                    // TODO: Update UserAtDesk table
                 }
 
                 // Update waitingListIndexes for division
@@ -573,7 +573,7 @@ public partial class CustomerController : ControllerBase
                         .Where(cdToUpdate =>
                             cdToUpdate.CustomerId != customerId &&
                             cdToUpdate.DivisionName == cd.DivisionName &&
-                            cdToUpdate.OfficeId == officeId &&
+                            cdToUpdate.DivisionOfficeId == officeId &&
                             cdToUpdate.WaitingListIndex > wlIndex).ToListAsync();
                     foreach (CustomerDivision cdToUpdate in cdsToUpdate)
                     {
@@ -584,10 +584,10 @@ public partial class CustomerController : ControllerBase
         }
 
         List<CustomerDto> customerToDelete = await _context.Customer
-            .Where(c => c.CustomerId == customerId)
+            .Where(c => c.Id == customerId)
             .Select(c => new CustomerDto
             {
-                Id = c.CustomerId,
+                Id = c.Id,
                 FullName = c.FullName,
                 CheckInTime = c.CheckInTime,
                 Divisions = c.Divisions.Select(d => new CustomerDivisionDto
@@ -614,18 +614,26 @@ public partial class CustomerController : ControllerBase
     [GeneratedRegex(@"^Desk\s\d+$")]
     private static partial Regex DeskRegex();
 
+    private class DeskDto
+    {
+        public int DeskNumber { get; set; }
+        public bool Occupied { get; set; }
+    }
+
     [HttpGet("offices/{officeId}/divisions")]
     public async Task<ActionResult<IEnumerable<Division>>> GetDivisionsInOffice(Guid officeId)
     {
         var divisions = await _context.Division
             .Where(d => d.OfficeId == officeId)
-            .Include(d => d.OccupiedDeskNums)
+            .Include(d => d.Desks)
+            .ThenInclude(d => d.UserAtDesk)
             .Select(d => new {
-                Name = d.DivisionName,
-                d.NumDesks,
-                OccupiedDeskNums = d.OccupiedDeskNums == null ? 
-                    new List<int>() 
-                    : d.OccupiedDeskNums.Select(odn => odn.DeskNumber).ToList() 
+                d.Name,
+                d.MaxNumberOfDesks,
+                Desks = d.Desks == null ? new List<DeskDto>() : d.Desks.Select(desk => new DeskDto {
+                    DeskNumber = desk.Number,
+                    Occupied = desk.UserAtDesk != null
+                }).ToList()
             })
             .ToListAsync();
 
@@ -672,7 +680,9 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that the user is at a desk
-        AtDesk? atDesk = await _context.AtDesk.Where(at => at.UserId == userId).FirstOrDefaultAsync();
+        UserAtDesk? atDesk = await _context.UserAtDesk
+            .Where(at => at.UserId == userId)
+            .FirstOrDefaultAsync();
         if (atDesk == null)
         {
             return BadRequest(new Response
@@ -682,7 +692,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // Remove user from desk
-        _context.AtDesk.Remove(atDesk);
+        _context.UserAtDesk.Remove(atDesk);
         await _context.SaveChangesAsync();
 
         await _hubContext.Clients.All.SendAsync("desksUpdated");
@@ -731,7 +741,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that the user is not already at a desk
-        AtDesk? atDesk = await _context.AtDesk.Where(at => at.UserId == userId).FirstOrDefaultAsync();
+        UserAtDesk? atDesk = await _context.UserAtDesk.Where(at => at.UserId == userId).FirstOrDefaultAsync();
         if (atDesk != null)
         {
             return BadRequest(new Response
@@ -741,7 +751,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that the division name is valid
-        Division? division = await _context.Division.FindAsync(officeId, postedDesk.DivisionName);
+        Division? division = await _context.Division.FindAsync( postedDesk.DivisionName, officeId);
         if (division == null)
         {
             return BadRequest(new Response
@@ -751,7 +761,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that the desk number is valid
-        if (postedDesk.DeskNumber < 1 || postedDesk.DeskNumber > division.NumDesks)
+        if (postedDesk.DeskNumber < 1 || postedDesk.DeskNumber > division.MaxNumberOfDesks)
         {
             return BadRequest(new Response
             {
@@ -760,10 +770,11 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that the desk is not already occupied
-        AtDesk? deskOccupied = await _context.AtDesk.FindAsync(
-            postedDesk.DeskNumber, 
-            officeId, 
-            postedDesk.DivisionName);
+        UserAtDesk? deskOccupied = await _context.UserAtDesk.FindAsync(
+            user.Id, 
+            postedDesk.DeskNumber,
+            postedDesk.DivisionName,
+            officeId);
         if (deskOccupied != null)
         {
             return BadRequest(new Response
@@ -772,15 +783,15 @@ public partial class CustomerController : ControllerBase
             });
         }
 
-        // Insert into AtDesk
-        AtDesk newAtDesk = new AtDesk
+        // Insert into UserAtDesk
+        UserAtDesk newUserAtDesk = new UserAtDesk
         {
             UserId = userId,
-            OfficeId = officeId,
-            DivisionName = postedDesk.DivisionName,
+            DeskDivisionOfficeId = officeId,
+            DeskDivisionName = postedDesk.DivisionName,
             DeskNumber = postedDesk.DeskNumber
         };
-        await _context.AtDesk.AddAsync(newAtDesk);
+        await _context.UserAtDesk.AddAsync(newUserAtDesk);
 
         await _context.SaveChangesAsync();
 
@@ -788,7 +799,7 @@ public partial class CustomerController : ControllerBase
 
         return Ok(new Response
         {
-            Data = newAtDesk
+            Data = newUserAtDesk
         });
     }
 
@@ -875,9 +886,9 @@ public partial class CustomerController : ControllerBase
         // Create user model
         User newUser = new() 
         {
-            UserId = potentialUserId,
+            Id = potentialUserId,
             Username = user.Username,
-            Password = passwordHash,
+            PasswordHash = passwordHash,
             FirstName = user.FirstName,
             LastName = user.LastName
         };
@@ -890,7 +901,7 @@ public partial class CustomerController : ControllerBase
         return Ok(new Response
         {
             Data = new {
-                Id = newUser.UserId,
+                Id = newUser.Id,
                 newUser.Username,
                 newUser.FirstName,
                 newUser.LastName
@@ -903,7 +914,7 @@ public partial class CustomerController : ControllerBase
     {
         Office? office = await _context.Office
             .Include(o => o.Divisions)
-            .FirstOrDefaultAsync(o => officeId == o.OfficeId);
+            .FirstOrDefaultAsync(o => officeId == o.Id);
 
         if (office == null)
         {
@@ -923,9 +934,9 @@ public partial class CustomerController : ControllerBase
 
         return new Response{
             Data = new {
-                Id = office.OfficeId,
-                Name = office.OfficeName,
-                DivisionNames = office.Divisions.Select(d => d.DivisionName).ToList()
+                Id = office.Id,
+                Name = office.Id,
+                DivisionNames = office.Divisions.Select(d => d.Name).ToList()
             }
         };
     }
@@ -948,7 +959,7 @@ public partial class CustomerController : ControllerBase
         // Check if the password is correct
         if (user.Password != null)
         {
-            if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.Password))
+            if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.PasswordHash))
             {
                 return BadRequest(new Response
                 {
@@ -981,7 +992,7 @@ public partial class CustomerController : ControllerBase
         var claims = new[]
         {
             // new Claim(ClaimTypes.Name, existingUser.Username),
-            new Claim(ClaimTypes.NameIdentifier, existingUser.UserId.ToString())
+            new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString())
         };
 
         var Sectoken = new JwtSecurityToken(
@@ -997,7 +1008,7 @@ public partial class CustomerController : ControllerBase
         return Ok(new Response
         {
             Data = new {
-                Id = existingUser.UserId,
+                Id = existingUser.Id,
                 existingUser.Username,
                 existingUser.FirstName,
                 existingUser.LastName,
@@ -1035,7 +1046,7 @@ public partial class CustomerController : ControllerBase
         Guid parsedId = Guid.Parse(userId);
 
         // Fetch the user data from the database
-        User? user = await _context.User.Include(u => u.Desk).FirstAsync(u => u.UserId == parsedId);
+        User? user = await _context.User.Include(u => u.Desk).FirstAsync(u => u.Id == parsedId);
 
         // If the user does not exist in the database, return an error
         if (user == null)
@@ -1050,13 +1061,13 @@ public partial class CustomerController : ControllerBase
         return Ok(new Response
         {
             Data = new {
-                Id = user.UserId,
+                user.Id,
                 user.Username,
                 user.FirstName,
                 user.LastName,
                 Desk = user.Desk == null ? null : new {
-                    user.Desk.DivisionName,
-                    user.Desk.DeskNumber
+                    DivisionName = user.Desk.DeskDivisionName,
+                    Number = user.Desk.DeskNumber
                 }
             }
         });

@@ -3,24 +3,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-[PrimaryKey(nameof(CustomerId), nameof(OfficeId), nameof(DivisionName))]
+[PrimaryKey(nameof(CustomerId), nameof(DivisionName), nameof(DivisionOfficeId))]
 public class CustomerDivision
 {
-    // Foreign Key
+    // Foreign Keys
     [Column(TypeName = "char(36)")]
     public Guid CustomerId { get; set; }
 
-    // Foreign Key
-    [Column(TypeName = "char(36)")]
-    public Guid OfficeId { get; set; }
-
-    // Foreign Key
     [Column(TypeName = "varchar(50)")]
     public required string DivisionName { get; set; }
 
+    [Column(TypeName = "char(36)")]
+    public Guid DivisionOfficeId { get; set; }
+
+    // Columns
     public required string Status { get; set; }
     public int? WaitingListIndex { get; set; }
 
-    // Dependent Navigation
+    // Navigation
+    public Division Division { get; set; } = null!;
     public ICollection<CustomerDivisionTimeCalled> TimesCalled { get; set; } = null!;
 }

@@ -5,10 +5,10 @@ namespace CustomerApi.Models;
 public class Office
 {
   [Column(TypeName = "char(36)")]
-  public required Guid OfficeId { get; set; }
+  public required Guid Id { get; set; }
 
   [Column(TypeName = "varchar(70)")]
-  public required string OfficeName { get; set; }
+  public required string Name { get; set; }
 
   public ICollection<Division>? Divisions { get; set; }
   public ICollection<UserOffice>? Users { get; set; }

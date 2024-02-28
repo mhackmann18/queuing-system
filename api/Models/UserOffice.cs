@@ -16,6 +16,6 @@ public class UserOffice
 
 
     // Dependent Navigation
-    // public ICollection<CustomerDivision>? Customers { get; set; }
-    // public User User { get; set; } = null!;
+    public Office Office { get; set; } = null!;
+    public User User { get; set; } = null!;
 }

@@ -1,4 +1,4 @@
--- CREATE DATABASE queuing_system;
+-- CREATE DATABASE queuing_system; -- This is done in the Dockerfile
 USE queuing_system;
 
 CREATE TABLE Company (
@@ -49,23 +49,23 @@ CREATE TABLE Division (
 CREATE TABLE Desk (
 	number INT NOT NULL,
 	divisionName VARCHAR(50) NOT NULL,
-	officeId CHAR(36) NOT NULL,
-	FOREIGN KEY(officeId, divisionName) REFERENCES Division(officeId, name) ON DELETE CASCADE,
-	PRIMARY KEY(officeId, divisionName, number)
+	divisionOfficeId CHAR(36) NOT NULL,
+	FOREIGN KEY(divisionOfficeId, divisionName) REFERENCES Division(officeId, name) ON DELETE CASCADE,
+	PRIMARY KEY(divisionOfficeId, divisionName, number)
 );
 
 CREATE TABLE UserAtDesk(
 	userId CHAR(36) NOT NULL,
 	deskNumber INT NOT NULL,
-	divisionName VARCHAR(50) NOT NULL,
-	officeId CHAR(36) NOT NULL,
+	deskDivisionName VARCHAR(50) NOT NULL,
+	deskDivisionOfficeId CHAR(36) NOT NULL,
 	FOREIGN KEY(userId) REFERENCES User(id) ON DELETE CASCADE,
 	-- TODO: Consider what should happen if desk is deleted
-	FOREIGN KEY(officeId, divisionName, deskNumber) 
-		REFERENCES Desk(officeId, divisionName, number), 
-	PRIMARY KEY(userId, deskNumber, divisionName, officeId),
+	FOREIGN KEY(deskDivisionOfficeId, deskDivisionName, deskNumber) 
+		REFERENCES Desk(divisionOfficeId, divisionName, number), 
+	PRIMARY KEY(userId, deskNumber, deskDivisionName, deskDivisionOfficeId),
 	UNIQUE(userId), -- A user can only be at one desk at a time
-	UNIQUE(officeId, divisionName, deskNumber) -- A desk can only sit one user at a time
+	UNIQUE(deskDivisionOfficeId, deskDivisionName, deskNumber) -- A desk can only sit one user at a time
 );
 
 CREATE TABLE Customer (
@@ -77,7 +77,7 @@ CREATE TABLE Customer (
 
 CREATE TABLE CustomerDivision (
 	customerId CHAR(36) NOT NULL,
-	officeId CHAR(36) NOT NULL,
+	divisionOfficeId CHAR(36) NOT NULL,
 	divisionName VARCHAR(50) NOT NULL,
 	waitingListIndex INT,
 	status ENUM(
@@ -87,33 +87,40 @@ CREATE TABLE CustomerDivision (
 		'Serving' 
 		-- Serving status should only be possible if the customer is at a desk
 	) NOT NULL,
-	PRIMARY KEY(customerId, officeId, divisionName),
+	PRIMARY KEY(customerId, divisionOfficeId, divisionName),
 	FOREIGN KEY(customerId) REFERENCES Customer(id) ON DELETE CASCADE,
-	FOREIGN KEY(officeId, divisionName) REFERENCES Division(officeId, name)
+	FOREIGN KEY(divisionOfficeId, divisionName) REFERENCES Division(officeId, name)
 );
 
 CREATE TABLE CustomerAtDesk	(
 	customerId CHAR(36) NOT NULL,
-	officeId CHAR(36) NOT NULL,
-	divisionName VARCHAR(50) NOT NULL,
+	deskDivisionOfficeId CHAR(36) NOT NULL,
+	deskDivisionName VARCHAR(50) NOT NULL,
 	deskNumber INT NOT NULL,
 	FOREIGN KEY(customerId) REFERENCES Customer(id) ON DELETE CASCADE,
-	FOREIGN KEY(officeId, divisionName, deskNumber) 
-		REFERENCES Desk(officeId, divisionName, number),
-	PRIMARY KEY(customerId, officeId, divisionName, deskNumber),
+	FOREIGN KEY(deskDivisionOfficeId, deskDivisionName, deskNumber) 
+		REFERENCES Desk(divisionOfficeId, divisionName, number),
+	PRIMARY KEY(customerId, deskDivisionOfficeId, deskDivisionName, deskNumber),
 	UNIQUE(customerId), -- A customer can only be at one desk at a time
-	UNIQUE(officeId, divisionName, deskNumber) -- A desk can only serve one customer at a time
+	UNIQUE(deskDivisionOfficeId, deskDivisionName, deskNumber) -- A desk can only serve one customer at a time
 );
 
 CREATE TABLE CustomerDivisionTimeCalled (
-	customerId CHAR(36) NOT NULL,
-	divisionName VARCHAR(50) NOT NULL,
-	officeId CHAR(36) NOT NULL,
+	customerDivisionCustomerId CHAR(36) NOT NULL,
+	customerDivisionDivisionName VARCHAR(50) NOT NULL,
+	customerDivisionDivisionOfficeId CHAR(36) NOT NULL,
   timeCalled DATETIME NOT NULL,
     
-	PRIMARY KEY(customerId, divisionName, timeCalled, officeId),
-	FOREIGN KEY(customerId, officeId, divisionName) 
-		REFERENCES CustomerDivision(customerId, officeId, divisionName) ON DELETE CASCADE
+	PRIMARY KEY(
+		customerDivisionCustomerId, 
+		customerDivisionDivisionName, 
+		customerDivisionDivisionOfficeId, 
+		timeCalled),
+	FOREIGN KEY(
+		customerDivisionCustomerId, 
+		customerDivisionDivisionName, 
+		customerDivisionDivisionOfficeId) 
+		REFERENCES CustomerDivision(customerId, divisionOfficeId, divisionName) ON DELETE CASCADE
 );
 
 SHOW TABLES IN queuing_system;
@@ -137,7 +144,7 @@ INSERT INTO Division (name, officeId, maxNumberOfDesks) VALUES
 ('Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 2);
 
 -- Inserting dummy values into Desk table
-INSERT INTO Desk (divisionName, officeId, number) VALUES 
+INSERT INTO Desk (divisionName, divisionOfficeId, number) VALUES 
 ('Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 1),
 ('Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 2),
 ('Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 3),

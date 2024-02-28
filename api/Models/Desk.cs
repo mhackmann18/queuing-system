@@ -3,22 +3,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Models;
 
-[PrimaryKey(nameof(DivisionOfficeId), nameof(DivisionName), nameof(Number))]
+[PrimaryKey(nameof(Number), nameof(DivisionName), nameof(DivisionOfficeId))]
 public class Desk
 {
   public required int Number { get; set; }
 
-  [Column(TypeName = "char(36)")]
-  public required Guid DivisionId { get; set; }
-  
-  [Column(TypeName = "char(36)")]
-  public required Guid DeskId { get; set; }
+  // Foreign Key
+  [Column(TypeName = "varchar(50)")]
+  public required string DivisionName { get; set; }
 
   // Foreign Key
   [Column(TypeName = "char(36)")]
   public Guid DivisionOfficeId { get; set; }
 
-  // Foreign Key
-  [Column(TypeName = "varchar(50)")]
-  public required string DivisionName { get; set; }
+  // Dependent Navigation
+  public UserAtDesk? UserAtDesk { get; set; }
 }
