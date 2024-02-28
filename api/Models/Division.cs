@@ -12,9 +12,10 @@ public class Division
 
     [Column(TypeName = "varchar(50)")]
     public required string DivisionName { get; set; }
-    public required int NumDesks { get; set; }
+
+    public required int MaxNumberOfDesks { get; set; }
 
     // Dependent Navigation
     public ICollection<CustomerDivision>? Customers { get; set; }
-    public ICollection<AtDesk>? OccupiedDeskNums { get; set; }
+    public ICollection<Desk>? Desks { get; set; }
 }

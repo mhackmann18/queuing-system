@@ -8,6 +8,5 @@ ENV MYSQL_ROOT_PASSWORD=SurfBreak1270!
 # When container starts, this script will be executed
 COPY ./sql-scripts/ /docker-entrypoint-initdb.d/
 
-# Commands to run (from the db directory): 
-# docker build -t mysql-db -f Dockerfile.dev .
-# docker run -d -p 3306:3306 mysql-db
+# From the db directory, run the following command to build the image and run the container: 
+# docker build -t mysql-db -f Dockerfile.dev . && docker run -d -p 3306:3306 mysql-db

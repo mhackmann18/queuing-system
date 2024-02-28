@@ -22,7 +22,7 @@ public class User
     public required string LastName { get; set; }
 
     // Dependent Navigation
-    public AtDesk? Desk { get; set; }
+    public UserAtDesk? Desk { get; set; }
 
     public ICollection<UserOffice> Offices { get; set; } = null!;
 }
