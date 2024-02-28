@@ -1010,8 +1010,18 @@ public partial class CustomerController : ControllerBase
     [Authorize]
     public async Task<ActionResult<Response>> GetCurrentUser()
     {
+        Claim? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if(userIdClaim == null)
+        {
+            return Unauthorized(new Response
+            {
+                Error = "Token does not contain a userId claim"
+            });
+        }
+
         // Get the username from the User property
-        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        string userId = userIdClaim.Value;
 
         // If the username claim is not included in the JWT, return an error
         if (userId == null)

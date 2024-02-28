@@ -90,34 +90,33 @@ SHOW TABLES IN queuing_system;
 
 -- Inserting dummy values into Office table
 INSERT INTO Office (officeId, officeName) VALUES 
-('1056cc0c-c844-11ee-851b-4529fd7b70be', 'DMV Office 1'),
-('1056d5d0-c844-11ee-851b-4529fd7b70be', 'DMV Office 2');
+('1056cc0c-c844-11ee-851b-4529fd7b70be', 'P&H MGMT LC Troy License Office');
+-- P&H MGMT is the name of the company
+-- TODO: Should be in the company table once it's created
 
 -- Inserting dummy values into Division table
 INSERT INTO Division (divisionName, officeId, numDesks) VALUES 
 ('Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 4),
-('Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 2),
-('Motor Vehicle', '1056d5d0-c844-11ee-851b-4529fd7b70be', 4),
-('Driver License', '1056d5d0-c844-11ee-851b-4529fd7b70be', 2);
+('Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 2);
 
 -- Inserting dummy values into Customer table
-INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
-('1056cc0c-c844-11ee-851b-4529fd7b70be', 'John Doe', NOW()),
-('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Jane Smith', NOW()),
-('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Michael Johnson', NOW()),
-('1056d904-c844-11ee-851b-4529fd7b70be', 'Emily Brown', NOW());
+-- INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
+-- ('1056cc0c-c844-11ee-851b-4529fd7b70be', 'John Doe', NOW()),
+-- ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Jane Smith', NOW()),
+-- ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Michael Johnson', NOW()),
+-- ('1056d904-c844-11ee-851b-4529fd7b70be', 'Emily Brown', NOW());
 
 -- Inserting dummy values into CustomerDivision table
-INSERT INTO CustomerDivision (customerId, divisionName, officeId, status, waitingListIndex) VALUES
-('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
-('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Desk 1', NULL),
-('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
-('1056d904-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'No Show', NULL);
+-- INSERT INTO CustomerDivision (customerId, divisionName, officeId, status, waitingListIndex) VALUES
+-- ('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
+-- ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Desk 1', NULL),
+-- ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
+-- ('1056d904-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'No Show', NULL);
 
 -- Inserting dummy values into CustomerDivisionTimeCalled table
-INSERT INTO CustomerDivisionTimeCalled (customerId, divisionName, officeId, timeCalled) VALUES
-('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW()),
-('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW());
+-- INSERT INTO CustomerDivisionTimeCalled (customerId, divisionName, officeId, timeCalled) VALUES
+-- ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW()),
+-- ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW());
 
 
 SELECT VERSION();

@@ -21,32 +21,36 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
 
   useEffect(() => {
     const getUserFromToken = async () => {
-      const res = await fetch('http://localhost:5274/api/v1/users/self', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (res.status === 401) {
-        logOut();
-        return;
-      }
-
-      const { data, error } = await res.json();
-
-      if (data) {
-        const { username, id, firstName, lastName } = data;
-        console.log(data);
-
-        setUser({
-          username,
-          id,
-          firstName,
-          lastName
+      try {
+        const res = await fetch('http://localhost:5274/api/v1/users/self', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         });
-      } else {
-        console.error(error);
+
+        if (res.status === 401) {
+          logOut();
+          return;
+        }
+
+        const { data, error } = await res.json();
+
+        if (data) {
+          const { username, id, firstName, lastName } = data;
+          console.log(data);
+
+          setUser({
+            username,
+            id,
+            firstName,
+            lastName
+          });
+        } else {
+          console.error(error);
+        }
+      } catch (error) {
+        logOut();
       }
     };
 
