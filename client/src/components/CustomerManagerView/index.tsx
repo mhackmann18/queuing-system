@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import CustomerPanel from './CustomerPanel';
 import { Customer } from 'utils/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import CustomerList from './CustomerList';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/useCustomers';
@@ -12,10 +12,14 @@ import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
 import StatusFiltersButtons from './Header/StatusFiltersButtons';
+import useAuth from 'hooks/useAuth';
+import useOffice from 'hooks/useOffice';
 // import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
+  const { id: officeId } = useOffice();
+  const { user } = useAuth();
   const [wlPosPicker, setWlPosPicker] =
     useState<WaitingListPositionPickerState>(null);
   const [error, setError] = useState<string>('');
@@ -34,6 +38,33 @@ export default function CustomerManagerView() {
       setWlPosPicker,
       setError
     );
+
+  const getUpFromDesk = useCallback(async () => {
+    // Get user up from desk
+    const res = await fetch(
+      `http://localhost:5274/api/v1/offices/${officeId}/users/${user!.id}/desk`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    const { error, data } = await res.json();
+
+    if (error) {
+      console.error(error);
+    } else if (data) {
+      console.log(data);
+    }
+  }, [user, officeId]);
+
+  // Remove user from desk when component unmounts
+  useEffect(() => {
+    return () => {
+      (async () => {
+        await getUpFromDesk();
+      })();
+    };
+  }, [getUpFromDesk]);
 
   // Ensure selected customer is always up to date.
   useEffect(() => {
@@ -55,12 +86,6 @@ export default function CustomerManagerView() {
       updatedSelectedCustomer || getNextSelectedCustomer(customers)
     );
   }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
-
-  useEffect(() => {
-    return () => {
-      console.log('unmounting');
-    };
-  });
 
   return (
     <div className="h-full">

@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react';
 import DeskSelectorButton from './DeskSelectorButton';
-import { useNavigate } from 'react-router-dom';
 import Connector from 'utils/signalRConnection';
 import useOffice from 'hooks/useOffice';
+import useDesk from 'hooks/useDesk';
+import { useNavigate } from 'react-router-dom';
 
 export default function DeskPickerView() {
   const { id: officeId } = useOffice();
-  const navigate = useNavigate();
   const [deskAvailabilityByDivision, setDeskAvailabilityByDivision] = useState<
     { divisionName: string; numDesks: number; occupiedDeskNums: number[] }[]
   >([]);
   const { events } = Connector();
+  const { sitAtDesk, desk } = useDesk();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (desk) {
+      console.log(getDeskNameLink(desk.divisionName, desk.deskNumber));
+      navigate(getDeskNameLink(desk.divisionName, desk.deskNumber));
+    }
+  }, [desk, navigate]);
 
   // Fetch desk availability on component mount
   useEffect(() => {
@@ -72,8 +81,14 @@ export default function DeskPickerView() {
                 const deskNum = index + 1;
 
                 const handleDeskClick = async () => {
-                  const deskNameLink = getDeskNameLink(divisionName, deskNum);
-                  navigate(`${deskNameLink}`);
+                  const res = await sitAtDesk({ divisionName, deskNumber: deskNum });
+
+                  console.log(res);
+
+                  if (res.error) {
+                    console.error(res.error);
+                    return;
+                  }
                 };
 
                 return (

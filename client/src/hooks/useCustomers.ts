@@ -10,7 +10,9 @@ import { MAX_NUMBER_OF_DESKS } from 'utils/constants';
 export default function useCustomers(filters: CustomerFilters) {
   const { id: officeId } = useOffice();
   // If there's no desk context, desk num will be 0
-  const { deskNum } = useDesk();
+  const {
+    desk: { deskNumber: deskNum }
+  } = useDesk();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
 
@@ -77,14 +79,16 @@ export default function useCustomers(filters: CustomerFilters) {
         console.log(data);
         setCustomers(
           sortCustomers(
-            data.map((c: CustomerDto) => sanitizeRawCustomer(c, filters.division))
+            data.map((c: CustomerDto) =>
+              sanitizeRawCustomer(c, filters.division, deskNum)
+            )
           )
         );
       } else {
         // setError(res.error)
       }
     }
-  }, [filters, officeId, statusFiltersToStatusArray]);
+  }, [filters, officeId, statusFiltersToStatusArray, deskNum]);
 
   // Load new customers when filters change
   useEffect(() => {

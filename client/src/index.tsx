@@ -14,6 +14,7 @@ import DeskPickerView from 'components/DeskPickerView';
 import { Outlet } from 'react-router-dom';
 import PrivateRoute from 'components/PrivateRoute';
 import DeskRequired from 'components/DeskRequired';
+import DeskContextProvider from 'components/ContextProviders/DeskContextProvider';
 
 const container = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(container);
@@ -43,7 +44,11 @@ const router = createBrowserRouter([
           },
           {
             path: 'customer-manager',
-            element: <Outlet />,
+            element: (
+              <DeskContextProvider>
+                <Outlet />
+              </DeskContextProvider>
+            ),
             children: [
               {
                 index: true,

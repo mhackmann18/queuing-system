@@ -1025,7 +1025,7 @@ public partial class CustomerController : ControllerBase
         Guid parsedId = Guid.Parse(userId);
 
         // Fetch the user data from the database
-        User? user = await _context.User.FindAsync(parsedId);
+        User? user = await _context.User.Include(u => u.Desk).FirstAsync(u => u.UserId == parsedId);
 
         // If the user does not exist in the database, return an error
         if (user == null)
@@ -1043,7 +1043,11 @@ public partial class CustomerController : ControllerBase
                 Id = user.UserId,
                 user.Username,
                 user.FirstName,
-                user.LastName
+                user.LastName,
+                Desk = user.Desk == null ? null : new {
+                    user.Desk.DivisionName,
+                    user.Desk.DeskNumber
+                }
             }
         });
     }
