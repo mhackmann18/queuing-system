@@ -83,7 +83,7 @@ export default function CustomerListRow({
       {isPastDate ? (
         <div>
           <span className="inline-block w-24">
-            {formatTimePassed(checkInTime, timesCalled[timesCalled.length - 1])}
+            {formatTimePassed(checkInTime, timesCalled[0])}
             {/* {timesCalled.length ? get12HourTimeString(timesCalled[0]) : ''} */}
           </span>
         </div>

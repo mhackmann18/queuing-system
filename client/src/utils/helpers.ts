@@ -196,7 +196,7 @@ const formatTimePassed = (startDate: Date, endDate: Date): string => {
     timeParts.push(`${minutes % 60} min`);
   }
 
-  return timeParts.length > 0 ? timeParts.join(' ') : '0 min';
+  return timeParts.length > 0 ? timeParts.join(' ') : '1 min';
 };
 
 const get12HourTimeString = (date: Date) => {

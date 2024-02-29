@@ -82,7 +82,7 @@ export default function ServiceHistoryView() {
           Average Wait Time:{' '}
           <span className="text-outer_space-500 font-normal">
             {averageWaitTime
-              ? `${Math.floor(averageWaitTime / 1000 / 60)} min`
+              ? `${Math.floor(averageWaitTime / 1000 / 60) || 1} min`
               : '--'}
           </span>
         </span>
