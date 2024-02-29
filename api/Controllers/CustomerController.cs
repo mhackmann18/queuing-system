@@ -125,6 +125,16 @@ public partial class CustomerController : ControllerBase
                             CustomerDivisionDivisionOfficeId = officeId
                         };
                         await _context.CustomerDivisionTimeCalled.AddAsync(cdtc);
+
+                        // Add customer to desk
+                        CustomerAtDesk cad = new CustomerAtDesk
+                        {
+                            CustomerId = customerId,
+                            DeskDivisionOfficeId = officeId,
+                            DeskDivisionName = div.Name,
+                            DeskNumber = int.Parse(newStatus.Split(" ")[1])
+                        };
+                        await _context.CustomerAtDesk.AddAsync(cad);
                     }
 
                     // If a customer is transitioning from 'Waiting' to any other status, their waitingListIndex should be null, and the existing customers need their indexes updated to fill the gap
@@ -686,6 +696,51 @@ public partial class CustomerController : ControllerBase
             {
                 Error = "User is not at a desk"
             });
+        }
+
+        // Check if there's a customer at the desk
+        CustomerAtDesk? customerAtDesk = await _context.CustomerAtDesk
+            .Where(cad => cad.DeskDivisionOfficeId == atDesk.DeskDivisionOfficeId && 
+                cad.DeskNumber == atDesk.DeskNumber &&
+                cad.DeskDivisionName == atDesk.DeskDivisionName)
+            .FirstOrDefaultAsync();
+
+        // Remove customer from desk and return customer to waiting list
+        if (customerAtDesk != null)
+        {
+            // Remove customer from desk
+            _context.CustomerAtDesk.Remove(customerAtDesk);
+
+            // Move all customers in the waiting list up one position
+            List<CustomerDivision> fd = await _context.CustomerDivision.Where(cd
+                => cd.DivisionOfficeId == atDesk.DeskDivisionOfficeId &&
+                cd.DivisionName == atDesk.DeskDivisionName &&
+                cd.Status == "Waiting" &&
+                cd.WaitingListIndex != null)
+                .ToListAsync();
+
+            foreach (CustomerDivision cd in fd)
+            {
+                cd.WaitingListIndex++;
+            }
+
+            // Place this customer at the front of the waiting list
+            CustomerDivision? thisCustomersDivision = await _context.CustomerDivision
+                .Where(cd => cd.CustomerId == customerAtDesk.CustomerId &&
+                    cd.DivisionOfficeId == atDesk.DeskDivisionOfficeId &&
+                    cd.DivisionName == atDesk.DeskDivisionName)
+                .FirstOrDefaultAsync();
+
+            if (thisCustomersDivision != null)
+            {
+                thisCustomersDivision.Status = "Waiting";
+                thisCustomersDivision.WaitingListIndex = 1;
+            } else {
+                return BadRequest(new Response
+                {
+                    Error = "Customer's division not found"
+                });
+            }
         }
 
         // Remove user from desk
