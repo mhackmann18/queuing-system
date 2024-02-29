@@ -14,6 +14,8 @@ import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEve
 import StatusFiltersButtons from './Header/StatusFiltersButtons';
 import useAuth from 'hooks/useAuth';
 import useOffice from 'hooks/useOffice';
+import { useBlocker } from 'react-router-dom';
+import CustomerServiceWarningModal from './CustomerServiceWarningModal';
 // import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
@@ -57,14 +59,35 @@ export default function CustomerManagerView() {
     }
   }, [user, officeId]);
 
-  // Remove user from desk when component unmounts
+  useEffect(() => {
+    const handleUnload = (e: BeforeUnloadEvent) => {
+      if (selectedCustomer && selectedCustomer.status === 'Serving') {
+        e.preventDefault();
+        return (e.returnValue = '');
+      } else {
+        getUpFromDesk();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, [selectedCustomer, getUpFromDesk]); // Empty dependency array means this effect runs once on mount and cleanup on unmount
+
+  // Leave desk on unmount
   useEffect(() => {
     return () => {
-      (async () => {
-        await getUpFromDesk();
-      })();
+      getUpFromDesk();
     };
   }, [getUpFromDesk]);
+
+  // Block navigation when there's a customer being served
+  const blocker = useBlocker(
+    !!selectedCustomer && selectedCustomer.status === 'Serving'
+  );
 
   // Ensure selected customer is always up to date.
   useEffect(() => {
@@ -89,6 +112,9 @@ export default function CustomerManagerView() {
 
   return (
     <div className="h-full">
+      {blocker.state === 'blocked' && (
+        <CustomerServiceWarningModal close={() => blocker.reset()} />
+      )}
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
 
       <div className="relative mx-auto flex h-14 max-w-5xl items-center">

@@ -160,6 +160,22 @@ public partial class CustomerController : ControllerBase
                         cd.WaitingListIndex = null;
                     }
 
+                    // If customer is transitioning from 'Desk X' to any other status, remove them from the desk. TODO: Add support for switching desks
+                    if (DeskRegex().IsMatch(cd.Status) && newStatus != cd.Status)
+                    {
+                        CustomerAtDesk? cad = await _context.CustomerAtDesk
+                            .Where(cad => cad.CustomerId == customerId &&
+                                cad.DeskDivisionOfficeId == officeId &&
+                                cad.DeskDivisionName == div.Name &&
+                                cad.DeskNumber == int.Parse(cd.Status.Split(new char[] { ' ' })[1]))
+                            .FirstOrDefaultAsync();
+
+                        if (cad != null)
+                        {
+                            _context.CustomerAtDesk.Remove(cad);
+                        }
+                    }
+
                     cd.Status = newStatus;
                 }
 
@@ -640,7 +656,9 @@ public partial class CustomerController : ControllerBase
             .Select(d => new {
                 d.Name,
                 d.MaxNumberOfDesks,
-                OccupiedDeskNums = d.Desks == null ? new List<int>() : d.Desks.Where(d => d.UserAtDesk != null).Select(desk => desk.UserAtDesk.DeskNumber).ToList()
+                OccupiedDeskNums = d.Desks == null ? new List<int>() : d.Desks.Where(d => d.UserAtDesk != null).Select(desk => 
+                    desk.UserAtDesk == null ? 
+                        0 : desk.UserAtDesk.DeskNumber).ToList()
             })
             .ToListAsync();
 
@@ -1101,7 +1119,7 @@ public partial class CustomerController : ControllerBase
         Guid parsedId = Guid.Parse(userId);
 
         // Fetch the user data from the database
-        User? user = await _context.User.Include(u => u.Desk).FirstAsync(u => u.Id == parsedId);
+        User? user = await _context.User.Include(u => u.Desk).FirstOrDefaultAsync(u => u.Id == parsedId);
 
         // If the user does not exist in the database, return an error
         if (user == null)
