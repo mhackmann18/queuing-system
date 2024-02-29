@@ -5,6 +5,7 @@ using CustomerApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             };
         });
 //Jwt configuration ends here
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AtDesk", policy =>
+        policy.AddRequirements(new AtDeskRequirement()));
+});
+
+builder.Services.AddScoped<IAuthorizationHandler, AtDeskHandler>();
 
 // Add services to the container.
 builder.Services.AddControllers();

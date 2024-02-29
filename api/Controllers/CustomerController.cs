@@ -30,6 +30,7 @@ public partial class CustomerController : ControllerBase
         _config = config;
     }
 
+    [Authorize] 
     [HttpGet("customers")]
     public async Task<ActionResult<Response>> GetCustomers()
     {
@@ -55,6 +56,7 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    [Authorize(Policy = "AtDesk")] 
     [HttpPatch("offices/{officeId}/customers/{customerId}")]
     public async Task<ActionResult<Response>> PatchCustomer(
         Guid officeId,
@@ -289,6 +291,7 @@ public partial class CustomerController : ControllerBase
         // }
     }
 
+    [Authorize] 
     [HttpPost("offices/{officeId}/customers/query")]
     public async Task<ActionResult<Response>> GetCustomersWithFilters(
         Guid officeId,
@@ -439,6 +442,7 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    [Authorize] 
     [HttpGet("customers/{customerId}")]
     public async Task<ActionResult<Response>> GetCustomer(Guid customerId)
     {
@@ -473,6 +477,7 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    [Authorize] 
     [HttpPost("offices/{officeId}/customers")]
     public async Task<ActionResult<Response>> PostCustomerToOffice(
         Guid officeId,
@@ -567,6 +572,7 @@ public partial class CustomerController : ControllerBase
         // }
     }
 
+    [Authorize(Policy = "AtDesk")] 
     [HttpDelete("offices/{officeId}/customers/{customerId}")]
     public async Task<ActionResult<CustomerDto>> DeleteCustomer(Guid officeId, Guid customerId)
     {
@@ -646,6 +652,7 @@ public partial class CustomerController : ControllerBase
         public bool Occupied { get; set; }
     }
 
+    [Authorize] 
     [HttpGet("offices/{officeId}/divisions")]
     public async Task<ActionResult<IEnumerable<Division>>> GetDivisionsInOffice(Guid officeId)
     {
@@ -669,6 +676,7 @@ public partial class CustomerController : ControllerBase
     }
 
     // Remove user from desk
+    [Authorize(Policy = "AtDesk")] 
     [HttpDelete("offices/{officeId}/users/{userId}/desk")]
     public async Task<ActionResult<Response>> RemoveUserFromDesk(
         Guid officeId,
@@ -774,6 +782,7 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    [Authorize] 
     [HttpPost("offices/{officeId}/users/{userId}/desk")]
     public async Task<ActionResult<Response>> PostUserToDesk(
         Guid officeId,
@@ -875,6 +884,7 @@ public partial class CustomerController : ControllerBase
             }
         });
     }
+
 
     [HttpPost("users")]
     public async Task<ActionResult<User>> AddUser(
@@ -982,6 +992,7 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    [Authorize] 
     [HttpGet("offices/{officeId}")]
     public async Task<ActionResult<Response>> GetOffice(Guid officeId)
     {
