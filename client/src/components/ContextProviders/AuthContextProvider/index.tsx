@@ -2,6 +2,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { AuthContext } from './context';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'utils/types';
+import { useLoginUser } from 'hooks/api/useLoginUser';
 
 export interface AuthContextProviderProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const navigate = useNavigate();
+  const { loginUser } = useLoginUser();
 
   const logOut = useCallback(() => {
     setUser(null);
@@ -60,15 +62,7 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
   }, [token, user, logOut]);
 
   const login = async (userCredentials: { username: string; password: string }) => {
-    const response = await fetch('http://localhost:5274/api/v1/users/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(userCredentials)
-    });
-
-    const { data, error } = await response.json();
+    const { data, error } = await loginUser(userCredentials);
 
     if (data) {
       const { username, id, firstName, lastName, token } = data;

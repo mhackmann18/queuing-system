@@ -5,11 +5,11 @@ import OfficeContextProvider from 'components/ContextProviders/OfficeContextProv
 function App() {
   return (
     <div className="text-eerie_black relative bg-white">
-      <OfficeContextProvider>
-        <AuthContextProvider>
+      <AuthContextProvider>
+        <OfficeContextProvider>
           <Outlet />
-        </AuthContextProvider>
-      </OfficeContextProvider>
+        </OfficeContextProvider>
+      </AuthContextProvider>
     </div>
   );
 }

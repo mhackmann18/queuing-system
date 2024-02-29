@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using CustomerApi.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 ValidIssuer = jwtIssuer,
                 ValidAudience = jwtIssuer,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            };
+
+            // Response when unauthorized
+            options.Events = new JwtBearerEvents
+            {
+                OnChallenge = context =>
+                {
+                    context.HandleResponse(); // Prevent the default behavior
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
+                    context.Response.WriteAsync(JsonConvert.SerializeObject(new
+                    {
+                        error = "You are not authorized"
+                    })); 
+                    return Task.CompletedTask;
+                }
             };
         });
 //Jwt configuration ends here
