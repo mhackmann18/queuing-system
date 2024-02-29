@@ -10,9 +10,8 @@ import { MAX_NUMBER_OF_DESKS } from 'utils/constants';
 export default function useCustomers(filters: CustomerFilters) {
   const { id: officeId } = useOffice();
   // If there's no desk context, desk num will be 0
-  const {
-    desk: { deskNumber: deskNum }
-  } = useDesk();
+  const { desk } = useDesk();
+  const deskNum = desk?.number || 0;
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
 
@@ -41,7 +40,7 @@ export default function useCustomers(filters: CustomerFilters) {
 
   const fetchCustomers = useCallback(async () => {
     const statuses = [...statusFiltersToStatusArray(filters.statuses)];
-    console.log(statuses);
+
     // TODO: Figure out whats going on here
     const utcDate = new Date(
       Date.UTC(
@@ -51,6 +50,20 @@ export default function useCustomers(filters: CustomerFilters) {
         filters.date.getHours(),
         filters.date.getMinutes()
       )
+    );
+
+    console.log(filters.division);
+
+    console.log(
+      JSON.stringify({
+        dates: [utcDate],
+        divisions: [
+          {
+            name: filters.division,
+            statuses
+          }
+        ]
+      })
     );
 
     const res = await fetch(

@@ -11,15 +11,15 @@ import Connector from 'utils/signalRConnection';
 
 interface Desk {
   divisionName: string;
-  deskNumber: number;
+  number: number;
 }
 
 interface SitAtDeskResponse {
   data?: {
-    userId: string;
-    officeId: string;
+    // userId: string;
+    // officeId: string;
     divisionName: string;
-    deskNumber: number;
+    number: number;
   };
   error?: string;
 }
@@ -74,7 +74,7 @@ export default function DeskContextProvider({
   }, [events, userToken]);
 
   const sitAtDesk = useCallback(
-    async ({ divisionName, deskNumber }: Desk): Promise<SitAtDeskResponse> => {
+    async ({ divisionName, number }: Desk): Promise<SitAtDeskResponse> => {
       // Sit user at desk
       const res = await fetch(
         `http://localhost:5274/api/v1/offices/${officeId}/users/${userId}/desk`,
@@ -85,7 +85,7 @@ export default function DeskContextProvider({
           },
           body: JSON.stringify({
             divisionName,
-            deskNumber
+            number
           })
         }
       );
@@ -93,8 +93,8 @@ export default function DeskContextProvider({
       const parsedRes = await res.json();
 
       if (parsedRes.data) {
-        const { divisionName, deskNumber } = parsedRes.data;
-        setDesk({ divisionName, deskNumber });
+        const { divisionName, number } = parsedRes.data;
+        setDesk({ divisionName, number });
       }
 
       return parsedRes;

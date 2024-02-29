@@ -11,7 +11,8 @@ export default function usePanelComponentActionBtnHandlers(
   setWlPosPicker: (pos: { index: number; locked: boolean } | null) => void,
   setError: (error: string) => void
 ): CustomerPanelActionEventHandlers | null {
-  const { divisionName, deskNum } = useDesk();
+  const { desk } = useDesk();
+  const { number: deskNum, divisionName } = desk!;
   const { id: officeId } = useOffice();
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useMemo(
@@ -84,6 +85,16 @@ export default function usePanelComponentActionBtnHandlers(
               } else if (selectedCustomer.atOtherDivision) {
                 setError('Customer is being served at another division.');
               } else {
+                console.log(
+                  JSON.stringify({
+                    divisions: [
+                      {
+                        name: divisionName,
+                        status: `Desk ${deskNum}`
+                      }
+                    ]
+                  })
+                );
                 const res = await fetch(
                   `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
                   {

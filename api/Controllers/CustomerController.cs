@@ -630,10 +630,7 @@ public partial class CustomerController : ControllerBase
             .Select(d => new {
                 d.Name,
                 d.MaxNumberOfDesks,
-                Desks = d.Desks == null ? new List<DeskDto>() : d.Desks.Select(desk => new DeskDto {
-                    DeskNumber = desk.Number,
-                    Occupied = desk.UserAtDesk != null
-                }).ToList()
+                OccupiedDeskNums = d.Desks == null ? new List<int>() : d.Desks.Where(d => d.UserAtDesk != null).Select(desk => desk.UserAtDesk.DeskNumber).ToList()
             })
             .ToListAsync();
 
@@ -761,7 +758,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // Check that the desk number is valid
-        if (postedDesk.DeskNumber < 1 || postedDesk.DeskNumber > division.MaxNumberOfDesks)
+        if (postedDesk.Number < 1 || postedDesk.Number > division.MaxNumberOfDesks)
         {
             return BadRequest(new Response
             {
@@ -772,7 +769,7 @@ public partial class CustomerController : ControllerBase
         // Check that the desk is not already occupied
         UserAtDesk? deskOccupied = await _context.UserAtDesk.FindAsync(
             user.Id, 
-            postedDesk.DeskNumber,
+            postedDesk.Number,
             postedDesk.DivisionName,
             officeId);
         if (deskOccupied != null)
@@ -789,7 +786,7 @@ public partial class CustomerController : ControllerBase
             UserId = userId,
             DeskDivisionOfficeId = officeId,
             DeskDivisionName = postedDesk.DivisionName,
-            DeskNumber = postedDesk.DeskNumber
+            DeskNumber = postedDesk.Number
         };
         await _context.UserAtDesk.AddAsync(newUserAtDesk);
 
@@ -799,7 +796,10 @@ public partial class CustomerController : ControllerBase
 
         return Ok(new Response
         {
-            Data = newUserAtDesk
+            Data = new {
+                DivisionName = newUserAtDesk.DeskDivisionName,
+                Number = newUserAtDesk.DeskNumber
+            }
         });
     }
 
@@ -934,8 +934,8 @@ public partial class CustomerController : ControllerBase
 
         return new Response{
             Data = new {
-                Id = office.Id,
-                Name = office.Id,
+                office.Id,
+                office.Name,
                 DivisionNames = office.Divisions.Select(d => d.Name).ToList()
             }
         };
@@ -1103,7 +1103,7 @@ public class CustomerPatchBody
 public class PostedDesk
 {
     public required string DivisionName { get; init; }
-    public required int DeskNumber { get; init; }
+    public required int Number { get; init; }
 }
 
 public class CustomerPostedInOffice

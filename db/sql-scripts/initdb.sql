@@ -77,17 +77,20 @@ CREATE TABLE Customer (
 
 CREATE TABLE CustomerDivision (
 	customerId CHAR(36) NOT NULL,
-	divisionOfficeId CHAR(36) NOT NULL,
 	divisionName VARCHAR(50) NOT NULL,
+	divisionOfficeId CHAR(36) NOT NULL,
 	waitingListIndex INT,
 	status ENUM(
 		'Waiting', 
 		'Served', 
 		'No Show',
-		'Serving' 
+		'Desk 1',
+		'Desk 2',
+		'Desk 3',
+		'Desk 4' 
 		-- Serving status should only be possible if the customer is at a desk
 	) NOT NULL,
-	PRIMARY KEY(customerId, divisionOfficeId, divisionName),
+	PRIMARY KEY(customerId, divisionName, divisionOfficeId),
 	FOREIGN KEY(customerId) REFERENCES Customer(id) ON DELETE CASCADE,
 	FOREIGN KEY(divisionOfficeId, divisionName) REFERENCES Division(officeId, name)
 );
@@ -117,10 +120,10 @@ CREATE TABLE CustomerDivisionTimeCalled (
 		customerDivisionDivisionOfficeId, 
 		timeCalled),
 	FOREIGN KEY(
-		customerDivisionCustomerId, 
-		customerDivisionDivisionName, 
-		customerDivisionDivisionOfficeId) 
-		REFERENCES CustomerDivision(customerId, divisionOfficeId, divisionName) ON DELETE CASCADE
+    customerDivisionCustomerId, 
+		customerDivisionDivisionName,
+    customerDivisionDivisionOfficeId) 
+		REFERENCES CustomerDivision(customerId, divisionName, divisionOfficeId) ON DELETE CASCADE
 );
 
 SHOW TABLES IN queuing_system;

@@ -16,8 +16,8 @@ export default function DeskPickerView() {
 
   useEffect(() => {
     if (desk) {
-      console.log(getDeskNameLink(desk.divisionName, desk.deskNumber));
-      navigate(getDeskNameLink(desk.divisionName, desk.deskNumber));
+      console.log(getDeskNameLink(desk.divisionName, desk.number));
+      navigate(getDeskNameLink(desk.divisionName, desk.number));
     }
   }, [desk, navigate]);
 
@@ -41,11 +41,11 @@ export default function DeskPickerView() {
           data.map(
             (division: {
               name: string;
-              numDesks: number;
+              maxNumberOfDesks: number;
               occupiedDeskNums: number[];
             }) => ({
               divisionName: division.name,
-              numDesks: division.numDesks,
+              numDesks: division.maxNumberOfDesks,
               occupiedDeskNums: division.occupiedDeskNums
             })
           )
@@ -81,7 +81,7 @@ export default function DeskPickerView() {
                 const deskNum = index + 1;
 
                 const handleDeskClick = async () => {
-                  const res = await sitAtDesk({ divisionName, deskNumber: deskNum });
+                  const res = await sitAtDesk({ divisionName, number: deskNum });
 
                   console.log(res);
 

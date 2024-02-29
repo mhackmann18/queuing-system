@@ -53,7 +53,7 @@ export default function useCustomers(filters: CustomerFilters) {
       setCustomers(
         sortCustomers(
           data.map((c: CustomerDto) =>
-            sanitizeRawCustomer(c, filters.divisions[0].name)
+            sanitizeRawCustomer(c, filters.divisions[0].name, 0)
           ) // TODO: Fix this atrocious code (filters.divisions[0].name)
         )
       );

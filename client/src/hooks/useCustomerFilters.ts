@@ -3,7 +3,8 @@ import { StatusFilters, CustomerFilters } from 'utils/types';
 import useDesk from './useDesk';
 
 export default function useCustomerFilters() {
-  const { divisionName } = useDesk();
+  const { desk } = useDesk();
+  const divisionName = desk!.divisionName;
   const [date, setDate] = useState(new Date());
   const [statuses, setStatuses] = useState<StatusFilters>({
     Serving: true,

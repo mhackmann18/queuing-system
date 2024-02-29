@@ -24,7 +24,7 @@ export default function DeskRequiredRoute({ children }: { children: ReactElement
   console.log(deskNum, divisionName);
   console.log(desk);
 
-  return desk.deskNumber === deskNum && desk.divisionName === divisionName ? (
+  return desk.number === deskNum && desk.divisionName === divisionName ? (
     children
   ) : (
     <Navigate to="/dashboard/customer-manager" />
