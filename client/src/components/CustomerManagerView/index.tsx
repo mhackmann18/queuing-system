@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import CustomerPanel from './CustomerPanel';
 import { Customer } from 'utils/types';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import CustomerList from './CustomerList';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/useCustomers';
@@ -12,16 +12,14 @@ import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
 import useNextCustomerId from 'hooks/useNextSelectedCustomer';
 import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEventHandlers';
 import StatusFiltersButtons from './Header/StatusFiltersButtons';
-import useAuth from 'hooks/useAuth';
-import useOffice from 'hooks/useOffice';
 import { useBlocker } from 'react-router-dom';
 import CustomerServiceWarningModal from './CustomerServiceWarningModal';
+import { useLeaveDesk } from 'hooks/apiHooks';
 // import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
-  const { id: officeId } = useOffice();
-  const { user } = useAuth();
+  const { leaveDesk } = useLeaveDesk();
   const [wlPosPicker, setWlPosPicker] =
     useState<WaitingListPositionPickerState>(null);
   const [error, setError] = useState<string>('');
@@ -41,31 +39,13 @@ export default function CustomerManagerView() {
       setError
     );
 
-  const getUpFromDesk = useCallback(async () => {
-    // Get user up from desk
-    const res = await fetch(
-      `http://localhost:5274/api/v1/offices/${officeId}/users/${user!.id}/desk`,
-      {
-        method: 'DELETE'
-      }
-    );
-
-    const { error, data } = await res.json();
-
-    if (error) {
-      console.error(error);
-    } else if (data) {
-      console.log(data);
-    }
-  }, [user, officeId]);
-
   useEffect(() => {
     const handleUnload = (e: BeforeUnloadEvent) => {
       if (selectedCustomer && selectedCustomer.status === 'Serving') {
         e.preventDefault();
         return (e.returnValue = '');
       } else {
-        getUpFromDesk();
+        leaveDesk();
       }
     };
 
@@ -75,14 +55,14 @@ export default function CustomerManagerView() {
     return () => {
       window.removeEventListener('beforeunload', handleUnload);
     };
-  }, [selectedCustomer, getUpFromDesk]); // Empty dependency array means this effect runs once on mount and cleanup on unmount
+  }, [selectedCustomer, leaveDesk]); // Empty dependency array means this effect runs once on mount and cleanup on unmount
 
   // Leave desk on unmount
   useEffect(() => {
     return () => {
-      getUpFromDesk();
+      leaveDesk();
     };
-  }, [getUpFromDesk]);
+  }, [leaveDesk]);
 
   // Block navigation when there's a customer being served
   const blocker = useBlocker(

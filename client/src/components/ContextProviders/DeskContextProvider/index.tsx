@@ -31,7 +31,9 @@ interface DeskContextT {
 
 export const DeskContext = createContext<DeskContextT>({
   desk: null,
-  sitAtDesk: async () => ({ error: 'DeskContext not yet initialized' })
+  sitAtDesk: async () => {
+    throw new Error('DeskContext is not provided.');
+  }
 });
 
 export default function DeskContextProvider({
@@ -81,7 +83,8 @@ export default function DeskContextProvider({
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`
           },
           body: JSON.stringify({
             divisionName,
@@ -99,7 +102,7 @@ export default function DeskContextProvider({
 
       return parsedRes;
     },
-    [officeId, userId]
+    [officeId, userId, userToken]
   );
 
   useEffect(() => {

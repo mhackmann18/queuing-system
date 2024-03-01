@@ -6,6 +6,7 @@ import useDesk from 'hooks/useDesk';
 import useOffice from 'hooks/useOffice';
 import { StatusFilters } from 'utils/types';
 import { MAX_NUMBER_OF_DESKS } from 'utils/constants';
+import useAuth from './useAuth';
 
 export default function useCustomers(filters: CustomerFilters) {
   const { id: officeId } = useOffice();
@@ -14,6 +15,7 @@ export default function useCustomers(filters: CustomerFilters) {
   const deskNum = desk?.number || 0;
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
+  const { token } = useAuth();
 
   const statusFiltersToStatusArray = useCallback(
     (statusFilters: StatusFilters) => {
@@ -71,7 +73,8 @@ export default function useCustomers(filters: CustomerFilters) {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           dates: [utcDate],
@@ -101,7 +104,7 @@ export default function useCustomers(filters: CustomerFilters) {
         // setError(res.error)
       }
     }
-  }, [filters, officeId, statusFiltersToStatusArray, deskNum]);
+  }, [filters, officeId, statusFiltersToStatusArray, deskNum, token]);
 
   // Load new customers when filters change
   useEffect(() => {

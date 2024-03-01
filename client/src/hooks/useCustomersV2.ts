@@ -3,6 +3,7 @@ import { sanitizeRawCustomer, sortCustomers } from 'utils/helpers';
 import { Customer, CustomerDto, DBCustomerStatus } from 'utils/types';
 import Connector from 'utils/signalRConnection';
 import useOffice from 'hooks/useOffice';
+import useAuth from './useAuth';
 
 interface Division {
   name: string;
@@ -20,6 +21,7 @@ export default function useCustomers(filters: CustomerFilters) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
   const [error, setError] = useState<string>('');
+  const { token } = useAuth();
 
   const fetchCustomers = useCallback(async () => {
     // TODO: Figure out whats going on here
@@ -38,7 +40,8 @@ export default function useCustomers(filters: CustomerFilters) {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           dates: [utcDate],
@@ -60,19 +63,16 @@ export default function useCustomers(filters: CustomerFilters) {
     } else {
       setError(error);
     }
-  }, [filters, officeId]);
+  }, [filters, officeId, token]);
 
   // Load new customers when filters change
   useEffect(() => {
     fetchCustomers();
-  }, [fetchCustomers]);
 
-  // Load new customers on update event
-  useEffect(() => {
     events({
       onCustomersUpdated: fetchCustomers
     });
-  }, [events, fetchCustomers]);
+  }, [fetchCustomers, events]);
 
   return { customers, error };
 }

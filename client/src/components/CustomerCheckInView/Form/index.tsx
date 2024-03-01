@@ -4,13 +4,13 @@ import { CheckInFormProps, CheckInFormValues } from './types';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FULL_NAME_MAX_LENGTH, REQUIRED_FIELD_ERROR } from 'utils/constants';
 import SubmitBtn from 'components/Form/SubmitBtn';
-import useOffice from 'hooks/useOffice';
+import { useCheckInCustomer } from 'hooks/apiHooks';
 
 export default function CustomerCheckInViewForm({
   divisions,
   onSubmitSuccess
 }: CheckInFormProps) {
-  const { id: officeId } = useOffice();
+  const { checkInCustomer } = useCheckInCustomer();
   const [submitError, setSubmitError] = useState<string>('');
   const {
     register,
@@ -22,33 +22,20 @@ export default function CustomerCheckInViewForm({
     fullName,
     reasonForVisit
   }) => {
-    const res = await fetch(
-      `http://localhost:5274/api/v1/offices/${officeId}/customers`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fullName,
-          divisionNames: reasonForVisit
-        })
-      }
-    );
+    const res = await checkInCustomer({
+      fullName,
+      divisionNames: reasonForVisit
+    });
 
-    if (res.status !== 200) {
+    if (res.error) {
       setSubmitError(
         "There's been a problem with the server. Please see a clerk for assistance."
       );
       return;
     }
 
-    const { data, error } = await res.json();
-
-    if (error) {
-      setSubmitError(error);
-    } else if (data) {
-      onSubmitSuccess(data);
+    if (res.data) {
+      onSubmitSuccess(res.data);
     }
   };
 

@@ -2,7 +2,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { AuthContext } from './context';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'utils/types';
-import { useLoginUser } from 'hooks/api/useLoginUser';
+import { useLoginUser } from 'hooks/apiHooks';
 
 export interface AuthContextProviderProps {
   children: ReactNode;

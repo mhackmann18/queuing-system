@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
 import DeskSelectorButton from './DeskSelectorButton';
-import Connector from 'utils/signalRConnection';
-import useOffice from 'hooks/useOffice';
 import useDesk from 'hooks/useDesk';
 import { useNavigate } from 'react-router-dom';
+import { useDivisions } from 'hooks/apiHooks';
 
 export default function DeskPickerView() {
-  const { id: officeId } = useOffice();
   const [deskAvailabilityByDivision, setDeskAvailabilityByDivision] = useState<
-    { divisionName: string; numDesks: number; occupiedDeskNums: number[] }[]
+    { name: string; maxNumberOfDesks: number; occupiedDeskNums: number[] }[]
   >([]);
-  const { events } = Connector();
   const { sitAtDesk, desk } = useDesk();
   const navigate = useNavigate();
+  const { divisions } = useDivisions();
 
   useEffect(() => {
     if (desk) {
@@ -23,40 +21,16 @@ export default function DeskPickerView() {
 
   // Fetch desk availability on component mount
   useEffect(() => {
-    const getDeskAvailabilty = async () => {
-      const res = await fetch(
-        `http://localhost:5274/api/v1/offices/${officeId}/divisions`,
-        {
-          method: 'GET'
-        }
+    if (divisions) {
+      setDeskAvailabilityByDivision(
+        divisions.map(({ name, maxNumberOfDesks, occupiedDeskNums }) => ({
+          name,
+          maxNumberOfDesks,
+          occupiedDeskNums
+        }))
       );
-
-      const { error, data } = await res.json();
-
-      if (error) {
-        console.error(error);
-      } else if (data) {
-        console.log(data);
-        setDeskAvailabilityByDivision(
-          data.map(
-            (division: {
-              name: string;
-              maxNumberOfDesks: number;
-              occupiedDeskNums: number[];
-            }) => ({
-              divisionName: division.name,
-              numDesks: division.maxNumberOfDesks,
-              occupiedDeskNums: division.occupiedDeskNums
-            })
-          )
-        );
-      }
-    };
-    events({
-      onDesksUpdated: getDeskAvailabilty
-    });
-    getDeskAvailabilty();
-  }, [events, officeId]);
+    }
+  }, [divisions]);
 
   // Convert division name and desk number to a link
   const getDeskNameLink = (divisionName: string, deskNum: number) =>
@@ -68,7 +42,7 @@ export default function DeskPickerView() {
         <h1 className="mb-6 text-2xl font-semibold">Select a desk</h1>
 
         {deskAvailabilityByDivision.map(
-          ({ divisionName, numDesks, occupiedDeskNums }) => (
+          ({ name: divisionName, maxNumberOfDesks, occupiedDeskNums }) => (
             <div
               key={divisionName}
               className="border-french_gray_1-600 mb-4 rounded-md border p-4 shadow-md"
@@ -77,7 +51,7 @@ export default function DeskPickerView() {
                 {divisionName}
               </h2>
 
-              {Array.from({ length: numDesks }).map((_, index) => {
+              {Array.from({ length: maxNumberOfDesks }).map((_, index) => {
                 const deskNum = index + 1;
 
                 const handleDeskClick = async () => {

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { CustomerPanelActionEventHandlers } from 'components/CustomerManagerView/CustomerPanel/types';
 import { Customer } from 'utils/types';
 import useDesk from './useDesk';
-import useOffice from './useOffice';
+import { usePatchCustomer, useDeleteCustomer } from 'hooks/apiHooks';
 
 export default function usePanelComponentActionBtnHandlers(
   selectedCustomer: Customer | null,
@@ -13,7 +13,8 @@ export default function usePanelComponentActionBtnHandlers(
 ): CustomerPanelActionEventHandlers | null {
   const { desk } = useDesk();
   const { number: deskNum, divisionName } = desk!;
-  const { id: officeId } = useOffice();
+  const { patchCustomer } = usePatchCustomer();
+  const { deleteCustomer } = useDeleteCustomer();
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useMemo(
       () =>
@@ -22,14 +23,7 @@ export default function usePanelComponentActionBtnHandlers(
             onClick: () => null,
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
-              const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
-                {
-                  method: 'DELETE'
-                }
-              );
-
-              const { data, error } = await res.json();
+              const { data, error } = await deleteCustomer(selectedCustomer.id);
 
               if (error) {
                 setError(error);
@@ -45,34 +39,20 @@ export default function usePanelComponentActionBtnHandlers(
             },
             onCancel: () => setWlPosPicker(null),
             onConfirm: async ({ onSuccess }) => {
-              const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
-                {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    divisions: [
-                      {
-                        name: divisionName,
-                        status: 'Waiting',
-                        waitingListIndex: wlPosPicker!.index + 1
-                      }
-                    ]
-                  })
-                }
-              );
-
-              const { data, error } = await res.json();
-
-              console.log(wlPosPicker?.index);
+              const { data, error } = await patchCustomer(selectedCustomer.id, {
+                divisions: [
+                  {
+                    name: divisionName,
+                    status: 'Waiting',
+                    waitingListIndex: wlPosPicker!.index + 1
+                  }
+                ]
+              });
 
               if (error) {
                 setError(error);
               } else if (data) {
                 onSuccess();
-                // fetchCustomers();
                 setWlPosPicker(null);
               }
             },
@@ -85,35 +65,14 @@ export default function usePanelComponentActionBtnHandlers(
               } else if (selectedCustomer.atOtherDivision) {
                 setError('Customer is being served at another division.');
               } else {
-                console.log(
-                  JSON.stringify({
-                    divisions: [
-                      {
-                        name: divisionName,
-                        status: `Desk ${deskNum}`
-                      }
-                    ]
-                  })
-                );
-                const res = await fetch(
-                  `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
-                  {
-                    method: 'PATCH',
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                      divisions: [
-                        {
-                          name: divisionName,
-                          status: `Desk ${deskNum}`
-                        }
-                      ]
-                    })
-                  }
-                );
-
-                const { data, error } = await res.json();
+                const { data, error } = await patchCustomer(selectedCustomer.id, {
+                  divisions: [
+                    {
+                      name: divisionName,
+                      status: `Desk ${deskNum}`
+                    }
+                  ]
+                });
 
                 if (error) {
                   setError(error);
@@ -125,25 +84,14 @@ export default function usePanelComponentActionBtnHandlers(
           },
           finishServing: {
             onClick: async () => {
-              const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
-                {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    divisions: [
-                      {
-                        name: divisionName,
-                        status: 'Served'
-                      }
-                    ]
-                  })
-                }
-              );
-
-              const { data, error } = await res.json();
+              const { data, error } = await patchCustomer(selectedCustomer.id, {
+                divisions: [
+                  {
+                    name: divisionName,
+                    status: 'Served'
+                  }
+                ]
+              });
 
               if (error) {
                 setError(error);
@@ -156,25 +104,14 @@ export default function usePanelComponentActionBtnHandlers(
             onClick: () => null,
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
-              const res = await fetch(
-                `http://localhost:5274/api/v1/offices/${officeId}/customers/${selectedCustomer.id}`,
-                {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    divisions: [
-                      {
-                        name: divisionName,
-                        status: 'No Show'
-                      }
-                    ]
-                  })
-                }
-              );
-
-              const { data, error } = await res.json();
+              const { data, error } = await patchCustomer(selectedCustomer.id, {
+                divisions: [
+                  {
+                    name: divisionName,
+                    status: 'No Show'
+                  }
+                ]
+              });
 
               if (error) {
                 setError(error);
@@ -193,7 +130,8 @@ export default function usePanelComponentActionBtnHandlers(
         customers,
         deskNum,
         divisionName,
-        officeId
+        patchCustomer,
+        deleteCustomer
       ]
     );
 
