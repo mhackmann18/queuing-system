@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using CustomerApi.Controllers;
+using CustomerApi.Requirements;
+using CustomerApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, AtDeskHandler>();
+
+builder.Services.AddHostedService<SessionCleanupService>();
 
 // Add services to the container.
 builder.Services.AddControllers();

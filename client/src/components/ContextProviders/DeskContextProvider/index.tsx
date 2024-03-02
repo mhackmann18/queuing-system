@@ -14,6 +14,12 @@ interface Desk {
   number: number;
 }
 
+// interface LeaveDeskResponse {
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   desk: any | null;
+//   error?: string;
+// }
+
 interface SitAtDeskResponse {
   data?: {
     // userId: string;

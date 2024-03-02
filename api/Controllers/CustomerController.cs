@@ -868,7 +868,8 @@ public partial class CustomerController : ControllerBase
             UserId = userId,
             DeskDivisionOfficeId = officeId,
             DeskDivisionName = postedDesk.DivisionName,
-            DeskNumber = postedDesk.Number
+            DeskNumber = postedDesk.Number,
+            SessionEndTime = DateTime.UtcNow.AddMinutes(15)
         };
         await _context.UserAtDesk.AddAsync(newUserAtDesk);
 
@@ -884,7 +885,6 @@ public partial class CustomerController : ControllerBase
             }
         });
     }
-
 
     [HttpPost("users")]
     public async Task<ActionResult<User>> AddUser(

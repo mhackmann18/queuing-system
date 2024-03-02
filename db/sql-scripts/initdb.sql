@@ -59,6 +59,7 @@ CREATE TABLE UserAtDesk(
 	deskNumber INT NOT NULL,
 	deskDivisionName VARCHAR(50) NOT NULL,
 	deskDivisionOfficeId CHAR(36) NOT NULL,
+	sessionEndTime DATETIME NOT NULL,
 	FOREIGN KEY(userId) REFERENCES User(id) ON DELETE CASCADE,
 	-- TODO: Consider what should happen if desk is deleted
 	FOREIGN KEY(deskDivisionOfficeId, deskDivisionName, deskNumber) 

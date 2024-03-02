@@ -6,6 +6,8 @@ namespace CustomerApi.Models;
 [PrimaryKey(nameof(UserId), nameof(DeskNumber), nameof(DeskDivisionName), nameof(DeskDivisionOfficeId))]
 public class UserAtDesk
 {
+  public required DateTime SessionEndTime { get; set; }
+  
   // Foreign Key
   [Column(TypeName = "char(36)")]
   public required Guid UserId { get; set; }

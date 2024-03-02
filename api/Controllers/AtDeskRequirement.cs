@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using CustomerApi.Models;
 
+namespace CustomerApi.Requirements;
+
 public class AtDeskRequirement : IAuthorizationRequirement { }
 
 public class AtDeskHandler : AuthorizationHandler<AtDeskRequirement>
@@ -22,6 +24,9 @@ public class AtDeskHandler : AuthorizationHandler<AtDeskRequirement>
             var userAtDesk = await _context.UserAtDesk.FirstOrDefaultAsync(u => u.UserId == userId);
             if (userAtDesk != null)
             {
+                // Extend the session by 15 minutes
+                userAtDesk.SessionEndTime = DateTime.UtcNow.AddMinutes(15);
+                await _context.SaveChangesAsync();
                 context.Succeed(requirement);
             }
         }
