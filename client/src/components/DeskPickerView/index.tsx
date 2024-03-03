@@ -14,7 +14,6 @@ export default function DeskPickerView() {
 
   useEffect(() => {
     if (desk) {
-      console.log(getDeskNameLink(desk.divisionName, desk.number));
       navigate(getDeskNameLink(desk.divisionName, desk.number));
     }
   }, [desk, navigate]);

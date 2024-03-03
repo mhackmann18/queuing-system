@@ -36,6 +36,27 @@ const sortCustomers = (customers: Customer[]): Customer[] => {
 };
 
 /**
+ * Converts local date object to utc date object. Dates that are sent to the server should be in
+ * this format.
+ * @param localDate
+ * @returns utc date object
+ */
+const convertLocalToUtc = (localDate: Date): Date => {
+  const utcDate = new Date(
+    Date.UTC(
+      localDate.getUTCFullYear(),
+      localDate.getUTCMonth(),
+      localDate.getUTCDate(),
+      localDate.getUTCHours(),
+      localDate.getUTCMinutes(),
+      localDate.getUTCSeconds()
+    )
+  );
+
+  return utcDate;
+};
+
+/**
  * Converts utc date object to local date object. This function should be used on any date that is
  * received from the server.
  * @param utcDate
@@ -292,5 +313,6 @@ export {
   formatString,
   sanitizeRawCustomer,
   sortCustomers,
-  convertUtcToLocal
+  convertUtcToLocal,
+  convertLocalToUtc
 };

@@ -144,8 +144,6 @@ export default function DeskContextProvider({
     return <div>Loading...</div>;
   }
 
-  console.log(desk);
-
   return (
     <DeskContext.Provider value={{ desk, sitAtDesk }}>
       {children}

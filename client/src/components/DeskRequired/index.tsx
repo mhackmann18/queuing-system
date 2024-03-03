@@ -21,9 +21,6 @@ export default function DeskRequiredRoute({ children }: { children: ReactElement
 
   const { divisionName, deskNum } = getDeskInfoFromDeskIdParam();
 
-  console.log(deskNum, divisionName);
-  console.log(desk);
-
   return desk.number === deskNum && desk.divisionName === divisionName ? (
     children
   ) : (

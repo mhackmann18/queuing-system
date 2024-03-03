@@ -537,6 +537,7 @@ public partial class CustomerController : ControllerBase
             {
                 foreach (var dateFilter in filters.Dates)
                 {
+                    _logger.LogInformation(dateFilter.Date.ToString());
                     var customersWithCurrentFilter = await _context
                         .Customer.Where(c =>
                             c.CheckInTime.Date == dateFilter.Date

@@ -1,5 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { sanitizeRawCustomer, sortCustomers } from 'utils/helpers';
+import {
+  convertLocalToUtc,
+  sanitizeRawCustomer,
+  sortCustomers
+} from 'utils/helpers';
 import { Customer, CustomerFilters, CustomerDto, StatusFilter } from 'utils/types';
 import Connector from 'utils/signalRConnection';
 import useDesk from 'hooks/useDesk';
@@ -43,30 +47,7 @@ export default function useCustomers(filters: CustomerFilters) {
   const fetchCustomers = useCallback(async () => {
     const statuses = [...statusFiltersToStatusArray(filters.statuses)];
 
-    // TODO: Figure out whats going on here
-    const utcDate = new Date(
-      Date.UTC(
-        filters.date.getFullYear(),
-        filters.date.getMonth(),
-        filters.date.getDate(),
-        filters.date.getHours(),
-        filters.date.getMinutes()
-      )
-    );
-
-    console.log(filters.division);
-
-    console.log(
-      JSON.stringify({
-        dates: [utcDate],
-        divisions: [
-          {
-            name: filters.division,
-            statuses
-          }
-        ]
-      })
-    );
+    const todaysDateUtc = convertLocalToUtc(new Date());
 
     const res = await fetch(
       `http://localhost:5274/api/v1/offices/${officeId}/customers/query`,
@@ -77,7 +58,7 @@ export default function useCustomers(filters: CustomerFilters) {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          dates: [utcDate],
+          dates: [todaysDateUtc],
           divisions: [
             {
               name: filters.division,
