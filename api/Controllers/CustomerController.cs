@@ -34,7 +34,7 @@ public partial class CustomerController : ControllerBase
     [HttpGet("customers")]
     public async Task<ActionResult<Response>> GetCustomers()
     {
-        var customers = await _context.Customer
+        List<CustomerDto> customers = await _context.Customer
             .Select(c => new CustomerDto
             {
                 Id = c.Id,
@@ -46,7 +46,8 @@ public partial class CustomerController : ControllerBase
                     Status = d.Status,
                     WaitingListIndex = d.WaitingListIndex,
                     TimesCalled = d.TimesCalled.Select(t => t.TimeCalled).ToList()
-                }).ToList()
+                })
+                .ToList()
             })
             .ToListAsync();
 
@@ -56,12 +57,33 @@ public partial class CustomerController : ControllerBase
         });
     }
 
+    public class PatchCustomerBody
+    {
+        public List<PatchCustomerBodyDivision>? Divisions { get; set; }
+
+        public class PatchCustomerBodyDivision
+        {
+            public required string Name { get; set; }
+            public string? Status { get; set; }
+            public int? WaitingListIndex { get; set; }
+            public List<DateTime>? TimesCalled { get; set; }
+        };
+    };
+
+    private Task<ActionResult<Response>?> PatchCustomerDivision(
+        Guid officeId, 
+        Guid customerId, 
+        PatchCustomerBody.PatchCustomerBodyDivision customerDivision)
+    {
+        throw new NotImplementedException();
+    }
+
     [Authorize(Policy = "AtDesk")] 
     [HttpPatch("offices/{officeId}/customers/{customerId}")]
     public async Task<ActionResult<Response>> PatchCustomer(
         Guid officeId,
         Guid customerId,
-        [FromBody] CustomerPatchBody customerFields
+        [FromBody] PatchCustomerBody customerFields
     )
     {
         // Check that customer exists
@@ -76,7 +98,7 @@ public partial class CustomerController : ControllerBase
 
         if (customerFields.Divisions != null)
         {
-            foreach (CustomerPatchBody.CustomerPatchBodyDivision div in customerFields.Divisions)
+            foreach (PatchCustomerBody.PatchCustomerBodyDivision div in customerFields.Divisions)
             {
                 string? newStatus = div.Status;
 
@@ -1169,19 +1191,6 @@ public class PostedCustomer
     public required string fullName { get; set; }
     public required Guid officeId { get; set; }
     public required string[] divisions { get; set; }
-};
-
-public class CustomerPatchBody
-{
-    public List<CustomerPatchBodyDivision>? Divisions { get; set; }
-
-    public class CustomerPatchBodyDivision
-    {
-        public required string Name { get; set; }
-        public string? Status { get; set; }
-        public int? WaitingListIndex { get; set; }
-        public List<DateTime>? TimesCalled { get; set; }
-    };
 };
 
 public class PostedDesk
