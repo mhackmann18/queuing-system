@@ -34,6 +34,23 @@ const sortCustomers = (customers: Customer[]): Customer[] => {
     return new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime();
   });
 };
+
+/**
+ * Converts utc date object to local date object. This function should be used on any date that is
+ * received from the server.
+ * @param utcDate
+ * @returns local date object
+ */
+const convertUtcToLocal = (utcDate: Date): Date => {
+  const utcTimeInMilliseconds = utcDate.getTime();
+
+  const localOffsetInMilliseconds = utcDate.getTimezoneOffset() * 60 * 1000;
+
+  const localDate = new Date(utcTimeInMilliseconds - localOffsetInMilliseconds);
+
+  return localDate;
+};
+
 const sanitizeRawCustomer = (
   customer: CustomerDto,
   division: string,
@@ -53,7 +70,7 @@ const sanitizeRawCustomer = (
       if (status === `Desk ${deskNum}`) {
         status = 'Serving';
       }
-      timesCalled.push(...d.timesCalled.map((d) => new Date(d)));
+      timesCalled.push(...d.timesCalled.map((d) => convertUtcToLocal(new Date(d))));
       waitingListIndex = d.waitingListIndex;
     }
   }
@@ -62,7 +79,7 @@ const sanitizeRawCustomer = (
     id,
     status,
     name,
-    checkInTime: new Date(checkInTime),
+    checkInTime: convertUtcToLocal(new Date(checkInTime)),
     timesCalled,
     reasonsForVisit,
     waitingListIndex
@@ -274,5 +291,6 @@ export {
   getNextSelectedCustomer,
   formatString,
   sanitizeRawCustomer,
-  sortCustomers
+  sortCustomers,
+  convertUtcToLocal
 };

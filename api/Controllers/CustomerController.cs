@@ -693,7 +693,7 @@ public partial class CustomerController : ControllerBase
         // TODO: Fix this shit
 
         await _context.SaveChangesAsync();
-        // DateTime today = DateTime.Now;
+        // DateTime today = DateTime.UtcNow;
         // ActionResult<Response> res = await GetCustomersWithFilters(
         //     officeId,
         //     new CustomersQueryBody{ Dates = new List<DateTime> { today } }
