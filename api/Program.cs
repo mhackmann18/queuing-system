@@ -6,13 +6,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
-using CustomerApi.Controllers;
 using CustomerApi.Requirements;
 using CustomerApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Jwt configuration starts here
+// Jwt configuration starts here
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
 var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>();
 
@@ -51,7 +50,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
             };
         });
-//Jwt configuration ends here
+// Jwt configuration ends here
 
 builder.Services.AddAuthorization(options =>
 {
@@ -59,9 +58,14 @@ builder.Services.AddAuthorization(options =>
         policy.AddRequirements(new AtDeskRequirement()));
 });
 
+// Add authorization handler to block users who are not at desk
 builder.Services.AddScoped<IAuthorizationHandler, AtDeskHandler>();
 
+// Clear old desk sessions
 builder.Services.AddHostedService<SessionCleanupService>();
+
+// Clear any leftover unserved customers from the previous day
+builder.Services.AddHostedService<ClearOldCustomersService>();
 
 // Add services to the container.
 builder.Services.AddControllers();

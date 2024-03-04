@@ -10,6 +10,7 @@ CREATE TABLE Company (
 CREATE TABLE Office (
 	id CHAR(36),
 	name VARCHAR(70) NOT NULL,
+	timezone VARCHAR(32) NOT NULL,
 	PRIMARY KEY(id)
 );
 
@@ -134,8 +135,8 @@ INSERT INTO Company (id, name) VALUES
 ('1056zz0c-c844-11ee-851b-4529fd7b70be', 'P&H MGMT LC');
 
 -- Inserting dummy values into Office table
-INSERT INTO Office (id, name) VALUES 
-('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Troy License Office');
+INSERT INTO Office (id, name, timezone) VALUES 
+('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Troy License Office', 'America/Chicago');
 -- P&H MGMT is the name of the company
 -- TODO: Should be in the company table once it's created
 
