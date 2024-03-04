@@ -1,35 +1,10 @@
-import {
-  ReactElement,
-  useEffect,
-  useState,
-  createContext,
-  useCallback
-} from 'react';
+import { ReactElement, useEffect, useState, useCallback } from 'react';
 import useAuth from 'hooks/useAuth';
 import useOffice from 'hooks/useOffice';
 import Connector from 'utils/signalRConnection';
 import api from 'utils/api';
-
-interface Desk {
-  divisionName: string;
-  number: number;
-}
-
-interface DeskContextT {
-  desk: Desk | null;
-  sitAtDesk: (desk: Desk) => Promise<void>;
-  leaveDesk: () => Promise<void>;
-}
-
-export const DeskContext = createContext<DeskContextT>({
-  desk: null,
-  sitAtDesk: async () => {
-    throw new Error('DeskContext is not provided.');
-  },
-  leaveDesk: async () => {
-    throw new Error('DeskContext is not provided.');
-  }
-});
+import { DeskContext } from './context';
+import { Desk } from './context';
 
 export default function DeskContextProvider({
   children

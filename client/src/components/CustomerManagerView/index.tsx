@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import CustomerPanel from './CustomerPanel';
 import { Customer } from 'utils/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import CustomerList from './CustomerList';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/api/useCustomers';
@@ -14,8 +14,7 @@ import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEve
 import StatusFiltersButtons from './Header/StatusFiltersButtons';
 import { useBlocker } from 'react-router-dom';
 import CustomerServiceWarningModal from './CustomerServiceWarningModal';
-import useDesk from 'hooks/useDesk';
-// import signalRConnection from 'utils/signalRConnection';
+import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
@@ -29,7 +28,7 @@ export default function CustomerManagerView() {
     selectedCustomer,
     customers
   );
-  const { leaveDesk } = useDesk();
+  const { leaveDesk } = useContext(DeskContext);
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useCustomerPanelActionEventHandlers(
       selectedCustomer,

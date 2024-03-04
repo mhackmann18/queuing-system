@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import DeskSelectorButton from './DeskSelectorButton';
-import useDesk from 'hooks/useDesk';
 import { useNavigate } from 'react-router-dom';
 import useDivisions from 'hooks/api/useDivisions';
 import { DivisionDto } from 'hooks/api/types';
+import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
 
 export default function DeskPickerView() {
   const navigate = useNavigate();
   const [deskAvailabilityByDivision, setDeskAvailabilityByDivision] = useState<
     DivisionDto[]
   >([]);
-  const { sitAtDesk, desk } = useDesk();
+  const { sitAtDesk, desk } = useContext(DeskContext);
   const {
     divisions,
     error: divisionsError,

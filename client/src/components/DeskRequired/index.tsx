@@ -1,10 +1,10 @@
-import { ReactElement } from 'react';
+import { ReactElement, useContext } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
-import useDesk from 'hooks/useDesk';
+import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
 
 export default function DeskRequiredRoute({ children }: { children: ReactElement }) {
   const { deskId } = useParams();
-  const { desk } = useDesk();
+  const { desk } = useContext(DeskContext);
 
   if (!desk) {
     return <Navigate to="/dashboard/customer-manager" />;

@@ -77,7 +77,7 @@ public partial class CustomerController : ControllerBase
     /* PATCH CUSTOMER */
     /******************/
 
-    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP 
+    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
     private ActionResult<Response>? RemoveCustomerDivisionWaitingListIndex(
         CustomerDivision customerDivision
@@ -111,7 +111,7 @@ public partial class CustomerController : ControllerBase
         return null;
     }
 
-    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP 
+    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
     private async Task<ActionResult<Response>?> UpdateCustomerDivisionStatus(
         CustomerDivision customerDivisionToUpdate,
@@ -178,7 +178,7 @@ public partial class CustomerController : ControllerBase
         return null;
     }
 
-    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP 
+    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
     private ActionResult<Response>? UpdateCustomerDivisionWaitingListIndex(
         CustomerDivision customerDivision,
@@ -278,7 +278,7 @@ public partial class CustomerController : ControllerBase
         return null;
     }
 
-    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP 
+    /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
     private async Task<ActionResult<Response>?> UpdateCustomerDivision(
         Guid officeId,
@@ -804,12 +804,15 @@ public partial class CustomerController : ControllerBase
             {
                 Name = d.Name,
                 NumberOfDesks = d.MaxNumberOfDesks,
-                OccupiedDeskNumbers = d.Desks == null
-                    ? new List<int>()
-                    : d
-                        .Desks.Where(d => d.UserAtDesk != null)
-                        .Select(desk => desk.UserAtDesk == null ? 0 : desk.UserAtDesk.DeskNumber)
-                        .ToList()
+                OccupiedDeskNumbers =
+                    d.Desks == null
+                        ? new List<int>()
+                        : d
+                            .Desks.Where(d => d.UserAtDesk != null)
+                            .Select(desk =>
+                                desk.UserAtDesk == null ? 0 : desk.UserAtDesk.DeskNumber
+                            )
+                            .ToList()
             })
             .ToListAsync();
 
@@ -988,11 +991,8 @@ public partial class CustomerController : ControllerBase
 
         await _hubContext.Clients.All.SendAsync("desksUpdated");
 
-        return Ok(new
-            {
-                DivisionName = newUserAtDesk.DeskDivisionName,
-                Number = newUserAtDesk.DeskNumber
-            }
+        return Ok(
+            new { DivisionName = newUserAtDesk.DeskDivisionName, Number = newUserAtDesk.DeskNumber }
         );
     }
 

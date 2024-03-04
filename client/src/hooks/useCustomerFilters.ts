@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useContext } from 'react';
 import { StatusFilters, CustomerFilters } from 'utils/types';
-import useDesk from './useDesk';
+import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
 
 export default function useCustomerFilters() {
-  const { desk } = useDesk();
+  const { desk } = useContext(DeskContext);
   const divisionName = desk!.divisionName;
   const [date, setDate] = useState(new Date());
   const [statuses, setStatuses] = useState<StatusFilters>({

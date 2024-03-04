@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useContext } from 'react';
 import { CustomerPanelActionEventHandlers } from 'components/CustomerManagerView/CustomerPanel/types';
 import { Customer } from 'utils/types';
-import useDesk from './useDesk';
 import { usePatchCustomer, useDeleteCustomer } from 'hooks/apiHooks';
+import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
 
 export default function usePanelComponentActionBtnHandlers(
   selectedCustomer: Customer | null,
@@ -11,7 +11,7 @@ export default function usePanelComponentActionBtnHandlers(
   setWlPosPicker: (pos: { index: number; locked: boolean } | null) => void,
   setError: (error: string) => void
 ): CustomerPanelActionEventHandlers | null {
-  const { desk } = useDesk();
+  const { desk } = useContext(DeskContext);
   const { number: deskNum, divisionName } = desk!;
   const { patchCustomer } = usePatchCustomer();
   const { deleteCustomer } = useDeleteCustomer();

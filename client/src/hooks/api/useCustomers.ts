@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useContext } from 'react';
 import {
   convertLocalToUtc,
   sanitizeRawCustomer,
@@ -6,16 +6,16 @@ import {
 } from 'utils/helpers';
 import { Customer, CustomerFilters, CustomerDto, StatusFilter } from 'utils/types';
 import Connector from 'utils/signalRConnection';
-import useDesk from 'hooks/useDesk';
 import useOffice from 'hooks/useOffice';
 import { StatusFilters } from 'utils/types';
 import { MAX_NUMBER_OF_DESKS } from 'utils/constants';
 import useAuth from '../useAuth';
+import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
 
 export default function useCustomers(filters: CustomerFilters) {
   const { id: officeId } = useOffice();
   // If there's no desk context, desk num will be 0
-  const { desk } = useDesk();
+  const { desk } = useContext(DeskContext);
   const deskNum = desk?.number || 0;
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
