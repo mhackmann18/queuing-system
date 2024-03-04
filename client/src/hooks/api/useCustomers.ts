@@ -11,6 +11,7 @@ import { StatusFilters } from 'utils/types';
 import { MAX_NUMBER_OF_DESKS } from 'utils/constants';
 import useAuth from '../useAuth';
 import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
+import api from 'utils/api';
 
 export default function useCustomers(filters: CustomerFilters) {
   const { id: officeId } = useOffice();
@@ -49,41 +50,30 @@ export default function useCustomers(filters: CustomerFilters) {
 
     const todaysDateUtc = convertLocalToUtc(new Date());
 
-    const res = await fetch(
-      `http://localhost:5274/api/v1/offices/${officeId}/customers/query`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          dates: [todaysDateUtc],
-          divisions: [
-            {
-              name: filters.division,
-              statuses
-            }
-          ]
-        })
-      }
+    const response = await api.getCustomersWithFilters(
+      officeId,
+      { dates: [todaysDateUtc], divisions: [{ name: filters.division, statuses }] },
+      token
     );
 
-    if (res.status === 200) {
-      const { error, data } = await res.json();
+    if (!response.ok) {
+      // setError('Error fetching customers');
+      return;
+    }
 
-      if (!error && data) {
-        console.log(data);
-        setCustomers(
-          sortCustomers(
-            data.map((c: CustomerDto) =>
-              sanitizeRawCustomer(c, filters.division, deskNum)
-            )
+    const { error, data } = await response.json();
+
+    if (!error && data) {
+      console.log(data);
+      setCustomers(
+        sortCustomers(
+          data.map((c: CustomerDto) =>
+            sanitizeRawCustomer(c, filters.division, deskNum)
           )
-        );
-      } else {
-        // setError(res.error)
-      }
+        )
+      );
+    } else {
+      // setError(res.error)
     }
   }, [filters, officeId, statusFiltersToStatusArray, deskNum, token]);
 

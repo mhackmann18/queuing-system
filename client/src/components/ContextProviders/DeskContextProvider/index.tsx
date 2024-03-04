@@ -22,12 +22,7 @@ export default function DeskContextProvider({
   useEffect(() => {
     events({
       onDesksUpdated: async () => {
-        const res = await fetch(`http://localhost:5274/api/v1/users/self`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        });
+        const res = await api.getUserFromAuthToken(userToken);
 
         const { error, data } = await res.json();
 
@@ -91,7 +86,7 @@ export default function DeskContextProvider({
 
   useEffect(() => {
     const getDesk = async () => {
-      const res = await api.getAuthenticatedUser(userToken);
+      const res = await api.getUserFromAuthToken(userToken);
 
       const { error, data } = await res.json();
 

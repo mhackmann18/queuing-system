@@ -217,7 +217,7 @@ public partial class CustomerController : ControllerBase
         maxPossibleIndex ??= 1;
 
         // Check that the waitingListIndex property is within bounds
-        if (customerDivision.WaitingListIndex > maxPossibleIndex)
+        if (newWaitingListIndex > maxPossibleIndex)
         {
             return BadRequest(
                 new Response
@@ -618,7 +618,7 @@ public partial class CustomerController : ControllerBase
             return NotFound(new Response { Error = $"No customer found with id {customerId}" });
         }
 
-        return Ok(new Response { Data = customer[0] });
+        return Ok(customer[0]);
     }
 
     [Authorize]

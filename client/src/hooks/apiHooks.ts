@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react';
 import { API_BASE_PATH, DUMMY_OFFICE_ID } from 'utils/constants';
 import useAuth from 'hooks/useAuth';
 import useOffice from './useOffice';
+import api from 'utils/api';
+import { CustomerDto } from 'utils/types';
 
 export function useLoginUser() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -15,13 +17,7 @@ export function useLoginUser() {
     }): Promise<{ data: any | null; error?: string }> => {
       setLoading(true);
       try {
-        const response = await fetch(`${API_BASE_PATH}/users/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(userCredentials)
-        });
+        const response = await api.loginUser(userCredentials);
 
         const parsedResponse = await response.json();
 
@@ -48,13 +44,7 @@ export function useFetchOffice() {
   }> => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_PATH}/offices/${DUMMY_OFFICE_ID}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await api.getOffice(DUMMY_OFFICE_ID, token);
 
       const parsedResponse = await response.json();
 
@@ -81,21 +71,14 @@ interface LeaveDeskResponse {
 export function useLeaveDesk() {
   const [loading, setLoading] = useState<boolean>(false);
   const { token, user } = useAuth();
+  const userId = user!.id;
   const { id: officeId } = useOffice();
 
   const leaveDesk = useCallback(async (): Promise<LeaveDeskResponse> => {
     setLoading(true);
     // Get user up from desk
     try {
-      const res = await fetch(
-        `http://localhost:5274/api/v1/offices/${officeId}/users/${user!.id}/desk`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const res = await api.deleteUserFromDesk(officeId, userId, token);
 
       const { error, data } = await res.json();
 
@@ -111,7 +94,7 @@ export function useLeaveDesk() {
     } finally {
       setLoading(false);
     }
-  }, [user, officeId, token]);
+  }, [userId, officeId, token]);
 
   return { leaveDesk, loading };
 }
@@ -125,16 +108,7 @@ export function useDeleteCustomer() {
     async (customerId: string): Promise<{ data: any | null; error?: string }> => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `${API_BASE_PATH}/offices/${officeId}/customers/${customerId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
+        const response = await api.deleteCustomer(officeId, customerId, token);
 
         const parsedResponse = await response.json();
 
@@ -160,27 +134,20 @@ export function useCheckInCustomer() {
     async (checkInData: {
       fullName: string;
       divisionNames: string[];
-    }): Promise<{ data: any | null; error?: string }> => {
+    }): Promise<{ customer?: CustomerDto; error?: string }> => {
       setLoading(true);
       try {
-        console.log('checkInData', checkInData);
-        const response = await fetch(
-          `${API_BASE_PATH}/offices/${officeId}/customers`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify(checkInData)
-          }
-        );
+        const response = await api.postCustomer(officeId, checkInData, token);
 
-        const parsedResponse = await response.json();
+        if (!response.ok) {
+          throw new Error('Error checking in customer');
+        }
 
-        return parsedResponse;
+        const customer = await response.json();
+
+        return { customer };
       } catch (error) {
-        return { data: null, error: String(error) };
+        return { error: String(error) };
       } finally {
         setLoading(false);
       }
@@ -202,26 +169,25 @@ export function usePatchCustomer() {
       updateData: {
         divisions: { name: string; status: string; waitingListIndex?: number }[];
       }
-    ): Promise<{ data: any | null; error?: string }> => {
+    ): Promise<{ customer?: CustomerDto; error?: string }> => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `${API_BASE_PATH}/offices/${officeId}/customers/${customerId}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify(updateData)
-          }
+        const response = await api.patchCustomer(
+          officeId,
+          customerId,
+          updateData,
+          token
         );
 
-        const parsedResponse = await response.json();
+        if (!response.ok) {
+          throw new Error('Error updating customer');
+        }
 
-        return parsedResponse;
+        const customer = await response.json();
+
+        return { customer };
       } catch (error) {
-        return { data: null, error: String(error) };
+        return { error: String(error) };
       } finally {
         setLoading(false);
       }

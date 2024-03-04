@@ -39,11 +39,12 @@ export default function usePanelComponentActionBtnHandlers(
             },
             onCancel: () => setWlPosPicker(null),
             onConfirm: async ({ onSuccess }) => {
-              const { data, error } = await patchCustomer(selectedCustomer.id, {
+              const { customer, error } = await patchCustomer(selectedCustomer.id, {
                 divisions: [
                   {
                     name: divisionName,
                     status: 'Waiting',
+                    // Database waiting list indexes are 1-based
                     waitingListIndex: wlPosPicker!.index + 1
                   }
                 ]
@@ -51,7 +52,7 @@ export default function usePanelComponentActionBtnHandlers(
 
               if (error) {
                 setError(error);
-              } else if (data) {
+              } else if (customer) {
                 onSuccess();
                 setWlPosPicker(null);
               }
@@ -65,26 +66,29 @@ export default function usePanelComponentActionBtnHandlers(
               } else if (selectedCustomer.atOtherDivision) {
                 setError('Customer is being served at another division.');
               } else {
-                const { data, error } = await patchCustomer(selectedCustomer.id, {
-                  divisions: [
-                    {
-                      name: divisionName,
-                      status: `Desk ${deskNum}`
-                    }
-                  ]
-                });
+                const { customer, error } = await patchCustomer(
+                  selectedCustomer.id,
+                  {
+                    divisions: [
+                      {
+                        name: divisionName,
+                        status: `Desk ${deskNum}`
+                      }
+                    ]
+                  }
+                );
 
                 if (error) {
                   setError(error);
-                } else if (data) {
-                  console.log(data);
+                } else if (customer) {
+                  console.log(customer);
                 }
               }
             }
           },
           finishServing: {
             onClick: async () => {
-              const { data, error } = await patchCustomer(selectedCustomer.id, {
+              const { customer, error } = await patchCustomer(selectedCustomer.id, {
                 divisions: [
                   {
                     name: divisionName,
@@ -95,8 +99,8 @@ export default function usePanelComponentActionBtnHandlers(
 
               if (error) {
                 setError(error);
-              } else if (data) {
-                console.log(data);
+              } else if (customer) {
+                console.log(customer);
               }
             }
           },
@@ -104,7 +108,7 @@ export default function usePanelComponentActionBtnHandlers(
             onClick: () => null,
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
-              const { data, error } = await patchCustomer(selectedCustomer.id, {
+              const { customer, error } = await patchCustomer(selectedCustomer.id, {
                 divisions: [
                   {
                     name: divisionName,
@@ -115,7 +119,7 @@ export default function usePanelComponentActionBtnHandlers(
 
               if (error) {
                 setError(error);
-              } else if (data) {
+              } else if (customer) {
                 // TODO: Give success indication
                 onSuccess();
               }

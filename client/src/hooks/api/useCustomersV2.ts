@@ -1,9 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
-import { sanitizeRawCustomer, sortCustomers } from 'utils/helpers';
+import {
+  convertLocalToUtc,
+  sanitizeRawCustomer,
+  sortCustomers
+} from 'utils/helpers';
 import { Customer, CustomerDto, DBCustomerStatus } from 'utils/types';
 import Connector from 'utils/signalRConnection';
 import useOffice from 'hooks/useOffice';
 import useAuth from '../useAuth';
+import api from 'utils/api';
 
 interface Division {
   name: string;
@@ -25,29 +30,12 @@ export default function useCustomers(filters: CustomerFilters) {
 
   const fetchCustomers = useCallback(async () => {
     // TODO: Figure out whats going on here
-    const utcDate = new Date(
-      Date.UTC(
-        filters.date.getFullYear(),
-        filters.date.getMonth(),
-        filters.date.getDate(),
-        filters.date.getHours(),
-        filters.date.getMinutes()
-      )
-    );
+    const utcDate = convertLocalToUtc(filters.date);
 
-    const res = await fetch(
-      `http://localhost:5274/api/v1/offices/${officeId}/customers/query`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          dates: [utcDate],
-          divisions: filters.divisions
-        })
-      }
+    const res = await api.getCustomersWithFilters(
+      officeId,
+      { dates: [utcDate], divisions: filters.divisions },
+      token
     );
 
     const { error, data } = await res.json();

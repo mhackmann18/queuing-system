@@ -34,8 +34,8 @@ export default function CustomerCheckInViewForm({
       return;
     }
 
-    if (res.data) {
-      onSubmitSuccess(res.data);
+    if (res.customer) {
+      onSubmitSuccess(res.customer);
     }
   };
 
