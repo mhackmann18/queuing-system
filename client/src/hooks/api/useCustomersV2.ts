@@ -3,7 +3,7 @@ import { sanitizeRawCustomer, sortCustomers } from 'utils/helpers';
 import { Customer, CustomerDto, DBCustomerStatus } from 'utils/types';
 import Connector from 'utils/signalRConnection';
 import useOffice from 'hooks/useOffice';
-import useAuth from './useAuth';
+import useAuth from '../useAuth';
 
 interface Division {
   name: string;

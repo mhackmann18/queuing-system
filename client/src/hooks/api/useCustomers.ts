@@ -10,7 +10,7 @@ import useDesk from 'hooks/useDesk';
 import useOffice from 'hooks/useOffice';
 import { StatusFilters } from 'utils/types';
 import { MAX_NUMBER_OF_DESKS } from 'utils/constants';
-import useAuth from './useAuth';
+import useAuth from '../useAuth';
 
 export default function useCustomers(filters: CustomerFilters) {
   const { id: officeId } = useOffice();

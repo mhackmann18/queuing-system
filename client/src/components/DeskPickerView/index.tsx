@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react';
 import DeskSelectorButton from './DeskSelectorButton';
 import useDesk from 'hooks/useDesk';
 import { useNavigate } from 'react-router-dom';
-import { useDivisions } from 'hooks/apiHooks';
+import useDivisions from 'hooks/api/useDivisions';
+import { DivisionDto } from 'hooks/api/types';
 
 export default function DeskPickerView() {
+  const navigate = useNavigate();
   const [deskAvailabilityByDivision, setDeskAvailabilityByDivision] = useState<
-    { name: string; maxNumberOfDesks: number; occupiedDeskNums: number[] }[]
+    DivisionDto[]
   >([]);
   const { sitAtDesk, desk } = useDesk();
-  const navigate = useNavigate();
-  const { divisions } = useDivisions();
+  const {
+    divisions,
+    error: divisionsError,
+    loading: divisionsLoading
+  } = useDivisions();
 
   useEffect(() => {
     if (desk) {
@@ -22,63 +27,60 @@ export default function DeskPickerView() {
   useEffect(() => {
     if (divisions) {
       setDeskAvailabilityByDivision(
-        divisions.map(({ name, maxNumberOfDesks, occupiedDeskNums }) => ({
+        divisions.map(({ name, numberOfDesks, occupiedDeskNumbers }) => ({
           name,
-          maxNumberOfDesks,
-          occupiedDeskNums
+          numberOfDesks,
+          occupiedDeskNumbers
         }))
       );
     }
   }, [divisions]);
 
   // Convert division name and desk number to a link
-  const getDeskNameLink = (divisionName: string, deskNum: number) =>
-    `${divisionName.toLowerCase().split(' ').join('-')}-desk-${deskNum}`;
+  const getDeskNameLink = (divisionName: string, deskNumber: number) =>
+    `${divisionName.toLowerCase().split(' ').join('-')}-desk-${deskNumber}`;
 
   return (
     <div className="flex h-full items-center justify-center">
       <div className="w-full max-w-96">
         <h1 className="mb-6 text-2xl font-semibold">Select a desk</h1>
 
-        {deskAvailabilityByDivision.map(
-          ({ name: divisionName, maxNumberOfDesks, occupiedDeskNums }) => (
-            <div
-              key={divisionName}
-              className="border-french_gray_1-600 mb-4 rounded-md border p-4 shadow-md"
-            >
-              <h2 className="text-slate_gray-400 mb-4 text-lg font-medium">
-                {divisionName}
-              </h2>
+        {divisionsLoading ? (
+          <>Loading available desks...</>
+        ) : (
+          deskAvailabilityByDivision.map(
+            ({ name: divisionName, numberOfDesks, occupiedDeskNumbers }) => (
+              <div
+                key={divisionName}
+                className="border-french_gray_1-600 mb-4 rounded-md border p-4 shadow-md"
+              >
+                <h2 className="text-slate_gray-400 mb-4 text-lg font-medium">
+                  {divisionName}
+                </h2>
 
-              {Array.from({ length: maxNumberOfDesks }).map((_, index) => {
-                const deskNum = index + 1;
+                {Array.from({ length: numberOfDesks }).map((_, index) => {
+                  const deskNum = index + 1;
 
-                const handleDeskClick = async () => {
-                  const res = await sitAtDesk({ divisionName, number: deskNum });
+                  const handleDeskClick = async () => {
+                    sitAtDesk({ divisionName, number: deskNum });
+                  };
 
-                  console.log(res);
-
-                  if (res.error) {
-                    console.error(res.error);
-                    return;
-                  }
-                };
-
-                return (
-                  <div key={`Desk ${deskNum}`} className="mb-1">
-                    {!occupiedDeskNums.includes(deskNum) ? (
-                      <DeskSelectorButton
-                        onClick={handleDeskClick}
-                        deskNum={deskNum}
-                        open={true}
-                      />
-                    ) : (
-                      <DeskSelectorButton deskNum={deskNum} open={false} />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                  return (
+                    <div key={`Desk ${deskNum}`} className="mb-1">
+                      {!occupiedDeskNumbers.includes(deskNum) ? (
+                        <DeskSelectorButton
+                          onClick={handleDeskClick}
+                          deskNum={deskNum}
+                          open={true}
+                        />
+                      ) : (
+                        <DeskSelectorButton deskNum={deskNum} open={false} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )
           )
         )}
       </div>

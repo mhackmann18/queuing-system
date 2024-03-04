@@ -794,17 +794,17 @@ public partial class CustomerController : ControllerBase
 
     [Authorize]
     [HttpGet("offices/{officeId}/divisions")]
-    public async Task<ActionResult<IEnumerable<Division>>> GetDivisionsInOffice(Guid officeId)
+    public async Task<ActionResult<DivisionDto>> GetDivisionsInOffice(Guid officeId)
     {
         var divisions = await _context
             .Division.Where(d => d.OfficeId == officeId)
             .Include(d => d.Desks)
             .ThenInclude(d => d.UserAtDesk)
-            .Select(d => new
+            .Select(d => new DivisionDto
             {
-                d.Name,
-                d.MaxNumberOfDesks,
-                OccupiedDeskNums = d.Desks == null
+                Name = d.Name,
+                NumberOfDesks = d.MaxNumberOfDesks,
+                OccupiedDeskNumbers = d.Desks == null
                     ? new List<int>()
                     : d
                         .Desks.Where(d => d.UserAtDesk != null)
@@ -813,7 +813,7 @@ public partial class CustomerController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(new Response { Data = divisions });
+        return Ok(divisions);
     }
 
     // Remove user from desk
@@ -988,14 +988,10 @@ public partial class CustomerController : ControllerBase
 
         await _hubContext.Clients.All.SendAsync("desksUpdated");
 
-        return Ok(
-            new Response
+        return Ok(new
             {
-                Data = new
-                {
-                    DivisionName = newUserAtDesk.DeskDivisionName,
-                    Number = newUserAtDesk.DeskNumber
-                }
+                DivisionName = newUserAtDesk.DeskDivisionName,
+                Number = newUserAtDesk.DeskNumber
             }
         );
     }

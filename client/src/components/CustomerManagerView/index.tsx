@@ -4,7 +4,7 @@ import { Customer } from 'utils/types';
 import { useEffect, useState } from 'react';
 import CustomerList from './CustomerList';
 import useCustomerFilters from 'hooks/useCustomerFilters';
-import useCustomers from 'hooks/useCustomers';
+import useCustomers from 'hooks/api/useCustomers';
 import Error from 'components/Error';
 import { sameDay, getNextSelectedCustomer } from 'utils/helpers';
 import { WaitingListPositionPickerState } from 'utils/types';

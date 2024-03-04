@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // TODO: Enable eslint rule
-import { useCallback, useEffect, useState } from 'react';
-import { API_BASE_URL, DUMMY_OFFICE_ID } from 'utils/constants';
-import Connector from 'utils/signalRConnection';
+import { useCallback, useState } from 'react';
+import { API_BASE_PATH, DUMMY_OFFICE_ID } from 'utils/constants';
 import useAuth from 'hooks/useAuth';
 import useOffice from './useOffice';
 
@@ -16,7 +15,7 @@ export function useLoginUser() {
     }): Promise<{ data: any | null; error?: string }> => {
       setLoading(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/users/login`, {
+        const response = await fetch(`${API_BASE_PATH}/users/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -49,7 +48,7 @@ export function useFetchOffice() {
   }> => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/offices/${DUMMY_OFFICE_ID}`, {
+      const response = await fetch(`${API_BASE_PATH}/offices/${DUMMY_OFFICE_ID}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -68,12 +67,6 @@ export function useFetchOffice() {
   }, [token]);
 
   return { fetchOffice, loading };
-}
-
-interface Division {
-  name: string;
-  maxNumberOfDesks: number;
-  occupiedDeskNums: number[];
 }
 
 // interface FetchDivisionsResponse {
@@ -123,52 +116,6 @@ export function useLeaveDesk() {
   return { leaveDesk, loading };
 }
 
-export function useDivisions() {
-  const [divisions, setDivisions] = useState<Division[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const { token } = useAuth();
-  const { events } = Connector();
-
-  const fetchDivisions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/offices/${DUMMY_OFFICE_ID}/divisions`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      const { data, error } = await response.json();
-
-      if (data) {
-        setDivisions(data);
-      } else {
-        setError(error);
-      }
-    } catch (error) {
-      setError(String(error));
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    // Fetch divisions on component mount
-    fetchDivisions();
-
-    // Fetch divisions on desks updated
-    events({ onDesksUpdated: fetchDivisions });
-  }, [events, fetchDivisions]);
-
-  return { divisions, loading, error };
-}
-
 export function useDeleteCustomer() {
   const [loading, setLoading] = useState<boolean>(false);
   const { token } = useAuth();
@@ -179,7 +126,7 @@ export function useDeleteCustomer() {
       setLoading(true);
       try {
         const response = await fetch(
-          `${API_BASE_URL}/offices/${officeId}/customers/${customerId}`,
+          `${API_BASE_PATH}/offices/${officeId}/customers/${customerId}`,
           {
             method: 'DELETE',
             headers: {
@@ -218,7 +165,7 @@ export function useCheckInCustomer() {
       try {
         console.log('checkInData', checkInData);
         const response = await fetch(
-          `${API_BASE_URL}/offices/${officeId}/customers`,
+          `${API_BASE_PATH}/offices/${officeId}/customers`,
           {
             method: 'POST',
             headers: {
@@ -259,7 +206,7 @@ export function usePatchCustomer() {
       setLoading(true);
       try {
         const response = await fetch(
-          `${API_BASE_URL}/offices/${officeId}/customers/${customerId}`,
+          `${API_BASE_PATH}/offices/${officeId}/customers/${customerId}`,
           {
             method: 'PATCH',
             headers: {

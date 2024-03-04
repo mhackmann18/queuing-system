@@ -1,4 +1,3 @@
-
 namespace CustomerApi.Models;
 
 public class CustomerDto

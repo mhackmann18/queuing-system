@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import { useEffect, useMemo, useState } from 'react';
 import CustomerList from 'components/CustomerManagerView/CustomerList';
-import useCustomers from 'hooks/useCustomersV2';
+import useCustomers from 'hooks/api/useCustomersV2';
 import { Customer, DBCustomerStatus } from 'utils/types';
 import Error from 'components/Error';
 import CustomerPanel from 'components/CustomerManagerView/CustomerPanel';

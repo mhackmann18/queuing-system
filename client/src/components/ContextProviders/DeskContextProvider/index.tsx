@@ -8,31 +8,16 @@ import {
 import useAuth from 'hooks/useAuth';
 import useOffice from 'hooks/useOffice';
 import Connector from 'utils/signalRConnection';
+import api from 'utils/api';
 
 interface Desk {
   divisionName: string;
   number: number;
 }
 
-// interface LeaveDeskResponse {
-//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   desk: any | null;
-//   error?: string;
-// }
-
-interface SitAtDeskResponse {
-  data?: {
-    // userId: string;
-    // officeId: string;
-    divisionName: string;
-    number: number;
-  };
-  error?: string;
-}
-
 interface DeskContextT {
   desk: Desk | null;
-  sitAtDesk: (desk: Desk) => Promise<SitAtDeskResponse>;
+  sitAtDesk: (desk: Desk) => Promise<void>;
 }
 
 export const DeskContext = createContext<DeskContextT>({
@@ -51,6 +36,7 @@ export default function DeskContextProvider({
   const { user, token: userToken } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [desk, setDesk] = useState<Desk | null>(null);
+  const [error, setError] = useState<string>('');
   const { events } = Connector();
   const userId = user!.id;
 
@@ -82,43 +68,33 @@ export default function DeskContextProvider({
   }, [events, userToken]);
 
   const sitAtDesk = useCallback(
-    async ({ divisionName, number }: Desk): Promise<SitAtDeskResponse> => {
-      // Sit user at desk
-      const res = await fetch(
-        `http://localhost:5274/api/v1/offices/${officeId}/users/${userId}/desk`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`
-          },
-          body: JSON.stringify({
-            divisionName,
-            number
-          })
+    async (desk: Desk): Promise<void> => {
+      setLoading(true);
+      try {
+        // Sit user at desk
+        const response = await api.postUserToDesk(officeId, userId, desk, userToken);
+
+        if (!response.ok) {
+          throw new Error('Could not sit at desk');
         }
-      );
 
-      const parsedRes = await res.json();
+        const deskResponse = await response.json();
 
-      if (parsedRes.data) {
-        const { divisionName, number } = parsedRes.data;
+        const { divisionName, number } = deskResponse;
+
         setDesk({ divisionName, number });
+      } catch (error) {
+        setError(String(error));
+      } finally {
+        setLoading(false);
       }
-
-      return parsedRes;
     },
     [officeId, userId, userToken]
   );
 
   useEffect(() => {
     const getDesk = async () => {
-      const res = await fetch(`http://localhost:5274/api/v1/users/self`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-      });
+      const res = await api.getAuthenticatedUser(userToken);
 
       const { error, data } = await res.json();
 
@@ -141,7 +117,11 @@ export default function DeskContextProvider({
   }, [userId, officeId, userToken]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <p>Loading desk...</p>;
+  }
+
+  if (error) {
+    return <p>There was a problem loading the available desks</p>;
   }
 
   return (

@@ -1,4 +1,4 @@
-import useCustomers from 'hooks/useCustomers';
+import useCustomers from 'hooks/api/useCustomers';
 import { useMemo, useEffect, useState } from 'react';
 import { WaitingListProps } from './types';
 import { Customer } from 'utils/types';
