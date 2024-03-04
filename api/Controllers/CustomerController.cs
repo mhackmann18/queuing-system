@@ -1100,7 +1100,7 @@ public partial class CustomerController : ControllerBase
 
     [Authorize]
     [HttpGet("offices/{officeId}")]
-    public async Task<ActionResult<Response>> GetOffice(Guid officeId)
+    public async Task<ActionResult<OfficeDto>> GetOffice(Guid officeId)
     {
         Office? office = await _context
             .Office.Include(o => o.Divisions)
@@ -1116,15 +1116,12 @@ public partial class CustomerController : ControllerBase
             return BadRequest(new Response { Error = "No divisions found for this office" });
         }
 
-        return new Response
-        {
-            Data = new
+        return new OfficeDto
             {
-                office.Id,
-                office.Name,
+                Id = office.Id,
+                Name = office.Name,
                 DivisionNames = office.Divisions.Select(d => d.Name).ToList()
-            }
-        };
+            };
     }
 
     [HttpPost("users/login")]

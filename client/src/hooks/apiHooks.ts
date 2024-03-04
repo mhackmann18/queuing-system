@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// TODO: Enable eslint rule
 import { useCallback, useState } from 'react';
-import { API_BASE_PATH, DUMMY_OFFICE_ID } from 'utils/constants';
 import useAuth from 'hooks/useAuth';
 import useOffice from './useOffice';
 import api from 'utils/api';
@@ -14,7 +11,7 @@ export function useLoginUser() {
     async (userCredentials: {
       username: string;
       password: string;
-    }): Promise<{ data: any | null; error?: string }> => {
+    }): Promise<{ data: object | null; error?: string }> => {
       setLoading(true);
       try {
         const response = await api.loginUser(userCredentials);
@@ -34,37 +31,8 @@ export function useLoginUser() {
   return { loginUser, loading };
 }
 
-export function useFetchOffice() {
-  const [loading, setLoading] = useState<boolean>(false);
-  const { token } = useAuth();
-
-  const fetchOffice = useCallback(async (): Promise<{
-    data: any | null;
-    error?: string;
-  }> => {
-    setLoading(true);
-    try {
-      const response = await api.getOffice(DUMMY_OFFICE_ID, token);
-
-      const parsedResponse = await response.json();
-
-      return parsedResponse;
-    } catch (error) {
-      return { data: null, error: String(error) };
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
-  return { fetchOffice, loading };
-}
-
-// interface FetchDivisionsResponse {
-//   divisions: Division[] | null;
-//   error?: string;
-// }
 interface LeaveDeskResponse {
-  desk: any | null;
+  desk: object | null;
   error?: string;
 }
 
@@ -105,7 +73,7 @@ export function useDeleteCustomer() {
   const { id: officeId } = useOffice();
 
   const deleteCustomer = useCallback(
-    async (customerId: string): Promise<{ data: any | null; error?: string }> => {
+    async (customerId: string): Promise<{ data: object | null; error?: string }> => {
       setLoading(true);
       try {
         const response = await api.deleteCustomer(officeId, customerId, token);
