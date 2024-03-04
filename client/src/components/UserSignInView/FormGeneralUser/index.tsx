@@ -6,16 +6,16 @@ import SubmitBtn from 'components/Form/SubmitBtn';
 import TextInput from 'components/Form/TextInput';
 import useAuth from 'hooks/useAuth';
 
-interface FormGeneralUserProps {
-  onSubmitSuccess: (data: unknown) => void;
-}
+// interface FormGeneralUserProps {
+//   onSubmitSuccess?: (data: unknown) => void;
+// }
 
 type FormData = {
   username: string;
   password: string;
 };
 
-export default function FormGeneralUser({ onSubmitSuccess }: FormGeneralUserProps) {
+export default function FormGeneralUser() {
   const [submitError, setSubmitError] = useState<string>('');
   const { login } = useAuth();
   const {
@@ -25,8 +25,8 @@ export default function FormGeneralUser({ onSubmitSuccess }: FormGeneralUserProp
   } = useForm<FormData>();
 
   const onSubmit = async ({ username, password }: FormData) => {
+    // Login function will redirect to the appropriate page on success
     login({ username, password });
-    console.log(onSubmitSuccess);
   };
 
   return (
