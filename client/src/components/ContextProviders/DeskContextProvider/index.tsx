@@ -18,11 +18,15 @@ interface Desk {
 interface DeskContextT {
   desk: Desk | null;
   sitAtDesk: (desk: Desk) => Promise<void>;
+  leaveDesk: () => Promise<void>;
 }
 
 export const DeskContext = createContext<DeskContextT>({
   desk: null,
   sitAtDesk: async () => {
+    throw new Error('DeskContext is not provided.');
+  },
+  leaveDesk: async () => {
     throw new Error('DeskContext is not provided.');
   }
 });
@@ -92,6 +96,24 @@ export default function DeskContextProvider({
     [officeId, userId, userToken]
   );
 
+  const leaveDesk = useCallback(async (): Promise<void> => {
+    setLoading(true);
+    // Get user up from desk
+    try {
+      const response = await api.deleteUserFromDesk(officeId, userId, userToken);
+
+      if (!response.ok) {
+        throw new Error('Could not leave desk');
+      }
+
+      setDesk(null);
+    } catch (error) {
+      setError(String(error));
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, officeId, userToken]);
+
   useEffect(() => {
     const getDesk = async () => {
       const res = await api.getAuthenticatedUser(userToken);
@@ -117,15 +139,19 @@ export default function DeskContextProvider({
   }, [userId, officeId, userToken]);
 
   if (loading) {
-    return <p>Loading desk...</p>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        Loading desk context...
+      </div>
+    );
   }
 
   if (error) {
-    return <p>There was a problem loading the available desks</p>;
+    return <p>There was a problem loading the desk context</p>;
   }
 
   return (
-    <DeskContext.Provider value={{ desk, sitAtDesk }}>
+    <DeskContext.Provider value={{ desk, sitAtDesk, leaveDesk }}>
       {children}
     </DeskContext.Provider>
   );

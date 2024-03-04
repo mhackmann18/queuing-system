@@ -14,12 +14,11 @@ import useCustomerPanelActionEventHandlers from 'hooks/useCustomerPanelActionEve
 import StatusFiltersButtons from './Header/StatusFiltersButtons';
 import { useBlocker } from 'react-router-dom';
 import CustomerServiceWarningModal from './CustomerServiceWarningModal';
-import { useLeaveDesk } from 'hooks/apiHooks';
+import useDesk from 'hooks/useDesk';
 // import signalRConnection from 'utils/signalRConnection';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
-  const { leaveDesk } = useLeaveDesk();
   const [wlPosPicker, setWlPosPicker] =
     useState<WaitingListPositionPickerState>(null);
   const [error, setError] = useState<string>('');
@@ -30,6 +29,7 @@ export default function CustomerManagerView() {
     selectedCustomer,
     customers
   );
+  const { leaveDesk } = useDesk();
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useCustomerPanelActionEventHandlers(
       selectedCustomer,

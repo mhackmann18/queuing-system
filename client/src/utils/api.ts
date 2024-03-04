@@ -45,7 +45,9 @@ const functions = {
   ) => api.post(`offices/${officeId}/users/${userId}/desk`, desk, authToken),
   getAuthenticatedUser: (authToken: string) => api.get('users/self', authToken),
   getOfficeDivisions: (officeId: string, authToken: string) =>
-    api.get(`offices/${officeId}/divisions`, authToken)
+    api.get(`offices/${officeId}/divisions`, authToken),
+  deleteUserFromDesk: (officeId: string, userId: string, authToken: string) =>
+    api.delete(`offices/${officeId}/users/${userId}/desk`, authToken)
 };
 
 export default functions;

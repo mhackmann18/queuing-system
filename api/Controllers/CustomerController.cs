@@ -907,7 +907,7 @@ public partial class CustomerController : ControllerBase
 
         await _hubContext.Clients.All.SendAsync("desksUpdated");
 
-        return Ok(new Response { Data = atDesk });
+        return Ok(atDesk);
     }
 
     [Authorize]
