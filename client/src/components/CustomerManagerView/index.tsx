@@ -16,6 +16,8 @@ import { useBlocker } from 'react-router-dom';
 import CustomerServiceWarningModal from './CustomerServiceWarningModal';
 import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
 import useExtendDeskSession from 'hooks/useExtendDeskSession';
+import DeskSessionExpirationWarningModal from './DeskSessionExpirationWarningModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
@@ -38,9 +40,8 @@ export default function CustomerManagerView() {
       setWlPosPicker,
       setError
     );
-  useExtendDeskSession({
-    onNearExpiration: () => setError('Session is about to expire')
-  });
+  const { sessionAboutToExpire, extendSession } = useExtendDeskSession();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleUnload = (e: BeforeUnloadEvent) => {
@@ -95,6 +96,12 @@ export default function CustomerManagerView() {
 
   return (
     <div className="h-full">
+      {sessionAboutToExpire && (
+        <DeskSessionExpirationWarningModal
+          onCancel={() => navigate('/dashboard')}
+          onConfirm={extendSession}
+        />
+      )}
       {blocker.state === 'blocked' && (
         <CustomerServiceWarningModal close={() => blocker.reset()} />
       )}

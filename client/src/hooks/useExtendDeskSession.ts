@@ -1,4 +1,4 @@
-import { useEffect, useRef, useContext, useState } from 'react';
+import { useEffect, useRef, useContext, useState, useCallback } from 'react';
 import api from 'utils/api';
 import useAuth from './useAuth';
 import useOffice from './useOffice';
@@ -7,21 +7,34 @@ import { parseServerDateAsUtc } from 'utils/helpers';
 
 const TIME_BEFORE_NEXT_EXTENSION_ALLOWED = 3000; // 3 seconds
 
-export default function useExtendDeskSession({
-  onNearExpiration = () => {}
-}: {
-  onNearExpiration?: () => void;
-}) {
+export default function useExtendDeskSession() {
   const { id: officeId } = useOffice();
   const { user, token: authToken } = useAuth();
   const userId = user!.id;
   const { originalSessionEndTime } = useContext(DeskContext);
-
+  const [sessionAboutToExpire, setSessionAboutToExpire] = useState(false);
   const [sessionEndTime, setSessionEndTime] = useState<Date | null>(
     originalSessionEndTime
   );
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const extendSession = useCallback(async () => {
+    try {
+      const response = await api.extendUserDeskSession(officeId, userId, authToken);
+
+      if (!response.ok) {
+        console.error('Error extending desk session', response);
+      }
+
+      const { sessionEndTime } = await response.json();
+
+      setSessionEndTime(parseServerDateAsUtc(sessionEndTime));
+      setSessionAboutToExpire(false);
+    } catch (error) {
+      console.error('Error extending desk session', error);
+    }
+  }, [authToken, officeId, userId]);
 
   useEffect(() => {
     const extendSessionOnActivity = () => {
@@ -30,23 +43,7 @@ export default function useExtendDeskSession({
       }
 
       debounceTimeout.current = setTimeout(async () => {
-        try {
-          const response = await api.extendUserDeskSession(
-            officeId,
-            userId,
-            authToken
-          );
-
-          if (!response.ok) {
-            console.error('Error extending desk session', response);
-          }
-
-          const { sessionEndTime } = await response.json();
-
-          setSessionEndTime(parseServerDateAsUtc(sessionEndTime));
-        } catch (error) {
-          console.error('Error extending desk session', error);
-        }
+        extendSession();
       }, TIME_BEFORE_NEXT_EXTENSION_ALLOWED);
     };
 
@@ -62,7 +59,7 @@ export default function useExtendDeskSession({
         clearTimeout(debounceTimeout.current);
       }
     };
-  }, [authToken, officeId, userId]);
+  }, [extendSession]);
 
   useEffect(() => {
     const checkSessionEndTime = setInterval(() => {
@@ -72,7 +69,9 @@ export default function useExtendDeskSession({
         const timeLeft = sessionEndTime.getTime() - new Date().getTime();
         if (timeLeft <= 60000) {
           // 60000 milliseconds = 1 minute
-          onNearExpiration();
+          setSessionAboutToExpire(true);
+        } else {
+          setSessionAboutToExpire(false);
         }
       }
     }, 1000); // Check every second
@@ -80,5 +79,7 @@ export default function useExtendDeskSession({
     return () => {
       clearInterval(checkSessionEndTime);
     };
-  }, [sessionEndTime, onNearExpiration]);
+  }, [sessionEndTime]);
+
+  return { sessionAboutToExpire, extendSession };
 }
