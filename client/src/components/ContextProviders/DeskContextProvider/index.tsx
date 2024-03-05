@@ -5,6 +5,7 @@ import Connector from 'utils/signalRConnection';
 import api from 'utils/api';
 import { DeskContext } from './context';
 import { Desk } from './context';
+import { parseServerDateAsUtc } from 'utils/helpers';
 
 export default function DeskContextProvider({
   children
@@ -63,7 +64,7 @@ export default function DeskContextProvider({
 
         const { divisionName, number, sessionEndTime } = deskResponse;
 
-        setOriginalSessionEndTime(new Date(sessionEndTime));
+        setOriginalSessionEndTime(parseServerDateAsUtc(sessionEndTime));
 
         console.log(sessionEndTime);
         console.log(new Date(sessionEndTime));

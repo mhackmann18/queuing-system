@@ -44,12 +44,12 @@ export interface Customer {
 export interface CustomerDto {
   id: string;
   fullName: string;
-  checkInTime: Date;
+  checkInTime: string;
   divisions: {
     name: string;
     status: CustomerStatus;
     waitingListIndex?: number;
-    timesCalled: Date[];
+    timesCalled: string[];
   }[];
 }
 

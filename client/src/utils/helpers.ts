@@ -56,21 +56,12 @@ const convertLocalToUtc = (localDate: Date): Date => {
   return utcDate;
 };
 
-/**
- * Converts utc date object to local date object. This function should be used on any date that is
- * received from the server.
- * @param utcDate
- * @returns local date object
- */
-const convertUtcToLocal = (utcDate: Date): Date => {
-  const utcTimeInMilliseconds = utcDate.getTime();
-
-  const localOffsetInMilliseconds = utcDate.getTimezoneOffset() * 60 * 1000;
-
-  const localDate = new Date(utcTimeInMilliseconds - localOffsetInMilliseconds);
-
-  return localDate;
-};
+function parseServerDateAsUtc(dateString: string) {
+  if (!dateString.endsWith('Z')) {
+    dateString += 'Z';
+  }
+  return new Date(dateString);
+}
 
 const sanitizeRawCustomer = (
   customer: CustomerDto,
@@ -93,31 +84,18 @@ const sanitizeRawCustomer = (
       }
       timesCalled.push(
         ...d.timesCalled
-          .map((d) => new Date(d))
+          .map((d) => parseServerDateAsUtc(d))
           .sort((a, b) => b.getTime() - a.getTime())
       );
       waitingListIndex = d.waitingListIndex;
     }
   }
 
-  console.log(checkInTime);
-  console.log(new Date(checkInTime));
-
-  // console.log(
-  //   new Date(checkInTime),
-  //   timesCalled,
-  //   waitingListIndex,
-  //   reasonsForVisit,
-  //   status,
-  //   name,
-  //   id
-  // );
-
   return {
     id,
     status,
     name,
-    checkInTime: new Date(checkInTime),
+    checkInTime: parseServerDateAsUtc(checkInTime),
     timesCalled,
     reasonsForVisit,
     waitingListIndex
@@ -330,6 +308,6 @@ export {
   formatString,
   sanitizeRawCustomer,
   sortCustomers,
-  convertUtcToLocal,
-  convertLocalToUtc
+  convertLocalToUtc,
+  parseServerDateAsUtc
 };

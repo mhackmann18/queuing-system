@@ -3,6 +3,7 @@ import api from 'utils/api';
 import useAuth from './useAuth';
 import useOffice from './useOffice';
 import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
+import { parseServerDateAsUtc } from 'utils/helpers';
 
 const TIME_BEFORE_NEXT_EXTENSION_ALLOWED = 3000; // 3 seconds
 
@@ -42,7 +43,7 @@ export default function useExtendDeskSession({
 
           const { sessionEndTime } = await response.json();
 
-          setSessionEndTime(new Date(sessionEndTime));
+          setSessionEndTime(parseServerDateAsUtc(sessionEndTime));
         } catch (error) {
           console.error('Error extending desk session', error);
         }
