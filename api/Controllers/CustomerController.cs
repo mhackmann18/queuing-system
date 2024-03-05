@@ -978,7 +978,7 @@ public partial class CustomerController : ControllerBase
             DeskDivisionOfficeId = officeId,
             DeskDivisionName = postedDesk.DivisionName,
             DeskNumber = postedDesk.Number,
-            SessionEndTime = DateTime.UtcNow.AddMinutes(15)
+            SessionEndTime = DateTime.UtcNow.AddSeconds(70)
         };
         await _context.UserAtDesk.AddAsync(newUserAtDesk);
 
@@ -987,7 +987,7 @@ public partial class CustomerController : ControllerBase
         await _hubContext.Clients.All.SendAsync("desksUpdated");
 
         return Ok(
-            new { DivisionName = newUserAtDesk.DeskDivisionName, Number = newUserAtDesk.DeskNumber }
+            new { DivisionName = newUserAtDesk.DeskDivisionName, Number = newUserAtDesk.DeskNumber, newUserAtDesk.SessionEndTime }
         );
     }
 
@@ -1030,10 +1030,10 @@ public partial class CustomerController : ControllerBase
         }
 
         // Extend the user's session
-        atDesk.SessionEndTime = DateTime.UtcNow.AddMinutes(15);
+        atDesk.SessionEndTime = DateTime.UtcNow.AddSeconds(70);
         await _context.SaveChangesAsync();
 
-        return Ok(atDesk);
+        return Ok(new{ atDesk.DeskDivisionName, atDesk.DeskNumber, atDesk.SessionEndTime });
     }
 
     [HttpPost("users")]
@@ -1281,7 +1281,8 @@ public partial class CustomerController : ControllerBase
                         : new
                         {
                             DivisionName = user.Desk.DeskDivisionName,
-                            Number = user.Desk.DeskNumber
+                            Number = user.Desk.DeskNumber,
+                            user.Desk.SessionEndTime
                         }
                 }
             }

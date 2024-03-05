@@ -9,6 +9,7 @@ interface DeskContextT {
   desk: Desk | null;
   sitAtDesk: (desk: Desk) => Promise<void>;
   leaveDesk: () => Promise<void>;
+  originalSessionEndTime: Date | null;
 }
 
 export const DeskContext = createContext<DeskContextT>({
@@ -18,5 +19,6 @@ export const DeskContext = createContext<DeskContextT>({
   },
   leaveDesk: async () => {
     throw new Error('DeskContext is not provided.');
-  }
+  },
+  originalSessionEndTime: null
 });

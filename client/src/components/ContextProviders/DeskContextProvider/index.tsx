@@ -16,6 +16,9 @@ export default function DeskContextProvider({
   const [loading, setLoading] = useState<boolean>(true);
   const [desk, setDesk] = useState<Desk | null>(null);
   const [error, setError] = useState<string>('');
+  const [originalSessionEndTime, setOriginalSessionEndTime] = useState<Date | null>(
+    null
+  );
   const { events } = Connector();
   const userId = user!.id;
 
@@ -34,7 +37,11 @@ export default function DeskContextProvider({
           if (!desk) {
             setDesk(null);
           } else {
-            setDesk(desk);
+            const { divisionName, number } = desk;
+            setDesk({
+              divisionName,
+              number
+            });
           }
         }
       }
@@ -54,9 +61,17 @@ export default function DeskContextProvider({
 
         const deskResponse = await response.json();
 
-        const { divisionName, number } = deskResponse;
+        const { divisionName, number, sessionEndTime } = deskResponse;
 
-        setDesk({ divisionName, number });
+        setOriginalSessionEndTime(new Date(sessionEndTime));
+
+        console.log(sessionEndTime);
+        console.log(new Date(sessionEndTime));
+
+        setDesk({
+          divisionName,
+          number
+        });
       } catch (error) {
         setError(String(error));
       } finally {
@@ -93,7 +108,11 @@ export default function DeskContextProvider({
       if (data) {
         const { desk } = data;
         if (desk) {
-          setDesk(desk);
+          const { divisionName, number } = desk;
+          setDesk({
+            divisionName,
+            number
+          });
         } else {
           setDesk(null);
         }
@@ -117,11 +136,14 @@ export default function DeskContextProvider({
   }
 
   if (error) {
+    console.error(error);
     return <p>There was a problem loading the desk context</p>;
   }
 
   return (
-    <DeskContext.Provider value={{ desk, sitAtDesk, leaveDesk }}>
+    <DeskContext.Provider
+      value={{ desk, sitAtDesk, leaveDesk, originalSessionEndTime }}
+    >
       {children}
     </DeskContext.Provider>
   );

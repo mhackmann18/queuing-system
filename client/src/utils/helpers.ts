@@ -93,18 +93,31 @@ const sanitizeRawCustomer = (
       }
       timesCalled.push(
         ...d.timesCalled
-          .map((d) => convertUtcToLocal(new Date(d)))
+          .map((d) => new Date(d))
           .sort((a, b) => b.getTime() - a.getTime())
       );
       waitingListIndex = d.waitingListIndex;
     }
   }
 
+  console.log(checkInTime);
+  console.log(new Date(checkInTime));
+
+  // console.log(
+  //   new Date(checkInTime),
+  //   timesCalled,
+  //   waitingListIndex,
+  //   reasonsForVisit,
+  //   status,
+  //   name,
+  //   id
+  // );
+
   return {
     id,
     status,
     name,
-    checkInTime: convertUtcToLocal(new Date(checkInTime)),
+    checkInTime: new Date(checkInTime),
     timesCalled,
     reasonsForVisit,
     waitingListIndex

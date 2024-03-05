@@ -15,6 +15,7 @@ import StatusFiltersButtons from './Header/StatusFiltersButtons';
 import { useBlocker } from 'react-router-dom';
 import CustomerServiceWarningModal from './CustomerServiceWarningModal';
 import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
+import useExtendDeskSession from 'hooks/useExtendDeskSession';
 
 export default function CustomerManagerView() {
   // Application state and custom hooks
@@ -37,6 +38,9 @@ export default function CustomerManagerView() {
       setWlPosPicker,
       setError
     );
+  useExtendDeskSession({
+    onNearExpiration: () => setError('Session is about to expire')
+  });
 
   useEffect(() => {
     const handleUnload = (e: BeforeUnloadEvent) => {

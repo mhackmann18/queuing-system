@@ -63,6 +63,8 @@ export default function useCustomers(filters: CustomerFilters) {
 
     const { error, data } = await response.json();
 
+    console.log('data', data);
+
     if (!error && data) {
       console.log(data);
       setCustomers(
