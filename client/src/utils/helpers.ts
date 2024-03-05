@@ -91,7 +91,11 @@ const sanitizeRawCustomer = (
       if (status === `Desk ${deskNum}`) {
         status = 'Serving';
       }
-      timesCalled.push(...d.timesCalled.map((d) => convertUtcToLocal(new Date(d))));
+      timesCalled.push(
+        ...d.timesCalled
+          .map((d) => convertUtcToLocal(new Date(d)))
+          .sort((a, b) => b.getTime() - a.getTime())
+      );
       waitingListIndex = d.waitingListIndex;
     }
   }
