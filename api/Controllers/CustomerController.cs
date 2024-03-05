@@ -991,6 +991,51 @@ public partial class CustomerController : ControllerBase
         );
     }
 
+    // Extend user's session at desk
+    [Authorize(Policy = "AtDesk")]
+    [HttpPost("offices/{officeId}/users/{userId}/desk/extend-session")]
+    public async Task<ActionResult<Response>> ExtendUserSessionAtDesk(
+        Guid officeId,
+        Guid userId
+    )
+    {
+        // Check that officeId is valid
+        Office? office = await _context.Office.FindAsync(officeId);
+        if (office == null)
+        {
+            return BadRequest(new Response { Error = "Invalid officeId provided" });
+        }
+
+        // Check that userId is valid
+        User? user = await _context.User.FindAsync(userId);
+        if (user == null)
+        {
+            return BadRequest(new Response { Error = "Invalid userId provided" });
+        }
+
+        // Check that the user is a member of the office
+        UserOffice? userOffice = await _context.UserOffice.FindAsync(userId, officeId);
+        if (userOffice == null)
+        {
+            return BadRequest(new Response { Error = "User is not a member of the office" });
+        }
+
+        // Check that the user is at a desk
+        UserAtDesk? atDesk = await _context
+            .UserAtDesk.Where(at => at.UserId == userId)
+            .FirstOrDefaultAsync();
+        if (atDesk == null)
+        {
+            return BadRequest(new Response { Error = "User is not at a desk" });
+        }
+
+        // Extend the user's session
+        atDesk.SessionEndTime = DateTime.UtcNow.AddMinutes(15);
+        await _context.SaveChangesAsync();
+
+        return Ok(atDesk);
+    }
+
     [HttpPost("users")]
     public async Task<ActionResult<User>> AddUser([FromBody] PostUserBody user)
     {

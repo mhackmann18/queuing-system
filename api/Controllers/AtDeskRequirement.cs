@@ -24,8 +24,6 @@ public class AtDeskHandler : AuthorizationHandler<AtDeskRequirement>
             var userAtDesk = await _context.UserAtDesk.FirstOrDefaultAsync(u => u.UserId == userId);
             if (userAtDesk != null)
             {
-                // Extend the session by 15 minutes
-                userAtDesk.SessionEndTime = DateTime.UtcNow.AddMinutes(15);
                 await _context.SaveChangesAsync();
                 context.Succeed(requirement);
             }

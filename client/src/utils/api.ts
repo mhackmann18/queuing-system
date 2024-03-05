@@ -9,7 +9,7 @@ const api = {
         ...(authToken && { Authorization: `Bearer ${authToken}` })
       }
     }),
-  post: (endpoint: string, body: object, authToken?: string) =>
+  post: (endpoint: string, body?: object, authToken?: string) =>
     fetch(`${API_BASE_PATH}/${endpoint}`, {
       method: 'POST',
       headers: {
@@ -62,7 +62,13 @@ const functions = {
   getOffice: (officeId: string, authToken: string) =>
     api.get(`offices/${officeId}`, authToken),
   deleteCustomer: (officeId: string, customerId: string, authToken: string) =>
-    api.delete(`offices/${officeId}/customers/${customerId}`, authToken)
+    api.delete(`offices/${officeId}/customers/${customerId}`, authToken),
+  extendUserDeskSession: (officeId: string, userId: string, authToken: string) =>
+    api.post(
+      `offices/${officeId}/users/${userId}/desk/extend-session`,
+      undefined,
+      authToken
+    )
 };
 
 export default functions;
