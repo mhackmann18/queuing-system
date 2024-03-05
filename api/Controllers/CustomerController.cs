@@ -731,11 +731,6 @@ public partial class CustomerController : ControllerBase
         {
             foreach (CustomerDivision cd in cds)
             {
-                if (DeskRegex().IsMatch(cd.Status))
-                {
-                    // TODO: Update UserAtDesk table
-                }
-
                 // Update waitingListIndexes for division
                 if (cd.Status == "Waiting" && cd.WaitingListIndex != null)
                 {

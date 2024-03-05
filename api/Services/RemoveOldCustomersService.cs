@@ -61,7 +61,7 @@ public class ClearOldCustomersService : BackgroundService
                                         .ConvertTimeFromUtc(c.CheckInTime, officeTimezone)
                                         .Date != officeLocalTime.Date
                                 )
-                            );
+                            ).ToList();
 
                         context.Customer.RemoveRange(customersToRemove);
 
