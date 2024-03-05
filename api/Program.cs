@@ -58,11 +58,11 @@ builder.Services.AddAuthorization(options =>
         policy.AddRequirements(new AtDeskRequirement()));
 });
 
-// Add authorization handler to block users who are not at desk
+// Add authorization handler to block users who are not at desk from accessing certain routes
 builder.Services.AddScoped<IAuthorizationHandler, AtDeskHandler>();
 
 // Clear old desk sessions
-builder.Services.AddHostedService<SessionCleanupService>();
+builder.Services.AddHostedService<DeskSessionCleanupService>();
 
 // Clear any leftover unserved customers from the previous day
 builder.Services.AddHostedService<ClearOldCustomersService>();
