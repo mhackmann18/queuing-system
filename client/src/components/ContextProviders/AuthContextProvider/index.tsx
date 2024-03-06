@@ -13,26 +13,26 @@ export default function AuthContextProvider({ children }: AuthContextProviderPro
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check for token in local storage every 10 seconds
-    const intervalId = setInterval(() => {
-      const tokenExists = localStorage.getItem('token');
-
-      if (!tokenExists) {
-        setToken('');
-      }
-    }, 10000);
-
-    // Cleanup function to clear the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, []);
-
   const logOut = useCallback(() => {
     setUser(null);
     setToken('');
     localStorage.removeItem('token');
     navigate('/sign-in');
   }, [navigate]);
+
+  useEffect(() => {
+    // Check for token in local storage every 10 seconds
+    const intervalId = setInterval(() => {
+      const tokenExists = localStorage.getItem('token');
+
+      if (!tokenExists) {
+        logOut();
+      }
+    }, 10000);
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, [logOut]);
 
   useEffect(() => {
     const getUserFromToken = async () => {

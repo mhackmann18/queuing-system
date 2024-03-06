@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import FormGeneralUser from './FormGeneralUser';
 import UserTypeButton from './UserTypeButton';
+import { useLocation } from 'react-router-dom';
 
 export default function UserSignInView() {
   const [userType, setUserType] = useState<'root' | 'general'>('general');
+  const { state } = useLocation();
+
+  if (state?.error) {
+    alert(state.error);
+  }
 
   return (
     <div className="flex h-screen items-center justify-center">
