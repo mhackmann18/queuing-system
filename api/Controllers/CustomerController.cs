@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using CustomerApi.Services;
+using CustomerApi.Utilities;
 
 namespace CustomerApi.Controllers;
 
@@ -226,6 +228,7 @@ public partial class CustomerController : ControllerBase
             cd.DivisionOfficeId == officeId
             && cd.DivisionName == divisionName
             && cd.WaitingListIndex != null
+            // TODO: && cd.Customer.CheckInTime.Date == customerDivision.Customer.CheckInTime.Date
         );
 
         // The if statements update the waiting list indexes for other customers in waiting list
@@ -510,33 +513,15 @@ public partial class CustomerController : ControllerBase
         // Filter by dates
         if (filters.Dates != null)
         {
-            var officeTimezone = TimeZoneInfo.FindSystemTimeZoneById(office.Timezone);
-            _logger.LogInformation(DateTime.UtcNow.ToString());
-            var officeLocalTime = TimeZoneInfo.ConvertTimeFromUtc(
-                DateTime.UtcNow,
-                officeTimezone
-            );
-            _logger.LogInformation(officeLocalTime.ToString()    );
             if (filteredCustomers.Count == 0)
             {
                 foreach (var dateFilter in filters.Dates)
                 {
-                    _logger.LogInformation(dateFilter.Date.ToString());
-                    var dateFilterLocalTime = TimeZoneInfo.ConvertTimeFromUtc(
-                        dateFilter,
-                        officeTimezone
-                    );
-                    _logger.LogInformation(dateFilterLocalTime.ToString());
-
                     var customersWithCurrentFilter = await _context
                         .Customer.Where(c =>
-                            TimeZoneInfo.ConvertTimeFromUtc(
-                        c.CheckInTime,
-                        officeTimezone
-                    ).Date == dateFilterLocalTime.Date
+                        DateUtils.SameDay(dateFilter, c.CheckInTime, office.Timezone)
                             && c.Divisions.Any(d => d.DivisionOfficeId == officeId)
                         )
-                        // .OrderBy(c => c.CheckInTime)
                         .Include(c => c.Divisions)
                         .ThenInclude(d => d.TimesCalled)
                         .ToListAsync();
@@ -548,20 +533,10 @@ public partial class CustomerController : ControllerBase
             {
                 foreach (DateTime dateFilter in filters.Dates)
                 {
-                    _logger.LogInformation(dateFilter.ToString());
-
-                    var dateFilterLocalTime = TimeZoneInfo.ConvertTimeFromUtc(
-                        dateFilter,
-                        officeTimezone
-                    );
-                    _logger.LogInformation(dateFilterLocalTime.ToString());
 
                     filteredCustomers = filteredCustomers
                         .Where(c =>
-                            TimeZoneInfo.ConvertTimeFromUtc(
-                        c.CheckInTime,
-                        officeTimezone
-                    ).Date == dateFilterLocalTime.Date)
+                            DateUtils.SameDay(dateFilter, c.CheckInTime, office.Timezone))
                         .ToList();
                 }
             }
