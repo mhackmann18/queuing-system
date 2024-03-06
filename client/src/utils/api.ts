@@ -1,35 +1,30 @@
 import { API_BASE_PATH } from 'utils/constants';
+import axios from 'axios';
 
 // Courtesy of https://www.wolff.fun/definitive-guide-react-apis/
 const api = {
   get: (endpoint: string, authToken?: string) =>
-    fetch(`${API_BASE_PATH}/${endpoint}`, {
-      method: 'GET',
+    axios.get(`${API_BASE_PATH}/${endpoint}`, {
       headers: {
         ...(authToken && { Authorization: `Bearer ${authToken}` })
       }
     }),
   post: (endpoint: string, body?: object, authToken?: string) =>
-    fetch(`${API_BASE_PATH}/${endpoint}`, {
-      method: 'POST',
+    axios.post(`${API_BASE_PATH}/${endpoint}`, body && JSON.stringify(body), {
       headers: {
         'Content-Type': 'application/json',
         ...(authToken && { Authorization: `Bearer ${authToken}` })
-      },
-      body: body && JSON.stringify(body)
+      }
     }),
   patch: (endpoint: string, body: object, authToken?: string) =>
-    fetch(`${API_BASE_PATH}/${endpoint}`, {
-      method: 'PATCH',
+    axios.patch(`${API_BASE_PATH}/${endpoint}`, body && JSON.stringify(body), {
       headers: {
         'Content-Type': 'application/json',
         ...(authToken && { Authorization: `Bearer ${authToken}` })
-      },
-      body: body && JSON.stringify(body)
+      }
     }),
   delete: (endpoint: string, authToken?: string) =>
-    fetch(`${API_BASE_PATH}/${endpoint}`, {
-      method: 'DELETE',
+    axios.delete(`${API_BASE_PATH}/${endpoint}`, {
       headers: {
         ...(authToken && { Authorization: `Bearer ${authToken}` })
       }

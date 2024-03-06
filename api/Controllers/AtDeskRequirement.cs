@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using CustomerApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using CustomerApi.Models;
 
 namespace CustomerApi.Requirements;
 
@@ -16,7 +16,10 @@ public class AtDeskHandler : AuthorizationHandler<AtDeskRequirement>
         _context = context;
     }
 
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, AtDeskRequirement requirement)
+    protected override async Task HandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        AtDeskRequirement requirement
+    )
     {
         var userIdClaim = context.User.FindFirst(claim => claim.Type == ClaimTypes.NameIdentifier);
         if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))

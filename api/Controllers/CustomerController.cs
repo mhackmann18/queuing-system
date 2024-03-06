@@ -37,7 +37,7 @@ public partial class CustomerController : ControllerBase
 
     [Authorize]
     [HttpGet("customers")]
-    public async Task<ActionResult<Response>> GetCustomers()
+    public async Task<ActionResult<List<CustomerDto>>> GetCustomers()
     {
         List<CustomerDto> customers = await _context
             .Customer.Select(c => new CustomerDto
@@ -57,7 +57,7 @@ public partial class CustomerController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(new Response { Data = customers });
+        return Ok(customers );
     }
 
     public class PatchCustomerBody
@@ -79,7 +79,7 @@ public partial class CustomerController : ControllerBase
 
     /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
-    private ActionResult<Response>? RemoveCustomerDivisionWaitingListIndex(
+    private ActionResult? RemoveCustomerDivisionWaitingListIndex(
         CustomerDivision customerDivision
     )
     {
@@ -88,7 +88,7 @@ public partial class CustomerController : ControllerBase
         if (wlIndex == null)
         {
             return BadRequest(
-                new Response { Error = "Customer division does not have a waitingListIndex" }
+                "Customer division does not have a waitingListIndex"
             );
         }
 
@@ -113,7 +113,7 @@ public partial class CustomerController : ControllerBase
 
     /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
-    private async Task<ActionResult<Response>?> UpdateCustomerDivisionStatus(
+    private async Task<ActionResult?> UpdateCustomerDivisionStatus(
         CustomerDivision customerDivisionToUpdate,
         string newStatus
     )
@@ -180,7 +180,7 @@ public partial class CustomerController : ControllerBase
 
     /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
-    private ActionResult<Response>? UpdateCustomerDivisionWaitingListIndex(
+    private ActionResult? UpdateCustomerDivisionWaitingListIndex(
         CustomerDivision customerDivision,
         int newWaitingListIndex
     )
@@ -193,10 +193,7 @@ public partial class CustomerController : ControllerBase
         if (newWaitingListIndex < 1)
         {
             return BadRequest(
-                new Response
-                {
-                    Error = $"'waitingListIndex' property must be a positive non-zero integer."
-                }
+               $"'waitingListIndex' property must be a positive non-zero integer."
             );
         }
 
@@ -220,11 +217,7 @@ public partial class CustomerController : ControllerBase
         if (newWaitingListIndex > maxPossibleIndex)
         {
             return BadRequest(
-                new Response
-                {
-                    Error =
                         $"The 'waitingListIndex' prop of division '{divisionName}' is out of bounds. The maximum allowed value is {maxPossibleIndex}."
-                }
             );
         }
 
@@ -280,7 +273,7 @@ public partial class CustomerController : ControllerBase
 
     /* Helper method for PatchCustomer. Does not save changes to the database. Returns HTTP
     response if there is an error, otherwise returns null. */
-    private async Task<ActionResult<Response>?> UpdateCustomerDivision(
+    private async Task<ActionResult?> UpdateCustomerDivision(
         Guid officeId,
         Guid customerId,
         PatchCustomerBody.PatchCustomerBodyDivision cdNewProps
@@ -290,7 +283,7 @@ public partial class CustomerController : ControllerBase
         if (cdNewProps.Name == null)
         {
             return BadRequest(
-                new Response { Error = "Must provide a 'name' property for each division" }
+                "Must provide a 'name' property for each division"
             );
         }
 
@@ -303,11 +296,7 @@ public partial class CustomerController : ControllerBase
         if (cdToUpdate == null)
         {
             return BadRequest(
-                new Response
-                {
-                    Error =
                         $"This customer does not belong to any division with the name '{cdNewProps.Name}'"
-                }
             );
         }
 
@@ -318,11 +307,7 @@ public partial class CustomerController : ControllerBase
             if (cdNewProps.Status == "Waiting" && cdNewProps.WaitingListIndex == null)
             {
                 return BadRequest(
-                    new Response
-                    {
-                        Error =
                             "Customers whose status is being updated to 'Waiting' must have a 'waitingListIndex' property"
-                    }
                 );
             }
 
@@ -341,11 +326,7 @@ public partial class CustomerController : ControllerBase
             if (cdNewProps.Status != "Waiting")
             {
                 return BadRequest(
-                    new Response
-                    {
-                        Error =
                             "The 'waitingListIndex' property can only be updated for customers whose status is 'Waiting'."
-                    }
                 );
             }
 
@@ -364,7 +345,7 @@ public partial class CustomerController : ControllerBase
 
     [Authorize(Policy = "AtDesk")]
     [HttpPatch("offices/{officeId}/customers/{customerId}")]
-    public async Task<ActionResult<Response>> PatchCustomer(
+    public async Task<ActionResult<CustomerDto>> PatchCustomer(
         Guid officeId,
         Guid customerId,
         [FromBody] PatchCustomerBody cdsToUpdate
@@ -374,7 +355,7 @@ public partial class CustomerController : ControllerBase
         Customer? customer = await _context.Customer.FindAsync(customerId);
         if (customer == null)
         {
-            return NotFound(new Response { Error = $"No customer found with id {customerId}" });
+            return NotFound($"No customer found with id {customerId}" );
         }
 
         if (cdsToUpdate.Divisions != null)
@@ -382,7 +363,7 @@ public partial class CustomerController : ControllerBase
             // Error handling for empty divisions array
             if (cdsToUpdate.Divisions.Count == 0)
             {
-                return BadRequest(new Response { Error = "Must provide at least one division" });
+                return BadRequest("Must provide at least one division" );
             }
 
             // Update each of the customer's divisions
@@ -399,7 +380,7 @@ public partial class CustomerController : ControllerBase
         }
         else // TODO: If other customer properties are allowed to be updated, the 'Divisions' property should not be required
         {
-            return BadRequest(new Response { Error = "Must provide a 'Divisions' property" });
+            return BadRequest("Must provide a 'Divisions' property" );
         }
 
         // Save changes to the database
@@ -412,7 +393,7 @@ public partial class CustomerController : ControllerBase
             _logger.LogError(ex, "Error saving changes to the database.");
             return StatusCode(
                 500,
-                new Response { Error = "Error saving changes to the database." }
+                "Error saving changes to the database."
             );
         }
 
@@ -424,7 +405,7 @@ public partial class CustomerController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending SignalR message.");
-            return StatusCode(500, new Response { Error = "Error sending SignalR message." });
+            return StatusCode(500, "Error sending SignalR message." );
         }
 
         // Return the updated customer
@@ -437,7 +418,7 @@ public partial class CustomerController : ControllerBase
 
     [Authorize]
     [HttpPost("offices/{officeId}/customers/query")]
-    public async Task<ActionResult<Response>> GetCustomersWithFilters(
+    public async Task<ActionResult<List<CustomerDto>>> GetCustomersWithFilters(
         Guid officeId,
         [FromBody] CustomersQueryBody filters
     )
@@ -446,7 +427,7 @@ public partial class CustomerController : ControllerBase
         Office? office = await _context.Office.FindAsync(officeId);
         if (office == null)
         {
-            return BadRequest(new Response { Error = "Invalid officeId provided" });
+            return BadRequest("Invalid officeId provided" );
         }
 
         // Check that division filters are valid
@@ -458,7 +439,7 @@ public partial class CustomerController : ControllerBase
                 if (division.Name == null)
                 {
                     return BadRequest(
-                        new Response { Error = "Must provide a 'name' property for each division" }
+                        "Must provide a 'name' property for each division"
                     );
                 }
                 else
@@ -477,7 +458,7 @@ public partial class CustomerController : ControllerBase
                     if (divisionFound == null)
                     {
                         return BadRequest(
-                            new Response { Error = $"Office has no division '{division.Name}'" }
+                            $"Office has no division '{division.Name}'"
                         );
                     }
                 }
@@ -493,11 +474,7 @@ public partial class CustomerController : ControllerBase
         if (filters.Divisions == null && filters.Dates == null)
         {
             return BadRequest(
-                new Response
-                {
-                    Error =
                         "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'"
-                }
             );
         }
 
@@ -526,7 +503,7 @@ public partial class CustomerController : ControllerBase
 
             if (filteredCustomers.Count == 0)
             {
-                return Ok(new Response { Data = new List<CustomerDto>() });
+                return Ok(new List<CustomerDto>());
             }
         }
 
@@ -563,7 +540,7 @@ public partial class CustomerController : ControllerBase
 
             if (filteredCustomers.Count == 0)
             {
-                return Ok(new Response { Data = new List<CustomerDto>() });
+                return Ok(new List<CustomerDto>() );
             }
         }
 
@@ -587,12 +564,12 @@ public partial class CustomerController : ControllerBase
             .OrderBy(c => c.CheckInTime)
             .ToList();
 
-        return Ok(new Response { Data = customers });
+        return Ok(customers );
     }
 
     [Authorize]
     [HttpGet("customers/{customerId}")]
-    public async Task<ActionResult<Response>> GetCustomer(Guid customerId)
+    public async Task<ActionResult<CustomerDto>> GetCustomer(Guid customerId)
     {
         var customer = await _context
             .Customer.Where(c => c.Id == customerId)
@@ -615,7 +592,7 @@ public partial class CustomerController : ControllerBase
 
         if (customer.Count == 0)
         {
-            return NotFound(new Response { Error = $"No customer found with id {customerId}" });
+            return NotFound($"No customer found with id {customerId}" );
         }
 
         return Ok(customer[0]);
@@ -623,7 +600,7 @@ public partial class CustomerController : ControllerBase
 
     [Authorize]
     [HttpPost("offices/{officeId}/customers")]
-    public async Task<ActionResult<Response>> PostCustomerToOffice(
+    public async Task<ActionResult<CustomerDto>> PostCustomerToOffice(
         Guid officeId,
         [FromBody] CustomerPostedInOffice postedCustomer
     )
@@ -634,14 +611,14 @@ public partial class CustomerController : ControllerBase
         // Check for errors in request body
         if (postedCustomer.divisionNames.Length == 0)
         {
-            return BadRequest(new Response { Error = "Please include at least one division" });
+            return BadRequest("Please include at least one division" );
         }
 
         // Check that officeId is valid
         Office? office = await _context.Office.FindAsync(officeId);
         if (office == null)
         {
-            return BadRequest(new Response { Error = "Invalid officeId provided" });
+            return BadRequest("Invalid officeId provided" );
         }
 
         // Insert into Customer
@@ -665,7 +642,7 @@ public partial class CustomerController : ControllerBase
             if (divisions.Count == 0)
             {
                 return BadRequest(
-                    new Response { Error = $"Invalid division '{divisionName}' provided" }
+                    $"Invalid division '{divisionName}' provided"
                 );
             }
             else
@@ -720,7 +697,7 @@ public partial class CustomerController : ControllerBase
         Customer? customer = await _context.Customer.FindAsync(customerId);
         if (customer == null)
         {
-            return NotFound(new Response { Error = $"No customer found with id {customerId}" });
+            return NotFound($"No customer found with id {customerId}" );
         }
 
         List<CustomerDivision> cds = await _context
@@ -775,17 +752,11 @@ public partial class CustomerController : ControllerBase
 
         await _hubContext.Clients.All.SendAsync("customersUpdated");
 
-        return Ok(new Response { Data = customerToDelete[0] });
+        return Ok(customerToDelete[0] );
     }
 
     [GeneratedRegex(@"^Desk\s\d+$")]
     private static partial Regex DeskRegex();
-
-    private class DeskDto
-    {
-        public int DeskNumber { get; set; }
-        public bool Occupied { get; set; }
-    }
 
     [Authorize]
     [HttpGet("offices/{officeId}/divisions")]
@@ -817,27 +788,27 @@ public partial class CustomerController : ControllerBase
     // Remove user from desk
     [Authorize(Policy = "AtDesk")]
     [HttpDelete("offices/{officeId}/users/{userId}/desk")]
-    public async Task<ActionResult<Response>> RemoveUserFromDesk(Guid officeId, Guid userId)
+    public async Task<ActionResult<UserDto>> RemoveUserFromDesk(Guid officeId, Guid userId)
     {
         // Check that officeId is valid
         Office? office = await _context.Office.FindAsync(officeId);
         if (office == null)
         {
-            return BadRequest(new Response { Error = "Invalid officeId provided" });
+            return BadRequest("Invalid officeId provided" );
         }
 
         // Check that userId is valid
         User? user = await _context.User.FindAsync(userId);
         if (user == null)
         {
-            return BadRequest(new Response { Error = "Invalid userId provided" });
+            return BadRequest("Invalid userId provided" );
         }
 
         // Check that the user is a member of the office
         UserOffice? userOffice = await _context.UserOffice.FindAsync(userId, officeId);
         if (userOffice == null)
         {
-            return BadRequest(new Response { Error = "User is not a member of the office" });
+            return BadRequest("User is not a member of the office" );
         }
 
         // Check that the user is at a desk
@@ -846,7 +817,7 @@ public partial class CustomerController : ControllerBase
             .FirstOrDefaultAsync();
         if (atDesk == null)
         {
-            return BadRequest(new Response { Error = "User is not at a desk" });
+            return BadRequest("User is not at a desk" );
         }
 
         // Check if there's a customer at the desk
@@ -895,7 +866,7 @@ public partial class CustomerController : ControllerBase
             }
             else
             {
-                return BadRequest(new Response { Error = "Customer's division not found" });
+                return BadRequest("Customer's division not found" );
             }
         }
 
@@ -910,7 +881,7 @@ public partial class CustomerController : ControllerBase
 
     [Authorize]
     [HttpPost("offices/{officeId}/users/{userId}/desk")]
-    public async Task<ActionResult<Response>> PostUserToDesk(
+    public async Task<ActionResult<DeskDto>> PostUserToDesk(
         Guid officeId,
         Guid userId,
         [FromBody] PostedDesk postedDesk
@@ -920,21 +891,21 @@ public partial class CustomerController : ControllerBase
         Office? office = await _context.Office.FindAsync(officeId);
         if (office == null)
         {
-            return BadRequest(new Response { Error = "Invalid officeId provided" });
+            return BadRequest("Invalid officeId provided" );
         }
 
         // Check that userId is valid
         User? user = await _context.User.FindAsync(userId);
         if (user == null)
         {
-            return BadRequest(new Response { Error = "Invalid userId provided" });
+            return BadRequest("Invalid userId provided" );
         }
 
         // Check that the user is a member of the office
         UserOffice? userOffice = await _context.UserOffice.FindAsync(userId, officeId);
         if (userOffice == null)
         {
-            return BadRequest(new Response { Error = "User is not a member of the office" });
+            return BadRequest("User is not a member of the office" );
         }
 
         // Check that the user is not already at a desk
@@ -943,20 +914,20 @@ public partial class CustomerController : ControllerBase
             .FirstOrDefaultAsync();
         if (atDesk != null)
         {
-            return BadRequest(new Response { Error = "User is already at a desk" });
+            return BadRequest("User is already at a desk" );
         }
 
         // Check that the division name is valid
         Division? division = await _context.Division.FindAsync(postedDesk.DivisionName, officeId);
         if (division == null)
         {
-            return BadRequest(new Response { Error = "Invalid division name provided" });
+            return BadRequest("Invalid division name provided" );
         }
 
         // Check that the desk number is valid
         if (postedDesk.Number < 1 || postedDesk.Number > division.MaxNumberOfDesks)
         {
-            return BadRequest(new Response { Error = "Invalid desk number provided" });
+            return BadRequest("Invalid desk number provided" );
         }
 
         // Check that the desk is not already occupied
@@ -968,7 +939,7 @@ public partial class CustomerController : ControllerBase
         );
         if (deskOccupied != null)
         {
-            return BadRequest(new Response { Error = "Desk is already occupied" });
+            return BadRequest("Desk is already occupied" );
         }
 
         // Insert into UserAtDesk
@@ -994,7 +965,7 @@ public partial class CustomerController : ControllerBase
     // Extend user's session at desk
     [Authorize(Policy = "AtDesk")]
     [HttpPost("offices/{officeId}/users/{userId}/desk/extend-session")]
-    public async Task<ActionResult<Response>> ExtendUserSessionAtDesk(
+    public async Task<ActionResult<DeskDto>> ExtendUserSessionAtDesk(
         Guid officeId,
         Guid userId
     )
@@ -1003,21 +974,21 @@ public partial class CustomerController : ControllerBase
         Office? office = await _context.Office.FindAsync(officeId);
         if (office == null)
         {
-            return BadRequest(new Response { Error = "Invalid officeId provided" });
+            return BadRequest("Invalid officeId provided" );
         }
 
         // Check that userId is valid
         User? user = await _context.User.FindAsync(userId);
         if (user == null)
         {
-            return BadRequest(new Response { Error = "Invalid userId provided" });
+            return BadRequest("Invalid userId provided" );
         }
 
         // Check that the user is a member of the office
         UserOffice? userOffice = await _context.UserOffice.FindAsync(userId, officeId);
         if (userOffice == null)
         {
-            return BadRequest(new Response { Error = "User is not a member of the office" });
+            return BadRequest("User is not a member of the office" );
         }
 
         // Check that the user is at a desk
@@ -1026,7 +997,7 @@ public partial class CustomerController : ControllerBase
             .FirstOrDefaultAsync();
         if (atDesk == null)
         {
-            return BadRequest(new Response { Error = "User is not at a desk" });
+            return BadRequest("User is not at a desk" );
         }
 
         // Extend the user's session
@@ -1058,13 +1029,13 @@ public partial class CustomerController : ControllerBase
         if (user.Username.Length < 8)
         {
             return BadRequest(
-                new Response { Error = "Username must be at least 8 characters long" }
+                "Username must be at least 8 characters long"
             );
         }
         if (user.Password.Length < 8)
         {
             return BadRequest(
-                new Response { Error = "Password must be at least 8 characters long" }
+                "Password must be at least 8 characters long"
             );
         }
 
@@ -1073,7 +1044,7 @@ public partial class CustomerController : ControllerBase
             .ToListAsync();
         if (existingUser.Count >= 1)
         {
-            return BadRequest(new Response { Error = "Username already exists" });
+            return BadRequest("Username already exists" );
         }
 
         // Generate a potential Guid for the user
@@ -1087,7 +1058,7 @@ public partial class CustomerController : ControllerBase
             if (existingOffice == null)
             {
                 // If the office doesn't exist, bad request
-                return BadRequest(new Response { Error = $"No office found with id {officeId}" });
+                return BadRequest($"No office found with id {officeId}" );
             }
 
             // Create new userOffice entry
@@ -1125,16 +1096,13 @@ public partial class CustomerController : ControllerBase
 
         // Return created user to client
         return Ok(
-            new Response
-            {
-                Data = new
+                new
                 {
                     Id = newUser.Id,
                     newUser.Username,
                     newUser.FirstName,
                     newUser.LastName
                 }
-            }
         );
     }
 
@@ -1148,12 +1116,12 @@ public partial class CustomerController : ControllerBase
 
         if (office == null)
         {
-            return NotFound(new Response { Error = $"No office found with id {officeId}" });
+            return NotFound($"No office found with id {officeId}" );
         }
 
         if (office.Divisions == null)
         {
-            return BadRequest(new Response { Error = "No divisions found for this office" });
+            return BadRequest("No divisions found for this office" );
         }
 
         return new OfficeDto
@@ -1174,7 +1142,7 @@ public partial class CustomerController : ControllerBase
 
         if (existingUser == null)
         {
-            return BadRequest(new Response { Error = "Username not found" });
+            return BadRequest("Username not found");
         }
 
         // Check if the password is correct
@@ -1182,19 +1150,19 @@ public partial class CustomerController : ControllerBase
         {
             if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.PasswordHash))
             {
-                return BadRequest(new Response { Error = "Incorrect password" });
+                return BadRequest("Incorrect password");
             }
         }
         else
         {
-            return BadRequest(new Response { Error = "Password cannot be null" });
+            return BadRequest("Password cannot be null");
         }
 
         // JWT token generation starts here
         var jwtKey = _config["Jwt:Key"];
         if (jwtKey == null)
         {
-            return BadRequest(new Response { Error = "JWT key not found" });
+            return BadRequest("JWT key not found");
         }
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
@@ -1211,7 +1179,7 @@ public partial class CustomerController : ControllerBase
             _config["Jwt:Issuer"],
             _config["Jwt:Issuer"],
             claims,
-            expires: DateTime.UtcNow.AddHours(9),
+            expires: DateTime.UtcNow.AddHours(9), // Expires in 9 hours
             signingCredentials: credentials
         );
 
@@ -1219,29 +1187,26 @@ public partial class CustomerController : ControllerBase
         // JWT token generation ends here
 
         return Ok(
-            new Response
+            new 
             {
-                Data = new
-                {
                     Id = existingUser.Id,
                     existingUser.Username,
                     existingUser.FirstName,
                     existingUser.LastName,
                     Token = token
-                }
             }
         );
     }
 
     [HttpGet("users/self")]
     [Authorize]
-    public async Task<ActionResult<Response>> GetCurrentUser()
+    public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
         Claim? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
         if (userIdClaim == null)
         {
-            return Unauthorized(new Response { Error = "Token does not contain a userId claim" });
+            return Unauthorized("Token does not contain a userId claim" );
         }
 
         // Get the username from the User property
@@ -1250,7 +1215,7 @@ public partial class CustomerController : ControllerBase
         // If the username claim is not included in the JWT, return an error
         if (userId == null)
         {
-            return Unauthorized(new Response { Error = "Token does not contain a username claim" });
+            return Unauthorized("Token does not contain a username claim" );
         }
 
         Guid parsedId = Guid.Parse(userId);
@@ -1263,14 +1228,12 @@ public partial class CustomerController : ControllerBase
         // If the user does not exist in the database, return an error
         if (user == null)
         {
-            return NotFound(new Response { Error = "User not found" });
+            return NotFound("User not found" );
         }
 
         // Return the user data
         return Ok(
-            new Response
-            {
-                Data = new
+                new
                 {
                     user.Id,
                     user.Username,
@@ -1285,7 +1248,6 @@ public partial class CustomerController : ControllerBase
                             user.Desk.SessionEndTime
                         }
                 }
-            }
         );
     }
 }
@@ -1313,12 +1275,6 @@ public class CustomerPostedInOffice
 {
     public required string fullName { get; init; }
     public required string[] divisionNames { get; init; }
-}
-
-public class Response
-{
-    public string? Error { get; init; }
-    public dynamic? Data { get; init; }
 }
 
 public class CustomersQueryBody
