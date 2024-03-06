@@ -22,5 +22,6 @@ public class CustomerDivision
 
     // Navigation
     public Division Division { get; set; } = null!;
+    public Customer Customer { get; set; } = null!;
     public ICollection<CustomerDivisionTimeCalled> TimesCalled { get; set; } = null!;
 }
