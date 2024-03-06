@@ -1,6 +1,6 @@
 using CustomerApi.Models;
-using Microsoft.EntityFrameworkCore;
 using CustomerApi.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Services;
 
@@ -59,9 +59,18 @@ public class ClearOldCustomersService : BackgroundService
                                     && d.Status != "Served"
                                     && d.Status != "No Show"
                                 )
-                            ).ToListAsync();
+                            )
+                            .ToListAsync();
 
-                        var customersToRemove = customers.Where(customer => !DateUtils.SameDay(customer.CheckInTime, DateTime.UtcNow, office.Timezone)).ToList();
+                        var customersToRemove = customers
+                            .Where(customer =>
+                                !DateUtils.SameDay(
+                                    customer.CheckInTime,
+                                    DateTime.UtcNow,
+                                    office.Timezone
+                                )
+                            )
+                            .ToList();
 
                         context.Customer.RemoveRange(customersToRemove);
 

@@ -1,11 +1,12 @@
 using CustomerApi.Models;
+using CustomerApi.Utilities;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApi.Services;
 
 /* This service runs in the background and checks for expired desk sessions every minute.
-   If a session has expired, the service will check if the desk was serving a customer, and 
+   If a session has expired, the service will check if the desk was serving a customer, and
    return said customer to the waiting list. The session is then removed,  */
 public class DeskSessionCleanupService : BackgroundService
 {
@@ -23,53 +24,78 @@ public class DeskSessionCleanupService : BackgroundService
             using (var scope = _serviceProvider.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<CustomerContext>();
-                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<SignalrHub>>();
+                var hubContext = scope.ServiceProvider.GetRequiredService<
+                    IHubContext<SignalrHub>
+                >();
 
                 // Flag to check if customers were updated
                 bool customersUpdated = false;
 
                 // Find expired sessions
-                var expiredSessions = await context.UserAtDesk
-                    .Where(u => u.SessionEndTime <= DateTime.UtcNow).ToListAsync();
+                var expiredSessions = await context
+                    .UserAtDesk.Where(u => u.SessionEndTime <= DateTime.UtcNow)
+                    .ToListAsync();
 
-                foreach(var session in expiredSessions)
+                foreach (var session in expiredSessions)
                 {
+                    Office? office = await context.Office.FindAsync(session.DeskDivisionOfficeId);
+
+                    if (office == null)
+                    {
+                        continue;
+                    }
                     // Check if there's a customer at the user's desk
-                    var customersAtDesk = await context.CustomerAtDesk
-                        .Where(c => c.DeskNumber == session.DeskNumber
+                    var customersAtDesk = await context
+                        .CustomerAtDesk.Where(c =>
+                            c.DeskNumber == session.DeskNumber
                             && c.DeskDivisionName == session.DeskDivisionName
-                            && c.DeskDivisionOfficeId == session.DeskDivisionOfficeId).ToListAsync();
+                            && c.DeskDivisionOfficeId == session.DeskDivisionOfficeId
+                        )
+                        .ToListAsync();
 
                     // If there's a customer at the desk, set the customersUpdated flag to true
-                    if(customersAtDesk.Count > 0)
+                    if (customersAtDesk.Count > 0)
                     {
                         customersUpdated = true;
                     }
 
-                    /* If there's a customer at the desk, insert the customer into the beginning of 
+                    /* If there's a customer at the desk, insert the customer into the beginning of
                        the waiting list and remove their CustomerAtDesk record */
-                    foreach(var cad in customersAtDesk)
+                    foreach (var cad in customersAtDesk)
                     {
                         // Find customer's division where customer is at a desk
-                        var cd = await context.CustomerDivision
-                            .Where(cd => cd.DivisionName == cad.DeskDivisionName
+                        var cd = await context
+                            .CustomerDivision.Where(cd =>
+                                cd.DivisionName == cad.DeskDivisionName
                                 && cd.DivisionOfficeId == cad.DeskDivisionOfficeId
-                                && cd.CustomerId == cad.CustomerId)
+                                && cd.CustomerId == cad.CustomerId
+                            )
                             .FirstOrDefaultAsync();
 
                         // Return customer to division's waiting list
-                        if(cd != null)
+                        if (cd != null)
                         {
                             cd.Status = "Waiting";
 
                             // Update waitingListIndexes for all customers in this customer's division
-                            List<CustomerDivision> fd = await context
-                                .CustomerDivision.Where(cd =>
+                            List<CustomerDivision> cds = await context
+                                .CustomerDivision.Include(cd => cd.Customer)
+                                .Where(cd =>
                                     cd.DivisionOfficeId == cad.DeskDivisionOfficeId
                                     && cd.DivisionName == cad.DeskDivisionName
                                     && cd.Status == "Waiting"
                                     && cd.WaitingListIndex != null
-                                ).ToListAsync();
+                                )
+                                .ToListAsync();
+
+                            List<CustomerDivision> fd = cds.Where(cd =>
+                                    DateUtils.SameDay(
+                                        cd.Customer.CheckInTime,
+                                        DateTime.UtcNow,
+                                        office.Timezone
+                                    )
+                                )
+                                .ToList();
 
                             // Move all customers in the waiting list up one position
                             foreach (CustomerDivision cdToInc in fd)
@@ -91,11 +117,13 @@ public class DeskSessionCleanupService : BackgroundService
                 await context.SaveChangesAsync();
 
                 // Send updates to SignalR clients if there are any changes
-                if(expiredSessions.Count > 0){
+                if (expiredSessions.Count > 0)
+                {
                     await hubContext.Clients.All.SendAsync("desksUpdated");
                 }
 
-                if(customersUpdated){
+                if (customersUpdated)
+                {
                     await hubContext.Clients.All.SendAsync("customersUpdated");
                 }
             }
