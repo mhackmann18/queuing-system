@@ -510,14 +510,30 @@ public partial class CustomerController : ControllerBase
         // Filter by dates
         if (filters.Dates != null)
         {
+            var officeTimezone = TimeZoneInfo.FindSystemTimeZoneById(office.Timezone);
+            _logger.LogInformation(DateTime.UtcNow.ToString());
+            var officeLocalTime = TimeZoneInfo.ConvertTimeFromUtc(
+                DateTime.UtcNow,
+                officeTimezone
+            );
+            _logger.LogInformation(officeLocalTime.ToString()    );
             if (filteredCustomers.Count == 0)
             {
                 foreach (var dateFilter in filters.Dates)
                 {
                     _logger.LogInformation(dateFilter.Date.ToString());
+                    var dateFilterLocalTime = TimeZoneInfo.ConvertTimeFromUtc(
+                        dateFilter,
+                        officeTimezone
+                    );
+                    _logger.LogInformation(dateFilterLocalTime.ToString());
+
                     var customersWithCurrentFilter = await _context
                         .Customer.Where(c =>
-                            c.CheckInTime.Date == dateFilter.Date
+                            TimeZoneInfo.ConvertTimeFromUtc(
+                        c.CheckInTime,
+                        officeTimezone
+                    ).Date == dateFilterLocalTime.Date
                             && c.Divisions.Any(d => d.DivisionOfficeId == officeId)
                         )
                         // .OrderBy(c => c.CheckInTime)
@@ -532,8 +548,20 @@ public partial class CustomerController : ControllerBase
             {
                 foreach (DateTime dateFilter in filters.Dates)
                 {
+                    _logger.LogInformation(dateFilter.ToString());
+
+                    var dateFilterLocalTime = TimeZoneInfo.ConvertTimeFromUtc(
+                        dateFilter,
+                        officeTimezone
+                    );
+                    _logger.LogInformation(dateFilterLocalTime.ToString());
+
                     filteredCustomers = filteredCustomers
-                        .Where(c => c.CheckInTime.Date == dateFilter.Date)
+                        .Where(c =>
+                            TimeZoneInfo.ConvertTimeFromUtc(
+                        c.CheckInTime,
+                        officeTimezone
+                    ).Date == dateFilterLocalTime.Date)
                         .ToList();
                 }
             }

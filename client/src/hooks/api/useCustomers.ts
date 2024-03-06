@@ -1,9 +1,5 @@
 import { useState, useCallback, useEffect, useContext } from 'react';
-import {
-  convertLocalToUtc,
-  sanitizeRawCustomer,
-  sortCustomers
-} from 'utils/helpers';
+import { sanitizeRawCustomer, sortCustomers } from 'utils/helpers';
 import { Customer, CustomerFilters, CustomerDto, StatusFilter } from 'utils/types';
 import Connector from 'utils/signalRConnection';
 import useOffice from 'hooks/useOffice';
@@ -48,11 +44,12 @@ export default function useCustomers(filters: CustomerFilters) {
   const fetchCustomers = useCallback(async () => {
     const statuses = [...statusFiltersToStatusArray(filters.statuses)];
 
-    const todaysDateUtc = convertLocalToUtc(new Date());
-
     const response = await api.getCustomersWithFilters(
       officeId,
-      { dates: [todaysDateUtc], divisions: [{ name: filters.division, statuses }] },
+      {
+        dates: [new Date().toISOString()],
+        divisions: [{ name: filters.division, statuses }]
+      },
       token
     );
 
