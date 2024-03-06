@@ -1,5 +1,6 @@
 using CustomerApi.Models;
 using Microsoft.EntityFrameworkCore;
+using CustomerApi.Utilities;
 
 namespace CustomerApi.Services;
 
@@ -50,18 +51,17 @@ public class ClearOldCustomersService : BackgroundService
 
                         /* Remove customers whose check-in time doesn't match the new day, and whose
                         status is not "Served" or "No Show" */
-                        var customersToRemove = await context
+                        var customers = await context
                             .Customer.Include(c => c.Divisions)
                             .Where(c =>
                                 c.Divisions.Any(d =>
                                     d.DivisionOfficeId == office.Id
                                     && d.Status != "Served"
                                     && d.Status != "No Show"
-                                    && TimeZoneInfo
-                                        .ConvertTimeFromUtc(c.CheckInTime, officeTimezone)
-                                        .Date != officeLocalTime.Date
                                 )
                             ).ToListAsync();
+
+                        var customersToRemove = customers.Where(customer => !DateUtils.SameDay(customer.CheckInTime, DateTime.UtcNow, office.Timezone)).ToList();
 
                         context.Customer.RemoveRange(customersToRemove);
 
