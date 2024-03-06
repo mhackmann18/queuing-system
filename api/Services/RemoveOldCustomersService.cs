@@ -50,7 +50,7 @@ public class ClearOldCustomersService : BackgroundService
 
                         /* Remove customers whose check-in time doesn't match the new day, and whose
                         status is not "Served" or "No Show" */
-                        var customersToRemove = context
+                        var customersToRemove = await context
                             .Customer.Include(c => c.Divisions)
                             .Where(c =>
                                 c.Divisions.Any(d =>
@@ -61,7 +61,7 @@ public class ClearOldCustomersService : BackgroundService
                                         .ConvertTimeFromUtc(c.CheckInTime, officeTimezone)
                                         .Date != officeLocalTime.Date
                                 )
-                            ).ToList();
+                            ).ToListAsync();
 
                         context.Customer.RemoveRange(customersToRemove);
 
