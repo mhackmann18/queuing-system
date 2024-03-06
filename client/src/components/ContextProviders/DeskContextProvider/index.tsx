@@ -28,22 +28,21 @@ export default function DeskContextProvider({
       onDesksUpdated: async () => {
         const res = await api.getUserFromAuthToken(userToken);
 
-        const { error, data } = await res.json();
+        if (res.status !== 200) {
+          console.error('Could not get user from auth token');
+          return;
+        }
 
-        if (error) {
-          console.error(error);
-        } else if (data) {
-          const { desk } = data;
+        const { desk } = res.data;
 
-          if (!desk) {
-            setDesk(null);
-          } else {
-            const { divisionName, number } = desk;
-            setDesk({
-              divisionName,
-              number
-            });
-          }
+        if (!desk) {
+          setDesk(null);
+        } else {
+          const { divisionName, number } = desk;
+          setDesk({
+            divisionName,
+            number
+          });
         }
       }
     });
@@ -56,13 +55,11 @@ export default function DeskContextProvider({
         // Sit user at desk
         const response = await api.postUserToDesk(officeId, userId, desk, userToken);
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error('Could not sit at desk');
         }
 
-        const deskResponse = await response.json();
-
-        const { divisionName, number, sessionEndTime } = deskResponse;
+        const { divisionName, number, sessionEndTime } = response.data;
 
         setOriginalSessionEndTime(parseServerDateAsUtc(sessionEndTime));
 
@@ -88,7 +85,7 @@ export default function DeskContextProvider({
     try {
       const response = await api.deleteUserFromDesk(officeId, userId, userToken);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error('Could not leave desk');
       }
 
@@ -104,22 +101,20 @@ export default function DeskContextProvider({
     const getDesk = async () => {
       const res = await api.getUserFromAuthToken(userToken);
 
-      const { error, data } = await res.json();
+      if (res.status !== 200) {
+        setError('Could not get user from auth token');
+        return;
+      }
 
-      if (data) {
-        const { desk } = data;
-        if (desk) {
-          const { divisionName, number } = desk;
-          setDesk({
-            divisionName,
-            number
-          });
-        } else {
-          setDesk(null);
-        }
-      } else if (error) {
+      const { desk } = res.data;
+      if (desk) {
+        const { divisionName, number } = desk;
+        setDesk({
+          divisionName,
+          number
+        });
+      } else {
         setDesk(null);
-        console.error(error);
       }
 
       setLoading(false);

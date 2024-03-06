@@ -23,11 +23,11 @@ export default function useExtendDeskSession() {
     try {
       const response = await api.extendUserDeskSession(officeId, userId, authToken);
 
-      if (!response.ok) {
-        console.error('Error extending desk session', response);
+      if (response.status !== 200) {
+        throw new Error('Could not extend desk session');
       }
 
-      const { sessionEndTime } = await response.json();
+      const { sessionEndTime } = await response.data;
 
       setSessionEndTime(parseServerDateAsUtc(sessionEndTime));
       setSessionAboutToExpire(false);

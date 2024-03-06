@@ -32,15 +32,15 @@ export default function useCustomers(filters: CustomerFilters) {
     // TODO: Figure out whats going on here
     const utcDate = convertLocalToUtc(filters.date);
 
-    const res = await api.getCustomersWithFilters(
-      officeId,
-      { dates: [utcDate], divisions: filters.divisions },
-      token
-    );
+    try {
+      const res = await api.getCustomersWithFilters(
+        officeId,
+        { dates: [utcDate], divisions: filters.divisions },
+        token
+      );
 
-    const { error, data } = await res.json();
+      const data = res.data;
 
-    if (!error && data) {
       setCustomers(
         sortCustomers(
           data.map((c: CustomerDto) =>
@@ -48,8 +48,8 @@ export default function useCustomers(filters: CustomerFilters) {
           ) // TODO: Fix this atrocious code (filters.divisions[0].name)
         )
       );
-    } else {
-      setError(error);
+    } catch (error) {
+      setError(String(error));
     }
   }, [filters, officeId, token]);
 

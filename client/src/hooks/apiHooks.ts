@@ -16,9 +16,11 @@ export function useLoginUser() {
       try {
         const response = await api.loginUser(userCredentials);
 
-        const parsedResponse = await response.json();
+        if (response.status !== 200) {
+          throw new Error('Error logging in');
+        }
 
-        return parsedResponse;
+        return { data: response.data };
       } catch (error) {
         return { data: null, error: String(error) };
       } finally {
@@ -48,11 +50,12 @@ export function useLeaveDesk() {
     try {
       const res = await api.deleteUserFromDesk(officeId, userId, token);
 
-      const { error, data } = await res.json();
+      if (res.status !== 200) {
+        throw new Error('Could not leave desk');
+      }
 
       return {
-        desk: data || null,
-        error
+        desk: res.data || null
       };
     } catch (error) {
       return {
@@ -78,9 +81,11 @@ export function useDeleteCustomer() {
       try {
         const response = await api.deleteCustomer(officeId, customerId, token);
 
-        const parsedResponse = await response.json();
+        if (response.status !== 200) {
+          throw new Error('Error deleting customer');
+        }
 
-        return parsedResponse;
+        return { data: response.data };
       } catch (error) {
         return { data: null, error: String(error) };
       } finally {
@@ -107,11 +112,11 @@ export function useCheckInCustomer() {
       try {
         const response = await api.postCustomer(officeId, checkInData, token);
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error('Error checking in customer');
         }
 
-        const customer = await response.json();
+        const customer = response.data;
 
         return { customer };
       } catch (error) {
@@ -147,11 +152,11 @@ export function usePatchCustomer() {
           token
         );
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error('Error updating customer');
         }
 
-        const customer = await response.json();
+        const customer = response.data;
 
         return { customer };
       } catch (error) {

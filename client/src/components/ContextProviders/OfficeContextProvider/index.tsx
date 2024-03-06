@@ -21,11 +21,11 @@ export default function OfficeContextProvider({
         setLoading(true);
         const response = await api.getOffice(DUMMY_OFFICE_ID, token);
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error('Failed to fetch office');
         }
 
-        const office = await response.json();
+        const office = response.data;
 
         setOffice({
           id: office.id,

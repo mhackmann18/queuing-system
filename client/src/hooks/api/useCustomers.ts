@@ -56,27 +56,23 @@ export default function useCustomers(filters: CustomerFilters) {
       token
     );
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       // setError('Error fetching customers');
       return;
     }
 
-    const { error, data } = await response.json();
+    const data = await response.data;
 
     console.log('data', data);
 
-    if (!error && data) {
-      console.log(data);
-      setCustomers(
-        sortCustomers(
-          data.map((c: CustomerDto) =>
-            sanitizeRawCustomer(c, filters.division, deskNum)
-          )
+    console.log(data);
+    setCustomers(
+      sortCustomers(
+        data.map((c: CustomerDto) =>
+          sanitizeRawCustomer(c, filters.division, deskNum)
         )
-      );
-    } else {
-      // setError(res.error)
-    }
+      )
+    );
   }, [filters, officeId, statusFiltersToStatusArray, deskNum, token]);
 
   // Load new customers when filters change
