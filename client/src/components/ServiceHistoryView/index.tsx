@@ -29,6 +29,12 @@ export default function ServiceHistoryView() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<string>('');
 
+  useEffect(() => {
+    if (fetchCustomersError) {
+      setError(fetchCustomersError);
+    }
+  }, [fetchCustomersError]);
+
   const averageWaitTime = useMemo(() => {
     if (!customers || !customers.length) {
       return 0;
