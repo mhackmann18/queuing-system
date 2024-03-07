@@ -42,12 +42,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 {
                     context.HandleResponse(); // Prevent the default behavior
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.ContentType = "application/json";
-                    context.Response.WriteAsync(JsonConvert.SerializeObject(new
-                    {
-                        error = "You are not authorized"
-                    })); 
-                    return Task.CompletedTask;
+                    context.Response.ContentType = "text/plain";
+                    return context.Response.WriteAsync("Your credentials are invalid or have expired. Please log in again."); 
                 }
             };
         });

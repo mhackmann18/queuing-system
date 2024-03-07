@@ -1216,7 +1216,7 @@ public partial class CustomerController : ControllerBase
             _config["Jwt:Issuer"],
             _config["Jwt:Issuer"],
             claims,
-            expires: DateTime.UtcNow.AddHours(9), // Expires in 9 hours
+            expires: DateTime.UtcNow.AddSeconds(9), // Expires in 9 hours
             signingCredentials: credentials
         );
 
