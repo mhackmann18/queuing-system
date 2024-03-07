@@ -38,9 +38,10 @@ export default function ServiceHistoryView() {
     let numServed = 0;
 
     for (const customer of customers) {
-      if (customer.status === 'Served') {
+      if (customer.status === 'Served' || customer.status === 'No Show') {
         timeSpentWaiting +=
-          customer.timesCalled[0].getTime() - customer.checkInTime.getTime();
+          customer.timesCalled[customer.timesCalled.length - 1].getTime() -
+          customer.checkInTime.getTime();
         numServed++;
       }
     }
