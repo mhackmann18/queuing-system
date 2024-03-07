@@ -4,31 +4,38 @@ import { CheckInFormProps, CheckInFormValues } from './types';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FULL_NAME_MAX_LENGTH, REQUIRED_FIELD_ERROR } from 'utils/constants';
 import SubmitBtn from 'components/Form/SubmitBtn';
-import { useCheckInCustomer } from 'hooks/apiHooks';
+import api from 'utils/api';
+import useAuth from 'hooks/useAuth';
+import useOffice from 'hooks/useOffice';
 
 export default function CustomerCheckInViewForm({
   divisions,
   onSubmitSuccess
 }: CheckInFormProps) {
-  const { checkInCustomer } = useCheckInCustomer();
   const [submitError, setSubmitError] = useState<string>('');
   const {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm<CheckInFormValues>();
+  const { token } = useAuth();
+  const { id: officeId } = useOffice();
 
   const onSubmit: SubmitHandler<CheckInFormValues> = async ({
     fullName,
     reasonForVisit
   }) => {
     try {
-      const response = await checkInCustomer({
-        fullName,
-        divisionNames: reasonForVisit
-      });
+      const response = await api.postCustomer(
+        officeId,
+        {
+          fullName,
+          divisionNames: reasonForVisit
+        },
+        token
+      );
 
-      onSubmitSuccess(response.customer);
+      onSubmitSuccess(response.data);
     } catch (error) {
       if (error instanceof Error) {
         setSubmitError(error.message);

@@ -25,7 +25,7 @@ export default function CustomerManagerView() {
     useState<WaitingListPositionPickerState>(null);
   const [error, setError] = useState<string>('');
   const { filters, ...filterUtils } = useCustomerFilters();
-  const { customers } = useCustomers(filters);
+  const { customers, error: getCustomersError } = useCustomers(filters);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const nextSelectedCustomerCandidateId = useNextCustomerId(
     selectedCustomer,
@@ -42,6 +42,12 @@ export default function CustomerManagerView() {
     );
   const { sessionAboutToExpire, extendSession } = useExtendDeskSession();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (getCustomersError) {
+      setError(getCustomersError);
+    }
+  }, [getCustomersError]);
 
   useEffect(() => {
     const handleUnload = (e: BeforeUnloadEvent) => {
@@ -94,12 +100,22 @@ export default function CustomerManagerView() {
     );
   }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
 
+  const handleExtendSessionButtonClick = async () => {
+    try {
+      await extendSession();
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      }
+    }
+  };
+
   return (
     <div className="h-full">
       {sessionAboutToExpire && (
         <DeskSessionExpirationWarningModal
           onCancel={() => navigate('/dashboard')}
-          onConfirm={extendSession}
+          onConfirm={handleExtendSessionButtonClick}
         />
       )}
       {blocker.state === 'blocked' && (

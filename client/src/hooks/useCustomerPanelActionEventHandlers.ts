@@ -1,8 +1,10 @@
 import { useMemo, useContext } from 'react';
 import { CustomerPanelActionEventHandlers } from 'components/CustomerManagerView/CustomerPanel/types';
 import { Customer } from 'utils/types';
-import { usePatchCustomer, useDeleteCustomer } from 'hooks/apiHooks';
 import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
+import useAuth from './useAuth';
+import useOffice from './useOffice';
+import api from 'utils/api';
 
 export default function usePanelComponentActionBtnHandlers(
   selectedCustomer: Customer | null,
@@ -13,8 +15,9 @@ export default function usePanelComponentActionBtnHandlers(
 ): CustomerPanelActionEventHandlers | null {
   const { desk } = useContext(DeskContext);
   const { number: deskNum, divisionName } = desk!;
-  const { patchCustomer } = usePatchCustomer();
-  const { deleteCustomer } = useDeleteCustomer();
+  const { token } = useAuth();
+  const { id: officeId } = useOffice();
+
   const customerPanelActionEventHandlers: CustomerPanelActionEventHandlers | null =
     useMemo(
       () =>
@@ -23,13 +26,13 @@ export default function usePanelComponentActionBtnHandlers(
             onClick: () => null,
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
-              const { data, error } = await deleteCustomer(selectedCustomer.id);
-
-              if (error) {
-                setError(error);
-              } else if (data) {
+              try {
+                await api.deleteCustomer(officeId, selectedCustomer.id, token);
                 onSuccess();
-                // fetchCustomers();
+              } catch (error) {
+                if (error instanceof Error) {
+                  setError(error.message);
+                }
               }
             }
           },
@@ -39,22 +42,29 @@ export default function usePanelComponentActionBtnHandlers(
             },
             onCancel: () => setWlPosPicker(null),
             onConfirm: async ({ onSuccess }) => {
-              const { customer, error } = await patchCustomer(selectedCustomer.id, {
-                divisions: [
+              try {
+                api.patchCustomer(
+                  officeId,
+                  selectedCustomer.id,
                   {
-                    name: divisionName,
-                    status: 'Waiting',
-                    // Database waiting list indexes are 1-based
-                    waitingListIndex: wlPosPicker!.index + 1
-                  }
-                ]
-              });
+                    divisions: [
+                      {
+                        name: divisionName,
+                        status: 'Waiting',
+                        // Database waiting list indexes are 1-based
+                        waitingListIndex: wlPosPicker!.index + 1
+                      }
+                    ]
+                  },
+                  token
+                );
 
-              if (error) {
-                setError(error);
-              } else if (customer) {
                 onSuccess();
                 setWlPosPicker(null);
+              } catch (error) {
+                if (error instanceof Error) {
+                  setError(error.message);
+                }
               }
             },
             confirmBtnDisabled: !wlPosPicker?.locked
@@ -66,41 +76,48 @@ export default function usePanelComponentActionBtnHandlers(
               } else if (selectedCustomer.atOtherDivision) {
                 setError('Customer is being served at another division.');
               } else {
-                const { customer, error } = await patchCustomer(
-                  selectedCustomer.id,
-                  {
-                    divisions: [
-                      {
-                        name: divisionName,
-                        status: `Desk ${deskNum}`
-                      }
-                    ]
+                try {
+                  await api.patchCustomer(
+                    officeId,
+                    selectedCustomer.id,
+                    {
+                      divisions: [
+                        {
+                          name: divisionName,
+                          status: `Desk ${deskNum}`
+                        }
+                      ]
+                    },
+                    token
+                  );
+                } catch (error) {
+                  if (error instanceof Error) {
+                    setError(error.message);
                   }
-                );
-
-                if (error) {
-                  setError(error);
-                } else if (customer) {
-                  console.log(customer);
                 }
               }
             }
           },
           finishServing: {
             onClick: async () => {
-              const { customer, error } = await patchCustomer(selectedCustomer.id, {
-                divisions: [
+              try {
+                await api.patchCustomer(
+                  officeId,
+                  selectedCustomer.id,
                   {
-                    name: divisionName,
-                    status: 'Served'
-                  }
-                ]
-              });
-
-              if (error) {
-                setError(error);
-              } else if (customer) {
-                console.log(customer);
+                    divisions: [
+                      {
+                        name: divisionName,
+                        status: 'Served'
+                      }
+                    ]
+                  },
+                  token
+                );
+              } catch (error) {
+                if (error instanceof Error) {
+                  setError(error.message);
+                }
               }
             }
           },
@@ -108,20 +125,25 @@ export default function usePanelComponentActionBtnHandlers(
             onClick: () => null,
             onCancel: () => null,
             onConfirm: async ({ onSuccess }) => {
-              const { customer, error } = await patchCustomer(selectedCustomer.id, {
-                divisions: [
+              try {
+                await api.patchCustomer(
+                  officeId,
+                  selectedCustomer.id,
                   {
-                    name: divisionName,
-                    status: 'No Show'
-                  }
-                ]
-              });
-
-              if (error) {
-                setError(error);
-              } else if (customer) {
-                // TODO: Give success indication
+                    divisions: [
+                      {
+                        name: divisionName,
+                        status: 'No Show'
+                      }
+                    ]
+                  },
+                  token
+                );
                 onSuccess();
+              } catch (error) {
+                if (error instanceof Error) {
+                  setError(error.message);
+                }
               }
             }
           }
@@ -134,8 +156,8 @@ export default function usePanelComponentActionBtnHandlers(
         customers,
         deskNum,
         divisionName,
-        patchCustomer,
-        deleteCustomer
+        token,
+        officeId
       ]
     );
 

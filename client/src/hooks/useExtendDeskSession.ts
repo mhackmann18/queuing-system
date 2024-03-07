@@ -19,21 +19,14 @@ export default function useExtendDeskSession() {
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // Exported function
   const extendSession = useCallback(async () => {
-    try {
-      const response = await api.extendUserDeskSession(officeId, userId, authToken);
+    const response = await api.extendUserDeskSession(officeId, userId, authToken);
 
-      if (response.status !== 200) {
-        throw new Error('Could not extend desk session');
-      }
+    const { sessionEndTime } = await response.data;
 
-      const { sessionEndTime } = await response.data;
-
-      setSessionEndTime(parseServerDateAsUtc(sessionEndTime));
-      setSessionAboutToExpire(false);
-    } catch (error) {
-      console.error('Error extending desk session', error);
-    }
+    setSessionEndTime(parseServerDateAsUtc(sessionEndTime));
+    setSessionAboutToExpire(false);
   }, [authToken, officeId, userId]);
 
   useEffect(() => {
@@ -43,7 +36,13 @@ export default function useExtendDeskSession() {
       }
 
       debounceTimeout.current = setTimeout(async () => {
-        extendSession();
+        try {
+          await extendSession();
+        } catch (error) {
+          if (error instanceof Error) {
+            console.log(error);
+          }
+        }
       }, TIME_BEFORE_NEXT_EXTENSION_ALLOWED);
     };
 
