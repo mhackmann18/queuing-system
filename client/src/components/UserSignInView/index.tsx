@@ -1,15 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FormGeneralUser from './FormGeneralUser';
 import UserTypeButton from './UserTypeButton';
 import { useLocation } from 'react-router-dom';
+import ErrorAlert from 'components/ErrorAlert';
 
 export default function UserSignInView() {
   const [userType, setUserType] = useState<'root' | 'general'>('general');
   const { state } = useLocation();
+  const [error, setError] = useState<string>('');
 
-  if (state?.error) {
-    alert(state.error);
-  }
+  useEffect(() => {
+    if (state?.error) {
+      // Clear the error from the url
+      window.history.replaceState({}, '', '/sign-in');
+
+      // Set the error state
+      setError(state.error);
+    }
+  }, [state]);
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -38,6 +46,13 @@ export default function UserSignInView() {
         {/* General user signin form */}
         {userType === 'general' ? <FormGeneralUser /> : 'Not implemented'}
       </div>
+      {error && (
+        <ErrorAlert
+          close={() => setError('')}
+          error={state.error}
+          styles="fixed bottom-10 right-10"
+        />
+      )}
     </div>
   );
 }
