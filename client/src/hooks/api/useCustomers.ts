@@ -17,6 +17,7 @@ export default function useCustomers(filters: CustomerFilters) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { events } = Connector();
   const { token } = useAuth();
+  const [error, setError] = useState<string>('');
 
   const statusFiltersToStatusArray = useCallback(
     (statusFilters: StatusFilters) => {
@@ -44,32 +45,33 @@ export default function useCustomers(filters: CustomerFilters) {
   const fetchCustomers = useCallback(async () => {
     const statuses = [...statusFiltersToStatusArray(filters.statuses)];
 
-    const response = await api.getCustomersWithFilters(
-      officeId,
-      {
-        dates: [new Date().toISOString()],
-        divisions: [{ name: filters.division, statuses }]
-      },
-      token
-    );
+    try {
+      const response = await api.getCustomersWithFilters(
+        officeId,
+        {
+          dates: [new Date().toISOString()],
+          divisions: [{ name: filters.division, statuses }]
+        },
+        token
+      );
 
-    if (response.status !== 200) {
-      // setError('Error fetching customers');
-      return;
-    }
+      const customers = response.data;
 
-    const data = await response.data;
+      console.log(customers);
 
-    console.log('data', data);
-
-    console.log(data);
-    setCustomers(
-      sortCustomers(
-        data.map((c: CustomerDto) =>
-          sanitizeRawCustomer(c, filters.division, deskNum)
+      setError('');
+      setCustomers(
+        sortCustomers(
+          customers.map((c: CustomerDto) =>
+            sanitizeRawCustomer(c, filters.division, deskNum)
+          )
         )
-      )
-    );
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      }
+    }
   }, [filters, officeId, statusFiltersToStatusArray, deskNum, token]);
 
   // Load new customers when filters change
@@ -84,5 +86,5 @@ export default function useCustomers(filters: CustomerFilters) {
     });
   }, [events, filters.division, fetchCustomers]);
 
-  return { customers };
+  return { customers, error };
 }

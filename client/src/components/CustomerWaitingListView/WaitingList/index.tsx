@@ -2,6 +2,7 @@ import useCustomers from 'hooks/api/useCustomers';
 import { useMemo, useEffect, useState } from 'react';
 import { WaitingListProps } from './types';
 import { Customer } from 'utils/types';
+import ErrorView from 'components/ErrorView';
 
 export default function WaitingList({ division }: WaitingListProps) {
   const filters = useMemo(
@@ -12,12 +13,16 @@ export default function WaitingList({ division }: WaitingListProps) {
     }),
     [division]
   );
-  const { customers: initialCustomers } = useCustomers(filters);
+  const { customers: initialCustomers, error } = useCustomers(filters);
   const [customers, setCustomers] = useState<Customer[] | null>(null);
 
   useEffect(() => {
     setCustomers(initialCustomers);
   }, [initialCustomers]);
+
+  if (error) {
+    return <ErrorView error={error} />;
+  }
 
   return (
     <div key={division} className="flex-1 border-r-4 last:border-r-0">
