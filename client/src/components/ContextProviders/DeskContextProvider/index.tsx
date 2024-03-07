@@ -6,6 +6,7 @@ import api from 'utils/api';
 import { DeskContext } from './context';
 import { Desk } from './context';
 import { parseServerDateAsUtc } from 'utils/helpers';
+import ErrorView from 'components/ErrorView';
 
 export default function DeskContextProvider({
   children
@@ -49,54 +50,32 @@ export default function DeskContextProvider({
   }, [events, userToken]);
 
   const sitAtDesk = useCallback(
-    async (desk: Desk): Promise<void> => {
-      setLoading(true);
-      try {
-        // Sit user at desk
-        const response = await api.postUserToDesk(officeId, userId, desk, userToken);
+    async (desk: Desk): Promise<Desk> => {
+      // Sit user at desk
+      const response = await api.postUserToDesk(officeId, userId, desk, userToken);
 
-        if (response.status !== 200) {
-          throw new Error('Could not sit at desk');
-        }
+      const { divisionName, number, sessionEndTime } = response.data;
 
-        const { divisionName, number, sessionEndTime } = response.data;
+      setOriginalSessionEndTime(parseServerDateAsUtc(sessionEndTime));
 
-        setOriginalSessionEndTime(parseServerDateAsUtc(sessionEndTime));
+      setDesk({
+        divisionName,
+        number
+      });
 
-        console.log(sessionEndTime);
-        console.log(new Date(sessionEndTime));
-
-        setDesk({
-          divisionName,
-          number
-        });
-      } catch (error) {
-        setError(String(error));
-      } finally {
-        setLoading(false);
-      }
+      return { divisionName, number };
     },
     [officeId, userId, userToken]
   );
 
   const leaveDesk = useCallback(async (): Promise<void> => {
-    setLoading(true);
     // Get user up from desk
-    try {
-      const response = await api.deleteUserFromDesk(officeId, userId, userToken);
+    await api.deleteUserFromDesk(officeId, userId, userToken);
 
-      if (response.status !== 200) {
-        throw new Error('Could not leave desk');
-      }
-
-      setDesk(null);
-    } catch (error) {
-      setError(String(error));
-    } finally {
-      setLoading(false);
-    }
+    setDesk(null);
   }, [userId, officeId, userToken]);
 
+  // Get user's desk on component mount
   useEffect(() => {
     const getDesk = async () => {
       const res = await api.getUserFromAuthToken(userToken);
@@ -132,8 +111,7 @@ export default function DeskContextProvider({
   }
 
   if (error) {
-    console.error(error);
-    return <p>There was a problem loading the desk context</p>;
+    return <ErrorView error={error} />;
   }
 
   return (

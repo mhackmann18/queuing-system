@@ -4,24 +4,31 @@ import { useNavigate } from 'react-router-dom';
 import useDivisions from 'hooks/api/useDivisions';
 import { DivisionDto } from 'hooks/api/types';
 import { DeskContext } from 'components/ContextProviders/DeskContextProvider/context';
+import ErrorAlert from 'components/ErrorAlert';
 
 export default function DeskPickerView() {
   const navigate = useNavigate();
   const [deskAvailabilityByDivision, setDeskAvailabilityByDivision] = useState<
     DivisionDto[]
   >([]);
-  const { sitAtDesk, desk } = useContext(DeskContext);
+  const { sitAtDesk } = useContext(DeskContext);
   const {
     divisions,
-    error: divisionsError,
-    loading: divisionsLoading
+    loading: divisionsLoading,
+    error: divisionsError
   } = useDivisions();
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    if (desk) {
-      navigate(getDeskNameLink(desk.divisionName, desk.number));
+    if (divisionsError) {
+      setError(divisionsError);
     }
-  }, [desk, navigate]);
+  }, [divisionsError]);
+  // useEffect(() => {
+  //   if (desk) {
+  //     navigate(getDeskNameLink(desk.divisionName, desk.number));
+  //   }
+  // }, [desk, navigate]);
 
   // Fetch desk availability on component mount
   useEffect(() => {
@@ -62,7 +69,18 @@ export default function DeskPickerView() {
                   const deskNum = index + 1;
 
                   const handleDeskClick = async () => {
-                    sitAtDesk({ divisionName, number: deskNum });
+                    try {
+                      const desk = await sitAtDesk({
+                        divisionName,
+                        number: deskNum
+                      });
+                      navigate(getDeskNameLink(desk.divisionName, desk.number));
+                    } catch (error) {
+                      if (error instanceof Error) {
+                        // TODO handle error
+                        setError(error.message);
+                      }
+                    }
                   };
 
                   return (
@@ -84,6 +102,13 @@ export default function DeskPickerView() {
           )
         )}
       </div>
+      {error && (
+        <ErrorAlert
+          error={error}
+          close={() => setError('')}
+          styles={'fixed bottom-10 right-10'}
+        />
+      )}
     </div>
   );
 }

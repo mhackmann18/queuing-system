@@ -7,7 +7,7 @@ export interface Desk {
 
 interface DeskContextT {
   desk: Desk | null;
-  sitAtDesk: (desk: Desk) => Promise<void>;
+  sitAtDesk: (desk: Desk) => Promise<Desk>;
   leaveDesk: () => Promise<void>;
   originalSessionEndTime: Date | null;
 }

@@ -18,15 +18,13 @@ export default function useDivisions() {
     try {
       const response = await api.getOfficeDivisions(officeId, token);
 
-      if (response.status !== 200) {
-        throw new Error('Could not load divisions');
-      }
-
       const divisions = response.data;
 
       setDivisions(divisions);
     } catch (error) {
-      setError(String(error));
+      if (error instanceof Error) {
+        setError(error.message);
+      }
     } finally {
       setLoading(false);
     }
