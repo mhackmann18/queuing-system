@@ -23,20 +23,17 @@ export default function CustomerCheckInViewForm({
     reasonForVisit
   }) => {
     try {
-      await checkInCustomer({
+      const response = await checkInCustomer({
         fullName,
         divisionNames: reasonForVisit
       });
+
+      onSubmitSuccess(response.customer);
     } catch (error) {
       if (error instanceof Error) {
         setSubmitError(error.message);
       }
     }
-
-    console.log(onSubmitSuccess);
-    // if (res.customer) {
-    //   onSubmitSuccess(sanitizeRawCustomer(res.customer));
-    // }
   };
 
   return (
