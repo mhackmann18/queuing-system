@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Error from 'components/Error';
+import ErrorAlert from 'components/Error';
 import TextInputLabel from 'components/Form/TextInputLabel';
 import SubmitBtn from 'components/Form/SubmitBtn';
 import TextInput from 'components/Form/TextInput';
@@ -26,7 +26,13 @@ export default function FormGeneralUser() {
 
   const onSubmit = async ({ username, password }: FormData) => {
     // Login function will redirect to the appropriate page on success
-    login({ username, password });
+    try {
+      await login({ username, password });
+    } catch (error) {
+      if (error instanceof Error) {
+        setSubmitError(error.message);
+      }
+    }
   };
 
   return (
@@ -59,7 +65,11 @@ export default function FormGeneralUser() {
 
       {/* Submit Error */}
       {submitError && (
-        <Error error={submitError} close={() => setSubmitError('')} styles="mt-4" />
+        <ErrorAlert
+          error={submitError}
+          close={() => setSubmitError('')}
+          styles="mt-4"
+        />
       )}
     </form>
   );

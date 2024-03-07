@@ -1,6 +1,28 @@
 import { API_BASE_PATH } from 'utils/constants';
 import axios from 'axios';
 
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.log(error);
+    if (!axios.isAxiosError(error)) {
+      throw new Error(String(error));
+    }
+
+    if (error.response) {
+      if (error.response.status < 500) {
+        throw new Error(error.response.data || error.message || String(error));
+      } else {
+        throw new Error('Server error');
+      }
+    } else if (error.request) {
+      throw new Error('The server did not respond');
+    } else {
+      throw new Error(error.message || 'An error occurred');
+    }
+  }
+);
+
 // Courtesy of https://www.wolff.fun/definitive-guide-react-apis/
 const api = {
   get: (endpoint: string, authToken?: string) =>

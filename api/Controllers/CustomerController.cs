@@ -1179,7 +1179,7 @@ public partial class CustomerController : ControllerBase
 
         if (existingUser == null)
         {
-            return BadRequest("Username not found");
+            return Unauthorized("Username or password is incorrect");
         }
 
         // Check if the password is correct
@@ -1187,12 +1187,12 @@ public partial class CustomerController : ControllerBase
         {
             if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.PasswordHash))
             {
-                return BadRequest("Incorrect password");
+                return Unauthorized("Username or password is incorrect");
             }
         }
         else
         {
-            return BadRequest("Password cannot be null");
+            return BadRequest("Password field is required");
         }
 
         // JWT token generation starts here
