@@ -1,8 +1,8 @@
 import { IoCloseOutline } from 'react-icons/io5';
 import { MdError } from 'react-icons/md';
-import { ErrorProps } from './types';
+import { ErrorAlertProps } from './types';
 
-export default function Error({ error, close, styles = '' }: ErrorProps) {
+export default function ErrorAlert({ error, close, styles = '' }: ErrorAlertProps) {
   return (
     <div
       className={`rounded-md border-2 border-red-500 bg-white p-3 shadow-md ${styles}`}

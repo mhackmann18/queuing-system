@@ -5,7 +5,7 @@ import { useEffect, useState, useContext } from 'react';
 import CustomerList from './CustomerList';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/api/useCustomers';
-import Error from 'components/Error';
+import ErrorAlert from 'components/ErrorAlert';
 import { sameDay, getNextSelectedCustomer } from 'utils/helpers';
 import { WaitingListPositionPickerState } from 'utils/types';
 import { CustomerPanelActionEventHandlers } from './CustomerPanel/types';
@@ -148,7 +148,7 @@ export default function CustomerManagerView() {
       )}
       {error && (
         <div className={`${!wlPosPicker && 'z-20'} absolute bottom-10 right-10`}>
-          <Error error={error} close={() => setError('')} />
+          <ErrorAlert error={error} close={() => setError('')} />
         </div>
       )}
     </div>

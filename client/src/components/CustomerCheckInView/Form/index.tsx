@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Error from 'components/Error';
+import ErrorAlert from 'components/ErrorAlert';
 import { CheckInFormProps, CheckInFormValues } from './types';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FULL_NAME_MAX_LENGTH, REQUIRED_FIELD_ERROR } from 'utils/constants';
@@ -22,21 +22,21 @@ export default function CustomerCheckInViewForm({
     fullName,
     reasonForVisit
   }) => {
-    const res = await checkInCustomer({
-      fullName,
-      divisionNames: reasonForVisit
-    });
-
-    if (res.error) {
-      setSubmitError(
-        "There's been a problem with the server. Please see a clerk for assistance."
-      );
-      return;
+    try {
+      await checkInCustomer({
+        fullName,
+        divisionNames: reasonForVisit
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        setSubmitError(error.message);
+      }
     }
 
-    if (res.customer) {
-      onSubmitSuccess(res.customer);
-    }
+    console.log(onSubmitSuccess);
+    // if (res.customer) {
+    //   onSubmitSuccess(sanitizeRawCustomer(res.customer));
+    // }
   };
 
   return (
@@ -95,7 +95,11 @@ export default function CustomerCheckInViewForm({
 
       {/* Submit Error */}
       {submitError && (
-        <Error error={submitError} close={() => setSubmitError('')} styles="mt-4" />
+        <ErrorAlert
+          error={submitError}
+          close={() => setSubmitError('')}
+          styles="mt-4"
+        />
       )}
     </form>
   );

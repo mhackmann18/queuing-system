@@ -1,4 +1,4 @@
-export interface ErrorProps {
+export interface ErrorAlertProps {
   error: string;
   close: () => void;
   styles?: string;

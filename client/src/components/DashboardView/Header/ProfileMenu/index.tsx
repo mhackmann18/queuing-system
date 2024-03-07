@@ -1,6 +1,6 @@
 import { useRef, RefObject, useEffect, useState } from 'react';
 import useAuth from 'hooks/useAuth';
-import Error from 'components/Error';
+import ErrorAlert from 'components/ErrorAlert';
 
 interface ProfileMenuProps {
   open: boolean;
@@ -67,7 +67,7 @@ export default function ProfileMenu({
         </button>
       </div>
       {error && (
-        <Error
+        <ErrorAlert
           styles="fixed bottom-10 right-10 text-base"
           error={error}
           close={() => setError('')}

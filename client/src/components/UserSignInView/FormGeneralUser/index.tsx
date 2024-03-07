@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import ErrorAlert from 'components/Error';
+import ErrorAlert from 'components/ErrorAlert';
 import TextInputLabel from 'components/Form/TextInputLabel';
 import SubmitBtn from 'components/Form/SubmitBtn';
 import TextInput from 'components/Form/TextInput';

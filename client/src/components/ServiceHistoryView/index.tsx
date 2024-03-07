@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import CustomerList from 'components/CustomerManagerView/CustomerList';
 import useCustomers from 'hooks/api/useCustomersV2';
 import { Customer, DBCustomerStatus } from 'utils/types';
-import Error from 'components/Error';
+import ErrorAlert from 'components/ErrorAlert';
 import CustomerPanel from 'components/CustomerManagerView/CustomerPanel';
 import useOffice from 'hooks/useOffice';
 import DateToggler from 'components/CustomerManagerView/Header/DateToggler';
@@ -112,7 +112,7 @@ export default function ServiceHistoryView() {
 
       {error && (
         <div className={`fixed bottom-10 right-10 z-20`}>
-          <Error error={error} close={() => setError('')} />
+          <ErrorAlert error={error} close={() => setError('')} />
         </div>
       )}
     </div>
