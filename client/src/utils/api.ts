@@ -11,6 +11,9 @@ axios.interceptors.response.use(
 
     if (error.response) {
       if (error.response.status < 500) {
+        if (error.response.status === 401) {
+          return Promise.reject(error);
+        }
         throw new Error(error.response.data || error.message || String(error));
       } else {
         throw new Error('Server error');

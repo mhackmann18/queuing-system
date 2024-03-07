@@ -5,6 +5,7 @@ import TextInputLabel from 'components/Form/TextInputLabel';
 import SubmitBtn from 'components/Form/SubmitBtn';
 import TextInput from 'components/Form/TextInput';
 import useAuth from 'hooks/useAuth';
+import axios from 'axios';
 
 // interface FormGeneralUserProps {
 //   onSubmitSuccess?: (data: unknown) => void;
@@ -29,7 +30,11 @@ export default function FormGeneralUser() {
     try {
       await login({ username, password });
     } catch (error) {
-      if (error instanceof Error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          setSubmitError(error.response.data);
+        }
+      } else if (error instanceof Error) {
         setSubmitError(error.message);
       }
     }
