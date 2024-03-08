@@ -1,0 +1,29 @@
+# Ignore build artifacts
+bin/
+obj/
+
+# Ignore NuGet packages
+*.nupkg
+
+# Ignore Visual Studio files
+.vs/
+*.suo
+*.user
+*.sln.docstates
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore node_modules folder (if using Node.js)
+node_modules/
+
+# Ignore packages folder (if using NuGet)
+packages/
+
+# Ignore .NET Core build artifacts
+*.dll
+*.exe
+*.pdb
+*.deps.json
+*.runtimeconfig.json

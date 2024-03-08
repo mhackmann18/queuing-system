@@ -1,0 +1,18 @@
+# Use the official ASP.NET Core SDK image as the base image
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the project file and restore dependencies
+COPY *.csproj ./
+RUN dotnet restore
+
+# Copy the remaining source code
+COPY . ./
+
+# Expose the port used by the application
+EXPOSE 5274
+
+# Start the application
+CMD ["dotnet", "watch", "run", "--urls", "http://+:5274" ]

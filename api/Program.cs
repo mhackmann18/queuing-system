@@ -8,8 +8,19 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using CustomerApi.Requirements;
 using CustomerApi.Services;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Load environment variables from .env file
+if(builder.Environment.IsDevelopment())
+{
+    Env.Load(".env.dev");
+}
+else if(builder.Environment.IsProduction())
+{
+    Env.Load(".env.prod");
+}
 
 // Jwt configuration starts here
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
@@ -67,8 +78,15 @@ builder.Services.AddHostedService<ClearOldCustomersService>();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+
+// MySql configuration
+string? dbServer = Environment.GetEnvironmentVariable("DB_HOST");
+string? dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+string? dbUser = Environment.GetEnvironmentVariable("DB_USER");
+string? dbName = Environment.GetEnvironmentVariable("DB_NAME");
+
 builder.Services.AddDbContext<CustomerContext>(options =>
-    options.UseMySql("Server=127.0.0.1;User ID=root;Password=SurfBreak1270!;Database='queuing_system'", new MySqlServerVersion(new Version(8, 0, 33))));
+    options.UseMySql($"Server={dbServer};User ID={dbUser};Password={dbPassword};Database='{dbName}'", new MySqlServerVersion(new Version(8, 0, 33))));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMySqlDataSource(builder.Configuration.GetConnectionString("Default")!);
