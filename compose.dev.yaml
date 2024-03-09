@@ -24,6 +24,10 @@ services:
       dockerfile: Dockerfile.dev
     depends_on:
       - db
+    environment:
+      JWT_SECRET: jwt_secret
+    secrets:
+      - jwt_secret
 
   db:
     image: mhackmann18/qs-db:dev
