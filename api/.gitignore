@@ -270,6 +270,10 @@ paket-files/
 __pycache__/
 *.pyc
 
+# Environment variable
+.env
+.env.*
+
 # Cake - Uncomment if you are using it
 # tools/
 

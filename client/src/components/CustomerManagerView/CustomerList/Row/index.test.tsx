@@ -10,7 +10,7 @@ const mockOnClick = jest.fn();
 
 // Mock the customer data
 const mockCustomer: Customer = {
-  id: 1,
+  id: '',
   status: 'Served',
   name: 'John Doe',
   checkInTime: new Date('2023-01-01T10:00:00Z'),
@@ -52,7 +52,7 @@ describe.each([
       name: 'John Doe',
       timesCalled: [new Date()],
       checkInTime: new Date(),
-      id: 1,
+      id: '',
       reasonsForVisit: ['Motor Vehicle']
     };
 

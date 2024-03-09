@@ -1,6 +1,6 @@
 import * as signalR from '@microsoft/signalr';
 
-const URL = 'http://localhost:5274/hub'; //or whatever your backend port is
+const URL = import.meta.env.VITE_HUB_BASE_PATH;
 
 class Connector {
   private connection: signalR.HubConnection;

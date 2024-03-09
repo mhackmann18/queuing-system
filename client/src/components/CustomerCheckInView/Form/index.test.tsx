@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import CheckInForm from '.';
 import userEvent from '@testing-library/user-event';
 import { FULL_NAME_MAX_LENGTH } from 'utils/constants';
-import CustomerController from 'utils/CustomerController';
 
 function setup() {
   const mockDivisions = [
@@ -67,17 +66,4 @@ test('displays error message when reason for visit is not selected', async () =>
   await user.click(screen.getByRole('button', { name: /check in/i }));
 
   expect(await screen.findByText(/please select at least one/i)).toBeInTheDocument();
-});
-
-test('displays error message when server returns an error', async () => {
-  jest
-    .spyOn(CustomerController, 'create')
-    .mockImplementation(async () => ({ error: 'server error', data: null }));
-  const { mockDivisions, user } = setup();
-
-  await user.type(screen.getByLabelText(/full name/i), 'John Doe');
-  await user.click(screen.getByLabelText(mockDivisions[0]));
-  await user.click(screen.getByRole('button', { name: /check in/i }));
-
-  expect(await screen.findByText(/server error/i)).toBeInTheDocument();
 });

@@ -5,9 +5,7 @@ import { UserContext } from './context';
 
 export default function UserContextProvider({ children }: UserContextProviderProps) {
   const [user] = useState<User>({
-    id: 1,
-    division: 'Motor Vehicle',
-    deskNum: 1,
+    id: '',
     firstName: 'John',
     lastName: 'Doe',
     username: 'johndoe'
