@@ -34,6 +34,16 @@ services:
     build:
       context: ./db
       dockerfile: Dockerfile.dev
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_password
+    secrets:
+      - mysql_password
+
+secrets:
+  mysql_password:
+    file: mysql_password.txt
+  jwt_secret:
+    file: jwt_secret.txt
 
 volumes:
   data:
