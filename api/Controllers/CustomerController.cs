@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
 
 namespace CustomerApi.Controllers;
 
@@ -1196,7 +1197,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // JWT token generation starts here
-        var jwtKey = _config["Jwt:Key"];
+        var jwtKey = _config["JWT_SECRET"];
         if (jwtKey == null)
         {
             return BadRequest("JWT key not found");
