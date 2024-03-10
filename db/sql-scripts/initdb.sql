@@ -157,23 +157,4 @@ INSERT INTO Desk (divisionName, divisionOfficeId, number) VALUES
 ('Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 1),
 ('Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 2);
 
--- Inserting dummy values into Customer table
--- INSERT INTO Customer (customerId, fullName, checkInTime) VALUES
--- ('1056cc0c-c844-11ee-851b-4529fd7b70be', 'John Doe', NOW()),
--- ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Jane Smith', NOW()),
--- ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Michael Johnson', NOW()),
--- ('1056d904-c844-11ee-851b-4529fd7b70be', 'Emily Brown', NOW());
-
--- Inserting dummy values into CustomerDivision table
--- INSERT INTO CustomerDivision (customerId, divisionName, officeId, status, waitingListIndex) VALUES
--- ('1056cc0c-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
--- ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Desk 1', NULL),
--- ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'Waiting', 1),
--- ('1056d904-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', 'No Show', NULL);
-
--- Inserting dummy values into CustomerDivisionTimeCalled table
--- INSERT INTO CustomerDivisionTimeCalled (customerId, divisionName, officeId, timeCalled) VALUES
--- ('1056d5d0-c844-11ee-851b-4529fd7b70be', 'Motor Vehicle', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW()),
--- ('1056d7a6-c844-11ee-851b-4529fd7b70be', 'Driver License', '1056cc0c-c844-11ee-851b-4529fd7b70be', NOW());
-
 SELECT VERSION();
