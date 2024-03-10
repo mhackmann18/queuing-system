@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MySqlConnector;
 using Newtonsoft.Json;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,7 +85,8 @@ builder.Services.AddSignalR();
 
 // MySql configuration
 string? dbServer = Environment.GetEnvironmentVariable("DB_HOST");
-string? dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+string? dbPasswordPath = Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD_FILE");
+string dbPassword = File.ReadAllText(dbPasswordPath!);
 string? dbUser = Environment.GetEnvironmentVariable("DB_USER");
 string? dbName = Environment.GetEnvironmentVariable("DB_NAME");
 

@@ -26,8 +26,10 @@ services:
       - db
     environment:
       JWT_SECRET: jwt_secret
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_password
     secrets:
       - jwt_secret
+      - mysql_password
 
   db:
     image: mhackmann18/qs-db:dev
