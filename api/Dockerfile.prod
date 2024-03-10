@@ -33,4 +33,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 COPY .env.prod ./
 
 # Start the application
-ENTRYPOINT ["dotnet", "TodoApi.dll", "--urls", "http://+:8080"]
+ENTRYPOINT ["dotnet", "TodoApi.dll", "--urls", "https://+:8080"]
