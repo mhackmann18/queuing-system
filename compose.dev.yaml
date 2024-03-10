@@ -25,7 +25,7 @@ services:
     depends_on:
       - db
     environment:
-      JWT_SECRET: jwt_secret
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_password
     secrets:
       - jwt_secret

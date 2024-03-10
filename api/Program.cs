@@ -25,7 +25,8 @@ else if(builder.Environment.IsProduction())
 
 // Jwt configuration starts here
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
-var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>();
+string? jwtSecretPath = Environment.GetEnvironmentVariable("JWT_SECRET_FILE");
+var jwtKey = File.ReadAllText(jwtSecretPath!);
 
 if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtKey))
 {

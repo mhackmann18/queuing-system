@@ -1197,7 +1197,8 @@ public partial class CustomerController : ControllerBase
         }
 
         // JWT token generation starts here
-        var jwtKey = _config["JWT_SECRET"];
+        string? jwtSecretPath = _config["JWT_SECRET_FILE"];
+        string jwtKey = System.IO.File.ReadAllText(jwtSecretPath!);
         if (jwtKey == null)
         {
             return BadRequest("JWT key not found");
