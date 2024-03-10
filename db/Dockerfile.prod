@@ -7,7 +7,6 @@ RUN echo "[mysqld]" >> /etc/mysql/my.cnf && \
 
 # Set environment variables
 ENV MYSQL_DATABASE=queuing_system
-ENV MYSQL_ROOT_PASSWORD=SurfBreak1270!
 
 # When container starts, this script will be executed
 COPY ./sql-scripts/ /docker-entrypoint-initdb.d/
