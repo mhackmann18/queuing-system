@@ -123,6 +123,7 @@ app.UseCors(x =>
 
 app.UseHttpsRedirection();
 app.UseMiddleware<WebSocketsMiddleware>();
+app.UseMiddleware<SecretKeyMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

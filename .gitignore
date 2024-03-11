@@ -1,3 +1,4 @@
 .DS_Store
 mysql_password.txt
 jwt_secret.txt
+secret_key.txt
