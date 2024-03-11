@@ -114,11 +114,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+string? corsAllowedOrigin = builder.Configuration["CORS_ALLOWED_ORIGIN"];
+
+if(corsAllowedOrigin == null){
+    throw new Exception("CORS_ALLOWED_ORIGIN environment variable is missing");
+}
+
 app.UseCors(x =>
     x.AllowAnyMethod()
         .AllowAnyHeader()
-        .SetIsOriginAllowed(origin => true) // allow any origin
+        // .SetIsOriginAllowed(origin => true) // allow any origin
         .AllowCredentials()
+        .WithOrigins(corsAllowedOrigin)
 ); // allow credentials
 
 app.UseHttpsRedirection();
