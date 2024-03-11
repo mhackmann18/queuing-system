@@ -2,31 +2,26 @@ using System.Text;
 using CustomerApi.Models;
 using CustomerApi.Requirements;
 using CustomerApi.Services;
-using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MySqlConnector;
 using Newtonsoft.Json;
+using CustomerApi.Middleware;
 using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load environment variables from .env file
-if (builder.Environment.IsDevelopment())
-{
-    Env.Load(".env.dev");
-}
-else if(builder.Environment.IsProduction())
-{
-    Env.Load(".env.prod");
-}
-
 // Jwt configuration starts here
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
-string? jwtSecretPath = Environment.GetEnvironmentVariable("JWT_SECRET_FILE");
-var jwtKey = File.ReadAllText(jwtSecretPath!);
+string? jwtKeyFilePath = builder.Configuration["JWT_SECRET_FILE"];
+
+if(jwtKeyFilePath == null){
+    throw new Exception("JWT_SECRET_FILE environment variable is missing");
+}
+
+string jwtKey = File.ReadAllText(jwtKeyFilePath);
 
 if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtKey))
 {
@@ -82,14 +77,22 @@ builder.Services.AddHostedService<ClearOldCustomersService>();
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(hubOptions =>
+{
+    hubOptions.EnableDetailedErrors = true;
+});
 
 // MySql configuration
-string? dbServer = Environment.GetEnvironmentVariable("DB_HOST");
-string? dbPasswordPath = Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD_FILE");
-string dbPassword = File.ReadAllText(dbPasswordPath!);
-string? dbUser = Environment.GetEnvironmentVariable("DB_USER");
-string? dbName = Environment.GetEnvironmentVariable("DB_NAME");
+string? dbServer = builder.Configuration["DB_HOST"];
+string? dbPasswordPath = builder.Configuration["MYSQL_ROOT_PASSWORD_FILE"];
+
+if(dbPasswordPath == null){
+    throw new Exception("MYSQL_ROOT_PASSWORD_FILE environment variable is missing");
+}
+
+string dbPassword = File.ReadAllText(dbPasswordPath);
+string? dbUser = builder.Configuration["DB_USER"];
+string? dbName = builder.Configuration["DB_NAME"];
 
 builder.Services.AddDbContext<CustomerContext>(options =>
     options.UseMySql(
@@ -119,6 +122,8 @@ app.UseCors(x =>
 ); // allow credentials
 
 app.UseHttpsRedirection();
+app.UseMiddleware<WebSocketsMiddleware>();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<SignalrHub>("/hub");

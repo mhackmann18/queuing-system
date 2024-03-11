@@ -16,8 +16,12 @@ class Connector {
   static instance: Connector;
 
   constructor() {
+    const token = localStorage.getItem('token') || '';
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(URL)
+      .withUrl(URL, {
+        // Includes token as a query parameter (NOT IN THE AUTHORIZATION HEADER!)
+        accessTokenFactory: () => token
+      })
       .withAutomaticReconnect()
       .build();
     this.connection.start().catch((err) => console.log(err));

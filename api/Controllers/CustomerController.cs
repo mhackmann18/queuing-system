@@ -24,18 +24,21 @@ public partial class CustomerController : ControllerBase
     private readonly IHubContext<SignalrHub> _hubContext;
     private readonly ILogger<CustomerController> _logger;
     private readonly IConfiguration _config;
+    private readonly IWebHostEnvironment _env;
 
     public CustomerController(
         CustomerContext context,
         IHubContext<SignalrHub> hubContext,
         ILogger<CustomerController> logger,
-        IConfiguration config
+        IConfiguration config,
+        IWebHostEnvironment env
     )
     {
         _context = context;
         _logger = logger;
         _hubContext = hubContext;
         _config = config;
+        _env = env;
     }
 
     [Authorize]
@@ -1198,7 +1201,14 @@ public partial class CustomerController : ControllerBase
 
         // JWT token generation starts here
         string? jwtSecretPath = _config["JWT_SECRET_FILE"];
-        string jwtKey = System.IO.File.ReadAllText(jwtSecretPath!);
+
+        if (jwtSecretPath == null)
+        {
+            return BadRequest("JWT secret file not found");
+        }
+
+        string jwtKey = System.IO.File.ReadAllText(jwtSecretPath);
+
         if (jwtKey == null)
         {
             return BadRequest("JWT key not found");

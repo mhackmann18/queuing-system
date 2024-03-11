@@ -29,8 +29,5 @@ EXPOSE 8080
 # Set environment to production
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Copy the .env.prod file
-COPY .env.prod ./
-
 # Start the application
 ENTRYPOINT ["dotnet", "TodoApi.dll", "--urls", "https://+:8080"]
