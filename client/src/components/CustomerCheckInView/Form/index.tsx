@@ -44,9 +44,9 @@ export default function CustomerCheckInViewForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col text-2xl">
       {/* Full Name */}
-      <label htmlFor="fullName" className="mb-1 font-semibold">
+      <label htmlFor="fullName" className="mb-2 font-semibold">
         Full Name
       </label>
       <input
@@ -59,7 +59,7 @@ export default function CustomerCheckInViewForm({
             message: `Maximum length of ${FULL_NAME_MAX_LENGTH} characters`
           }
         })}
-        className={`rounded-md border p-2 ${
+        className={`rounded-md border p-3 ${
           errors.fullName ? 'border-red-600' : 'border-french_gray_2-600'
         }`}
       />
@@ -70,7 +70,7 @@ export default function CustomerCheckInViewForm({
       {/* Reason for Visit */}
       <fieldset
         name="reasonForVisit"
-        className={`mt-4 rounded-md border p-2 ${
+        className={`mt-4 rounded-md border p-3 ${
           errors.reasonForVisit ? 'border-red-600' : 'border-french_gray_2-600'
         }`}
       >
@@ -95,7 +95,7 @@ export default function CustomerCheckInViewForm({
       )}
 
       {/* Submit Button */}
-      <SubmitBtn text="Check In" styles="mt-6" />
+      <SubmitBtn text="Check In" styles="mt-6 py-4" />
 
       {/* Submit Error */}
       {submitError && (

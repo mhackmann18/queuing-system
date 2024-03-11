@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import SuccessPage from './SuccessPage';
 import CheckIn from './CheckIn';
+import { Helmet } from 'react-helmet';
 
 const SUCCESS_MESSAGE_DURATION = 5000;
 
@@ -23,6 +24,12 @@ export default function CustomerCheckInView() {
 
   return (
     <div className="fixed inset-0 z-20 h-lvh w-screen bg-white">
+      <Helmet>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        />
+      </Helmet>
       {!displaySuccess ? (
         <div className="flex h-full">
           <CheckIn
