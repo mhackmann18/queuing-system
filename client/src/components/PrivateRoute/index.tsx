@@ -1,46 +1,48 @@
-import { ReactElement, useEffect, useState, useRef } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import useAuth from 'hooks/useAuth';
-import axios from 'axios';
+import { ReactElement, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import app from 'utils/initFirebase';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
 
+/**
+ * `PrivateRoute` is a React component that provides a private route functionality.
+ * It checks if the user is authenticated and if not, it redirects to the '/sign-in' route.
+ * If the user is authenticated, it renders the child components.
+ *
+ * @component
+ * @param {Object} props The props that are passed to this component.
+ * @param {ReactElement} props.children The child components that this route will render if the user is authenticated.
+ *
+ * @returns {JSX.Element|null} Returns the child components if the user is authenticated, otherwise returns null.
+ *
+ * @example
+ * <PrivateRoute>
+ *   <YourComponent />
+ * </PrivateRoute>
+ */
 export default function PrivateRoute({ children }: { children: ReactElement }) {
-  const { token, user, logOut } = useAuth();
+  // Default to true while we check if the user is authenticated
   const [loading, setLoading] = useState<boolean>(true);
+
   const navigate = useNavigate();
-  const interceptorRef = useRef<number>(0);
 
-  // Log out if the user makes a request and gets a 401 (unauthorized) response from any api call
+  // Check if the user is authenticated when the component mounts
   useEffect(() => {
-    interceptorRef.current = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          logOut();
-          navigate('/sign-in', {
-            state: { error: 'Your session has expired. Please sign in again.' }
-          });
-        }
-        return Promise.reject(error);
+    const unsubscribe = onAuthStateChanged(getAuth(app), (user) => {
+      // If the user is not authenticated, redirect to the sign-in page
+      if (!user) {
+        navigate('/sign-in');
+      } else {
+        // Will trigger a re-render and render the child components
+        setLoading(false);
       }
-    );
+    });
 
-    return () => {
-      axios.interceptors.response.eject(interceptorRef.current);
-    };
-  }, [navigate, logOut]);
+    return () => unsubscribe();
+  }, [navigate]);
 
-  useEffect(() => {
-    if (token && user) {
-      setLoading(false);
-    }
-  }, [token, user]);
-
-  if (!token) {
-    return <Navigate to="/sign-in" />;
-  }
-
+  // TODO: Add loading indicator
   if (loading) {
-    return <div>Loading...</div>;
+    return null;
   }
 
   return children;

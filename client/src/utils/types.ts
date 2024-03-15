@@ -10,9 +10,7 @@ export type ManageCustomerAction =
   | 'Return to Waiting List';
 
 export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
+  email: string;
   username: string;
 }
 

@@ -1,91 +1,101 @@
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from 'firebase/auth';
+import app from 'utils/initFirebase';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { AuthContext } from './context';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'utils/types';
-import api from 'utils/api';
-import axios from 'axios';
 
-export interface AuthContextProviderProps {
-  children: ReactNode;
-}
-
-export default function AuthContextProvider({ children }: AuthContextProviderProps) {
+/**
+ * `AuthContextProvider` is a React component that provides an authentication context to its children.
+ * It maintains the state of the current user and provides functions to log in and log out.
+ *
+ * @component
+ * @param {Object} props The props that are passed to this component.
+ * @param {ReactNode} props.children The child components over which this context provider will be applied.
+ *
+ * @returns {JSX.Element} Returns a `AuthContext.Provider` component that wraps the children, providing them access to the authentication context.
+ *
+ * @example
+ * <AuthContextProvider>
+ *   <YourComponent />
+ * </AuthContextProvider>
+ */
+export default function AuthContextProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
   const navigate = useNavigate();
 
-  // Exposed function to log out a user
-  const logOut = useCallback(() => {
-    setUser(null);
-    setToken('');
-    localStorage.removeItem('token');
-    navigate('/sign-in');
-  }, [navigate]);
-
-  // useEffect(() => {
-  //   // Check for token in local storage every 10 seconds
-  //   const intervalId = setInterval(() => {
-  //     const tokenExists = localStorage.getItem('token');
-
-  //     if (!tokenExists) {
-  //       logOut();
-  //     }
-  //   }, 10000);
-
-  //   // Cleanup function to clear the interval when the component unmounts
-  //   return () => clearInterval(intervalId);
-  // }, [logOut]);
-
-  // Attempt to get the user from the token if the token exists
+  // Check if the user is logged in
   useEffect(() => {
-    const getUserFromToken = async () => {
-      try {
-        const res = await api.getUserFromAuthToken(token);
+    const unsubscribe = onAuthStateChanged(getAuth(app), (user) => {
+      // If the user is logged in, set the user in state
+      if (user) {
+        const { email, displayName } = user;
 
-        const data = res.data;
+        if (!email) {
+          throw new Error('User does not have an id');
+        }
 
-        const { username, id, firstName, lastName } = data;
+        if (!displayName) {
+          throw new Error('User does not have a display name');
+        }
 
         setUser({
-          username,
-          id,
-          firstName,
-          lastName
+          username: displayName,
+          email
         });
-      } catch (error) {
-        // If the request was unauthorized, the token is invalid, so log out the user
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          logOut();
-        }
+
+        // If the user is not logged in, set the user in state to null
+      } else {
+        setUser(null);
       }
-    };
-
-    // If there is a token and no user, attempt to get the user from the token
-    if (token && !user) {
-      getUserFromToken();
-    }
-  }, [token, user, logOut]);
-
-  // Exposed function to login a user
-  const login = async (userCredentials: { username: string; password: string }) => {
-    const response = await api.loginUser(userCredentials);
-
-    const { username, id, firstName, lastName, token } = response.data;
-
-    setUser({
-      username,
-      id,
-      firstName,
-      lastName
     });
 
-    setToken(token);
-    localStorage.setItem('token', token);
+    return () => unsubscribe();
+  }, [navigate]);
+
+  // Logout user in firebase
+  const logOut = useCallback(async () => {
+    try {
+      await signOut(getAuth(app));
+    } catch (error) {
+      console.error('Error signing out', error);
+    }
+  }, []);
+
+  // Exposed function to login a user
+  const login = async ({
+    username,
+    password
+  }: {
+    username: string;
+    password: string;
+  }) => {
+    const response = await signInWithEmailAndPassword(
+      getAuth(app),
+      username,
+      password
+    );
+
+    const { email, displayName } = response.user;
+
+    if (!email) {
+      throw new Error('User does not have an id');
+    }
+
+    if (!displayName) {
+      throw new Error('User does not have a display name');
+    }
+
     navigate('/dashboard');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logOut }}>
+    <AuthContext.Provider value={{ user, login, logOut }}>
       {children}
     </AuthContext.Provider>
   );

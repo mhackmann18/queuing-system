@@ -7,10 +7,6 @@ import TextInput from 'components/Form/TextInput';
 import useAuth from 'hooks/useAuth';
 import axios from 'axios';
 
-// interface FormGeneralUserProps {
-//   onSubmitSuccess?: (data: unknown) => void;
-// }
-
 type FormData = {
   username: string;
   password: string;
