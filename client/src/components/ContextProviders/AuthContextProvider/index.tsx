@@ -67,7 +67,7 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
     }
   }, []);
 
-  // Exposed function to login a user
+  // Login user in firebase
   const login = async ({
     username,
     password
