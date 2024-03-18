@@ -63,7 +63,6 @@ const functions = {
     desk: object,
     authToken: string
   ) => api.post(`offices/${officeId}/users/${userId}/desk`, desk, authToken),
-  getUserFromAuthToken: (authToken: string) => api.get('users/self', authToken),
   getOfficeDivisions: (officeId: string, authToken: string) =>
     api.get(`offices/${officeId}/divisions`, authToken),
   deleteUserFromDesk: (officeId: string, userId: string, authToken: string) =>
@@ -78,7 +77,6 @@ const functions = {
     api.post(`offices/${officeId}/customers`, body, authToken),
   getCustomersWithFilters: (officeId: string, body: object, authToken: string) =>
     api.post(`offices/${officeId}/customers/query`, body, authToken),
-  loginUser: (userCredentials: object) => api.post('users/login', userCredentials),
   getOffice: (officeId: string, authToken: string) =>
     api.get(`offices/${officeId}`, authToken),
   deleteCustomer: (officeId: string, customerId: string, authToken: string) =>
