@@ -5,10 +5,12 @@ interface AuthContextT {
   user: User | null;
   login: (userCredentials: { username: string; password: string }) => Promise<void>;
   logOut: () => void;
+  token: string;
 }
 
 export const AuthContext = createContext<AuthContextT>({
   user: null,
   login: async () => {},
-  logOut: () => null
+  logOut: () => null,
+  token: ''
 });

@@ -27,14 +27,17 @@ import { User } from 'utils/types';
  */
 export default function AuthContextProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string>('');
   const navigate = useNavigate();
 
   // Check if the user is logged in
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuth(app), (user) => {
+    const unsubscribe = onAuthStateChanged(getAuth(app), async (user) => {
       // If the user is logged in, set the user in state
       if (user) {
         const { email, displayName } = user;
+
+        const userToken = await user.getIdToken();
 
         if (!email) {
           throw new Error('User does not have an id');
@@ -48,10 +51,12 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
           username: displayName,
           email
         });
+        setToken(userToken);
 
         // If the user is not logged in, set the user in state to null
       } else {
         setUser(null);
+        setToken('');
       }
     });
 
@@ -97,7 +102,7 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logOut }}>
+    <AuthContext.Provider value={{ token, user, login, logOut }}>
       {children}
     </AuthContext.Provider>
   );
