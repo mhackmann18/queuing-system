@@ -28,8 +28,8 @@ packages/
 *.deps.json
 *.runtimeconfig.json
 
-# Other ignore patterns
-firebase-private-key.json
+# Secrets
+firebase-pk.json
 jwt_secret.txt
 mysql_password.txt
 secret_key.txt
