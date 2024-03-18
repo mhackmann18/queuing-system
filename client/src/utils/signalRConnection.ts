@@ -1,4 +1,6 @@
 import * as signalR from '@microsoft/signalr';
+import app from './initFirebase';
+import { getAuth } from 'firebase/auth';
 
 const URL = import.meta.env.VITE_HUB_BASE_PATH;
 
@@ -16,7 +18,7 @@ class Connector {
   static instance: Connector;
 
   constructor() {
-    const token = localStorage.getItem('token') || '';
+    const token = getAuth(app).currentUser?.getIdToken() || '';
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(URL, {
         // Includes token as a query parameter (NOT IN THE AUTHORIZATION HEADER!)

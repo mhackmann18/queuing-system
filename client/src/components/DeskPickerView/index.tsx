@@ -24,13 +24,7 @@ export default function DeskPickerView() {
       setError(divisionsError);
     }
   }, [divisionsError]);
-  // useEffect(() => {
-  //   if (desk) {
-  //     navigate(getDeskNameLink(desk.divisionName, desk.number));
-  //   }
-  // }, [desk, navigate]);
 
-  // Fetch desk availability on component mount
   useEffect(() => {
     if (divisions) {
       setDeskAvailabilityByDivision(
