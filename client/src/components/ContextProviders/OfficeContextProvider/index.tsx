@@ -1,8 +1,9 @@
-import useAuth from 'hooks/useAuth';
 import { useState, ReactElement, useEffect } from 'react';
 import { OfficeContext, OfficeContextT } from './context';
 import api from 'utils/api';
 import { DUMMY_OFFICE_ID } from 'utils/constants';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import app from 'utils/initFirebase';
 
 interface OfficeContextProviderProps {
   children: ReactElement;
@@ -13,12 +14,24 @@ export default function OfficeContextProvider({
 }: OfficeContextProviderProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [office, setOffice] = useState<OfficeContextT | null>(null);
-  const { token } = useAuth();
+  const [user, setUser] = useState(getAuth(app).currentUser);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(getAuth(app), (user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const getOffice = async () => {
       try {
         setLoading(true);
+        const token = await user!.getIdToken();
+        console.log(token);
         const response = await api.getOffice(DUMMY_OFFICE_ID, token);
 
         if (response.status !== 200) {
@@ -39,10 +52,10 @@ export default function OfficeContextProvider({
       }
     };
 
-    if (token) {
+    if (user) {
       getOffice();
     }
-  }, [token]);
+  }, [user]);
 
   if (loading) {
     return null;

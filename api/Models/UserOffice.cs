@@ -7,8 +7,8 @@ namespace CustomerApi.Models;
 public class UserOffice
 {
     // Foreign Key
-    [Column(TypeName = "char(36)")]
-    public required Guid UserId { get; set; }
+    [Column(TypeName = "varchar(36)")]
+    public required string UserId { get; set; }
 
     // Foreign Key
     [Column(TypeName = "char(36)")]

@@ -828,7 +828,7 @@ public partial class CustomerController : ControllerBase
     // Remove user from desk
     [Authorize(Policy = "AtDesk")]
     [HttpDelete("offices/{officeId}/users/{userId}/desk")]
-    public async Task<ActionResult<UserDto>> RemoveUserFromDesk(Guid officeId, Guid userId)
+    public async Task<ActionResult<UserDto>> RemoveUserFromDesk(Guid officeId, string userId)
     {
         // Check that officeId is valid
         Office? office = await _context.Office.FindAsync(officeId);
@@ -919,7 +919,7 @@ public partial class CustomerController : ControllerBase
     [HttpPost("offices/{officeId}/users/{userId}/desk")]
     public async Task<ActionResult<DeskDto>> PostUserToDesk(
         Guid officeId,
-        Guid userId,
+        string userId,
         [FromBody] PostedDesk postedDesk
     )
     {
@@ -1006,7 +1006,7 @@ public partial class CustomerController : ControllerBase
     // Extend user's session at desk
     [Authorize(Policy = "AtDesk")]
     [HttpPost("offices/{officeId}/users/{userId}/desk/extend-session")]
-    public async Task<ActionResult<DeskDto>> ExtendUserSessionAtDesk(Guid officeId, Guid userId)
+    public async Task<ActionResult<DeskDto>> ExtendUserSessionAtDesk(Guid officeId, string userId)
     {
         // Check that officeId is valid
         Office? office = await _context.Office.FindAsync(officeId);
@@ -1055,41 +1055,8 @@ public partial class CustomerController : ControllerBase
     [HttpPost("users")]
     public async Task<ActionResult<User>> AddUser([FromBody] PostUserBody user)
     {
-        // if (user.Password == null)
-        // {
-        //     return BadRequest();
-        // }
-        // if (user.Username == null)
-        // {
-        //     return BadRequest();
-        // }
-        // if (user.FirstName == null)
-        // {
-        //     return BadRequest();
-        // }
-        // if (user.LastName == null)
-        // {
-        //     return BadRequest("");
-        // }
-        if (user.Username.Length < 8)
-        {
-            return BadRequest("Username must be at least 8 characters long");
-        }
-        if (user.Password.Length < 8)
-        {
-            return BadRequest("Password must be at least 8 characters long");
-        }
-
-        List<User> existingUser = await _context
-            .User.Where(u => u.Username == user.Username)
-            .ToListAsync();
-        if (existingUser.Count >= 1)
-        {
-            return BadRequest("Username already exists");
-        }
-
         // Generate a potential Guid for the user
-        Guid potentialUserId = Guid.NewGuid();
+        string userId = user.Id;
 
         foreach (Guid officeId in user.OfficeIds)
         {
@@ -1105,7 +1072,7 @@ public partial class CustomerController : ControllerBase
             // Create new userOffice entry
             UserOffice userOffice = new UserOffice
             {
-                UserId = potentialUserId,
+                UserId = userId,
                 OfficeId = officeId
             };
 
@@ -1113,22 +1080,11 @@ public partial class CustomerController : ControllerBase
             await _context.UserOffice.AddAsync(userOffice);
         }
 
-        // Encrypt password before storing on server
-        string passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(user.Password, 13);
-
-        // Console.WriteLine(passwordHash);
-        // Console.WriteLine(BCrypt.Net.BCrypt.EnhancedVerify(user.Password, passwordHash));
-
-
         // Create user model
         User newUser =
             new()
             {
-                Id = potentialUserId,
-                Username = user.Username,
-                PasswordHash = passwordHash,
-                FirstName = user.FirstName,
-                LastName = user.LastName
+                Id = userId
             };
 
         await _context.User.AddAsync(newUser);
@@ -1139,10 +1095,7 @@ public partial class CustomerController : ControllerBase
         return Ok(
             new
             {
-                Id = newUser.Id,
-                newUser.Username,
-                newUser.FirstName,
-                newUser.LastName
+                Id = newUser.Id
             }
         );
     }
@@ -1171,133 +1124,6 @@ public partial class CustomerController : ControllerBase
             Name = office.Name,
             DivisionNames = office.Divisions.Select(d => d.Name).ToList()
         };
-    }
-
-    [HttpPost("users/login")]
-    public async Task<ActionResult<User>> LoginUser([FromBody] LoginUserBody user)
-    {
-        // Check if there is a user with the specific username
-        User? existingUser = await _context
-            .User.Where(u => u.Username == user.Username)
-            .FirstOrDefaultAsync(u => u.Username == user.Username);
-
-        if (existingUser == null)
-        {
-            return Unauthorized("Username or password is incorrect");
-        }
-
-        // Check if the password is correct
-        if (user.Password != null)
-        {
-            if (!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, existingUser.PasswordHash))
-            {
-                return Unauthorized("Username or password is incorrect");
-            }
-        }
-        else
-        {
-            return BadRequest("Password field is required");
-        }
-
-        // JWT token generation starts here
-        string? jwtSecretPath = _config["JWT_SECRET_FILE"];
-
-        if (jwtSecretPath == null)
-        {
-            return BadRequest("JWT secret file not found");
-        }
-
-        string jwtKey = System.IO.File.ReadAllText(jwtSecretPath);
-
-        if (jwtKey == null)
-        {
-            return BadRequest("JWT key not found");
-        }
-
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        // Create a claim for the username
-        var claims = new[]
-        {
-            // new Claim(ClaimTypes.Name, existingUser.Username),
-            new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString())
-        };
-
-        var Sectoken = new JwtSecurityToken(
-            _config["Jwt:Issuer"],
-            _config["Jwt:Issuer"],
-            claims,
-            expires: DateTime.UtcNow.AddHours(9), // Expires in 9 hours
-            signingCredentials: credentials
-        );
-
-        var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
-        // JWT token generation ends here
-
-        return Ok(
-            new
-            {
-                Id = existingUser.Id,
-                existingUser.Username,
-                existingUser.FirstName,
-                existingUser.LastName,
-                Token = token
-            }
-        );
-    }
-
-    [HttpGet("users/self")]
-    [Authorize]
-    public async Task<ActionResult<UserDto>> GetCurrentUser()
-    {
-        Claim? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-
-        if (userIdClaim == null)
-        {
-            return Unauthorized("Token does not contain a userId claim");
-        }
-
-        // Get the username from the User property
-        string userId = userIdClaim.Value;
-
-        // If the username claim is not included in the JWT, return an error
-        if (userId == null)
-        {
-            return Unauthorized("Token does not contain a username claim");
-        }
-
-        Guid parsedId = Guid.Parse(userId);
-
-        // Fetch the user data from the database
-        User? user = await _context
-            .User.Include(u => u.Desk)
-            .FirstOrDefaultAsync(u => u.Id == parsedId);
-
-        // If the user does not exist in the database, return an error
-        if (user == null)
-        {
-            return NotFound("User not found");
-        }
-
-        // Return the user data
-        return Ok(
-            new
-            {
-                user.Id,
-                user.Username,
-                user.FirstName,
-                user.LastName,
-                Desk = user.Desk == null
-                    ? null
-                    : new
-                    {
-                        DivisionName = user.Desk.DeskDivisionName,
-                        Number = user.Desk.DeskNumber,
-                        user.Desk.SessionEndTime
-                    }
-            }
-        );
     }
 }
 
@@ -1340,10 +1166,7 @@ public class CustomersQueryBody
 
 public class PostUserBody
 {
-    public required string Username { get; init; }
-    public required string Password { get; init; }
-    public required string FirstName { get; init; }
-    public required string LastName { get; init; }
+    public required string Id { get; init; }
 
     public required List<Guid> OfficeIds { get; init; }
 }

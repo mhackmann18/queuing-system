@@ -81,6 +81,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
       password
     );
 
+    console.log(response);
+
     const { email, displayName } = response.user;
 
     if (!email) {

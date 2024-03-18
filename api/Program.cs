@@ -1,65 +1,42 @@
-using System.Text;
 using CustomerApi.Models;
 using CustomerApi.Requirements;
 using CustomerApi.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using MySqlConnector;
 using Newtonsoft.Json;
 using CustomerApi.Middleware;
-using System.IO;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Jwt configuration starts here
-var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
-string? jwtKeyFilePath = builder.Configuration["JWT_SECRET_FILE"];
-
-if(jwtKeyFilePath == null){
-    throw new Exception("JWT_SECRET_FILE environment variable is missing");
+// Check that firebase credentials are set
+if(builder.Configuration["FIREBASE_CREDENTIALS_FILE"] == null){
+    throw new Exception("FIREBASE_CREDENTIALS_FILE environment variable is missing");
 }
 
-string jwtKey = File.ReadAllText(jwtKeyFilePath);
-
-if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtKey))
+// Firebase configuration starts here
+builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions
 {
-    throw new Exception("Jwt configuration is missing");
+    // Credential = GoogleCredential.GetApplicationDefault(),
+    ProjectId = builder.Configuration["FIREBASE_PROJECT_ID"],
+    Credential = GoogleCredential.FromFile(builder.Configuration["FIREBASE_CREDENTIALS_FILE"])
+}));
+
+// var defaultAuth = FirebaseAuth.GetAuth(defaultApp);
+
+string? projectId = builder.Configuration["FIREBASE_PROJECT_ID"];
+
+if(projectId == null){
+    throw new Exception("FIREBASE_PROJECT_ID environment variable is missing");
 }
 
 builder
-    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtIssuer,
-            ClockSkew = TimeSpan.Zero, // TODO: Remove this line in production
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
-
-        // Response when unauthorized
-        options.Events = new JwtBearerEvents
-        {
-            OnChallenge = context =>
-            {
-                context.HandleResponse(); // Prevent the default behavior
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                context.Response.ContentType = "text/plain";
-                return context.Response.WriteAsync(
-                    "Your credentials are invalid or have expired. Please log in again."
-                );
-            }
-        };
-    });
-
-// Jwt configuration ends here
+    .Services.AddAuthentication("Firebase")
+    .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>("Firebase", null);
+// Firebase configuration ends here
 
 builder.Services.AddAuthorization(options =>
 {

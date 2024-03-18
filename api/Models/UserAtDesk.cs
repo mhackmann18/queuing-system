@@ -9,8 +9,8 @@ public class UserAtDesk
   public required DateTime SessionEndTime { get; set; }
   
   // Foreign Key
-  [Column(TypeName = "char(36)")]
-  public required Guid UserId { get; set; }
+  [Column(TypeName = "varchar(36)")]
+  public required string UserId { get; set; }
   
   // Foreign Key
   public required int DeskNumber { get; set; }

@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="DotNetEnv" Version="3.0.0" />
+    <PackageReference Include="FirebaseAdmin" Version="2.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0"> 
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

@@ -23,16 +23,12 @@ CREATE TABLE CompanyOffice (
 );
 
 CREATE TABLE User (
-	id CHAR(36),
-	username VARCHAR(50) NOT NULL UNIQUE,
-	passwordHash VARCHAR(72) NOT NULL,
-	firstName VARCHAR(50) NOT NULL,
-	lastName VARCHAR(50) NOT NULL,
+	id VARCHAR(36),
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE UserOffice (
-	userId CHAR(36) NOT NULL,
+	userId VARCHAR(36) NOT NULL,
 	officeId CHAR(36) NOT NULL,
 	PRIMARY KEY(userId, officeId),
 	FOREIGN KEY(userId) REFERENCES User(id) ON DELETE CASCADE,
@@ -56,7 +52,7 @@ CREATE TABLE Desk (
 );
 
 CREATE TABLE UserAtDesk(
-	userId CHAR(36) NOT NULL,
+	userId VARCHAR(36) NOT NULL,
 	deskNumber INT NOT NULL,
 	deskDivisionName VARCHAR(50) NOT NULL,
 	deskDivisionOfficeId CHAR(36) NOT NULL,

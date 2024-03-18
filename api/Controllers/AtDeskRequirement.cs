@@ -22,9 +22,9 @@ public class AtDeskHandler : AuthorizationHandler<AtDeskRequirement>
     )
     {
         var userIdClaim = context.User.FindFirst(claim => claim.Type == ClaimTypes.NameIdentifier);
-        if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
+        if (userIdClaim != null)
         {
-            var userAtDesk = await _context.UserAtDesk.FirstOrDefaultAsync(u => u.UserId == userId);
+            var userAtDesk = await _context.UserAtDesk.FirstOrDefaultAsync(u => u.UserId == userIdClaim.Value);
             if (userAtDesk != null)
             {
                 await _context.SaveChangesAsync();
