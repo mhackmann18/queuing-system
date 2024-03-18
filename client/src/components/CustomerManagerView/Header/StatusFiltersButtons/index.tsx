@@ -33,7 +33,7 @@ export default function StatusFiltersButtons({
         active: !!statuses.Served
       },
       {
-        name: 'Other Desks',
+        name: 'At Other Desks',
         onClick: () => toggleStatusFilter('Other Desks'),
         active: !!statuses['Other Desks'],
         disabled: !sameDay(filters.date, new Date())
