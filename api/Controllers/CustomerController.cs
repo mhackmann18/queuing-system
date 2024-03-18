@@ -1101,6 +1101,57 @@ public partial class CustomerController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("users/self")]
+    public async Task<ActionResult<UserDto>> GetSelf()
+    {
+        // Get the user's ID from the claims
+        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        // Check if the user's ID is null
+        if (userId == null)
+        {
+            return BadRequest("No user ID found in claims");
+        }
+
+        // Get the user from the database
+        User? user = await _context.User.FindAsync(userId);
+
+        // Check if the user is null
+        if (user == null)
+        {
+            return BadRequest("No user found with the provided ID");
+        }
+
+        var desk = await _context
+            .UserAtDesk.Where(uad => uad.UserId == userId)
+            .Select(uad => new
+            {
+                DivisionName = uad.DeskDivisionName,
+                Number = uad.DeskNumber
+            })
+            .FirstOrDefaultAsync();
+
+        if(desk == null)
+        {
+            return Ok(
+                new
+                {
+                    Id = user.Id
+                }
+            );
+        }
+
+        // Return the user to the client
+        return Ok(
+            new
+            {
+                Id = user.Id,
+                Desk = desk
+            }
+        );
+    }
+
+    [Authorize]
     [HttpGet("offices/{officeId}")]
     public async Task<ActionResult<OfficeDto>> GetOffice(Guid officeId)
     {

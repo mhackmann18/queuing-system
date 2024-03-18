@@ -12,6 +12,7 @@ export type ManageCustomerAction =
 export interface User {
   email: string;
   username: string;
+  id: string;
 }
 
 export type DBCustomerStatus = 'Waiting' | 'Served' | 'No Show' | `Desk ${number}`;

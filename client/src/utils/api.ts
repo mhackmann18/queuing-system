@@ -63,6 +63,7 @@ const functions = {
     desk: object,
     authToken: string
   ) => api.post(`offices/${officeId}/users/${userId}/desk`, desk, authToken),
+  getUserFromAuthToken: (authToken: string) => api.get('users/self', authToken),
   getOfficeDivisions: (officeId: string, authToken: string) =>
     api.get(`offices/${officeId}/divisions`, authToken),
   deleteUserFromDesk: (officeId: string, userId: string, authToken: string) =>

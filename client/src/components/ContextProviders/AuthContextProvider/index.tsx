@@ -35,7 +35,7 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
     const unsubscribe = onAuthStateChanged(getAuth(app), async (user) => {
       // If the user is logged in, set the user in state
       if (user) {
-        const { email, displayName } = user;
+        const { email, displayName, uid } = user;
 
         const userToken = await user.getIdToken();
 
@@ -49,7 +49,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
 
         setUser({
           username: displayName,
-          email
+          email,
+          id: uid
         });
         setToken(userToken);
 
@@ -85,8 +86,6 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
       username,
       password
     );
-
-    console.log(response);
 
     const { email, displayName } = response.user;
 
