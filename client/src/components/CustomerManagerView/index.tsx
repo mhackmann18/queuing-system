@@ -124,6 +124,9 @@ export default function CustomerManagerView() {
       {wlPosPicker && <div className="fixed inset-0 z-10 bg-black opacity-50" />}
 
       <div className="relative mx-auto flex h-14 max-w-5xl items-center">
+        <span className="border-french_gray_1 mr-2 border-r pr-2 font-medium">
+          Customer Filters
+        </span>
         <StatusFiltersButtons
           filters={filters}
           setStatusFilters={filterUtils.setStatuses}
@@ -159,7 +162,7 @@ export default function CustomerManagerView() {
         </div>
       ) : (
         <div className="text-french_gray_2 flex h-[calc(100%-3.5rem)] items-center justify-center">
-          No customers found
+          No customers found. Try changing the filters.
         </div>
       )}
       {error && (
