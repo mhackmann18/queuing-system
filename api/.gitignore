@@ -275,4 +275,6 @@ __pycache__/
 
 # End of https://www.toptal.com/developers/gitignore/api/aspnetcore
 
+# Secrets
 firebase-pk.json
+firebase_api_key.txt

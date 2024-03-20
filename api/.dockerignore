@@ -33,3 +33,4 @@ firebase-pk.json
 jwt_secret.txt
 mysql_password.txt
 secret_key.txt
+firebase_api_key.txt

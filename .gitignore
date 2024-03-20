@@ -2,3 +2,7 @@
 mysql_password.txt
 jwt_secret.txt
 secret_key.txt
+firebase-pk.json
+firebase_api_key.txt
+.env
+.env.*

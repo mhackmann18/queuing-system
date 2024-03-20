@@ -10,6 +10,11 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile.dev
+    environment:
+      - VITE_FIREBASE_API_KEY
+      - VITE_FIREBASE_PROJECT_ID
+      - VITE_FIREBASE_APP_ID
+      - VITE_FIREBASE_PROJECT_NUMBER
     depends_on:
       - api
 
@@ -27,9 +32,11 @@ services:
     environment:
       JWT_SECRET_FILE: /run/secrets/jwt_secret
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_password
+      FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase_pk
     secrets:
       - jwt_secret
       - mysql_password
+      - firebase_pk
 
   db:
     image: mhackmann18/qs-db:dev
@@ -50,6 +57,8 @@ secrets:
     file: mysql_password.txt
   jwt_secret:
     file: jwt_secret.txt
+  firebase_pk:
+    file: firebase-pk.json
 
 volumes:
   data:
