@@ -1052,11 +1052,18 @@ public partial class CustomerController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpPost("users")]
     public async Task<ActionResult<User>> AddUser([FromBody] PostUserBody user)
     {
-        // Generate a potential Guid for the user
-        string userId = user.Id;
+        // Get the user's ID from the claims
+        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        // Check if the user's ID is null
+        if (userId == null)
+        {
+            return BadRequest("No user ID found in claims");
+        }
 
         foreach (Guid officeId in user.OfficeIds)
         {
@@ -1217,7 +1224,5 @@ public class CustomersQueryBody
 
 public class PostUserBody
 {
-    public required string Id { get; init; }
-
     public required List<Guid> OfficeIds { get; init; }
 }
