@@ -4,6 +4,7 @@ import ConfirmAction from 'components/ConfirmAction';
 import { CustomerPanelActionsProps } from './types';
 import { getAvailableActions } from 'utils/helpers';
 import { DESK_REGEX } from 'utils/constants';
+import UpdateReasonsForVisit from './UpdateReasonsForVisit';
 
 export default function CustomerPanelActions({
   customer,
@@ -141,9 +142,7 @@ export default function CustomerPanelActions({
     case 'update_reasons_for_visit': {
       const { onConfirm } = actionEventHandlers.updateReasonsForVisit;
       return (
-        <ConfirmAction
-          title="Update Reasons for Visit"
-          message="Update reasons for visit"
+        <UpdateReasonsForVisit
           onCancel={() => setPanelState('default')}
           onConfirm={() =>
             onConfirm({
