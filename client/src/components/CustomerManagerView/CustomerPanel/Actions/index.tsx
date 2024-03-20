@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import CustomerPanelActionButton from '../ActionButton';
-import Confirm from 'components/ConfirmAction';
+import ConfirmAction from 'components/ConfirmAction';
 import { CustomerPanelActionsProps } from './types';
 import { getAvailableActions } from 'utils/helpers';
 import { DESK_REGEX } from 'utils/constants';
@@ -42,7 +42,13 @@ export default function CustomerPanelActions({
           case 'Return to Waiting List':
             onClick = () => {
               actionEventHandlers.returnToWaitingList.onClick();
-              setPanelState('rtwl');
+              setPanelState('return_to_waiting_list');
+            };
+            break;
+          case 'Update Reasons for Visit':
+            onClick = () => {
+              actionEventHandlers.updateReasonsForVisit.onClick();
+              setPanelState('update_reasons_for_visit');
             };
             break;
         }
@@ -55,6 +61,7 @@ export default function CustomerPanelActions({
       actionEventHandlers.finishServing,
       actionEventHandlers.markNoShow,
       actionEventHandlers.returnToWaitingList,
+      actionEventHandlers.updateReasonsForVisit,
       setPanelState,
       customer
     ]
@@ -66,7 +73,7 @@ export default function CustomerPanelActions({
       const { onCancel, onConfirm } = actionEventHandlers.delete;
 
       return (
-        <Confirm
+        <ConfirmAction
           title="Confirm Deletion"
           message={
             'Are you sure you want to delete this customer? This action cannot be undone.'
@@ -86,12 +93,12 @@ export default function CustomerPanelActions({
         />
       );
     }
-    case 'rtwl': {
+    case 'return_to_waiting_list': {
       const { onCancel, onConfirm, confirmBtnDisabled } =
         actionEventHandlers.returnToWaitingList;
 
       return (
-        <Confirm
+        <ConfirmAction
           title="Return Customer to Waiting List"
           message={'Select where this customer should appear in the waiting list.'}
           onCancel={() => {
@@ -112,7 +119,7 @@ export default function CustomerPanelActions({
       const { onConfirm, onCancel } = actionEventHandlers.markNoShow;
 
       return (
-        <Confirm
+        <ConfirmAction
           title={'Mark Customer as a No Show?'}
           message={
             'Marking this customer as a no show will remove them from the waiting list and require them to re-check in.'
@@ -122,6 +129,22 @@ export default function CustomerPanelActions({
             setPanelState('default');
           }}
           confirmBtnText="Mark No Show"
+          onConfirm={() =>
+            onConfirm({
+              onSuccess: () => setPanelState('default'),
+              onFailure: () => null
+            })
+          }
+        />
+      );
+    }
+    case 'update_reasons_for_visit': {
+      const { onConfirm } = actionEventHandlers.updateReasonsForVisit;
+      return (
+        <ConfirmAction
+          title="Update Reasons for Visit"
+          message="Update reasons for visit"
+          onCancel={() => setPanelState('default')}
           onConfirm={() =>
             onConfirm({
               onSuccess: () => setPanelState('default'),

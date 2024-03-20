@@ -22,6 +22,22 @@ export default function usePanelComponentActionBtnHandlers(
     useMemo(
       () =>
         selectedCustomer && {
+          updateReasonsForVisit: {
+            onClick: () => null,
+            onCancel: () => null,
+            onConfirm: async ({ onSuccess, onFailure }) => {
+              try {
+                console.log('updateReasonsForVisit');
+
+                onSuccess();
+              } catch (error) {
+                if (error instanceof Error) {
+                  setError(error.message);
+                }
+                onFailure();
+              }
+            }
+          },
           delete: {
             onClick: () => null,
             onCancel: () => null,

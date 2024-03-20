@@ -185,16 +185,21 @@ const getAvailableActions = (customer: Customer): ManageCustomerAction[] => {
 
   switch (customer.status) {
     case 'Waiting':
-      if (customer.timesCalled.length) {
-        actions = ['Call to Station', 'Mark No Show', 'Delete'];
-      } else {
-        actions = ['Call to Station', 'Delete'];
-      }
+      actions = [
+        'Call to Station',
+        // Only show mark no show if the customer has been called at least once
+        ...(customer.timesCalled.length
+          ? ['Mark No Show' as ManageCustomerAction]
+          : []),
+        'Update Reasons for Visit',
+        'Delete'
+      ];
       break;
     case 'Serving':
       actions = [
         'Finish Serving',
         'Mark No Show',
+        'Update Reasons for Visit',
         'Return to Waiting List',
         'Delete'
       ];

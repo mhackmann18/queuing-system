@@ -7,7 +7,8 @@ export type ManageCustomerAction =
   | 'Mark No Show'
   | 'Call to Station'
   | 'Delete'
-  | 'Return to Waiting List';
+  | 'Return to Waiting List'
+  | 'Update Reasons for Visit';
 
 export interface User {
   email: string;

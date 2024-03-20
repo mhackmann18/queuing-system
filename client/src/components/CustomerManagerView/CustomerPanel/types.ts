@@ -1,6 +1,17 @@
 import { Customer } from 'utils/types';
 
 export interface CustomerPanelActionEventHandlers {
+  updateReasonsForVisit: {
+    onClick: () => void;
+    onCancel: () => void;
+    onConfirm: ({
+      onSuccess,
+      onFailure
+    }: {
+      onSuccess: () => void;
+      onFailure: () => void;
+    }) => void;
+  };
   delete: {
     onClick: () => void;
     onCancel: () => void;
@@ -49,4 +60,9 @@ export interface CustomerPanelProps {
   styles?: string;
 }
 
-export type CustomerPanelState = 'default' | 'delete' | 'rtwl' | 'mark_no_show';
+export type CustomerPanelState =
+  | 'default'
+  | 'delete'
+  | 'return_to_waiting_list'
+  | 'mark_no_show'
+  | 'update_reasons_for_visit';
