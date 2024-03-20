@@ -33,6 +33,7 @@ services:
       JWT_SECRET_FILE: /run/secrets/jwt_secret
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_password
       FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase_pk
+      DB_HOST: db
     secrets:
       - jwt_secret
       - mysql_password

@@ -3,6 +3,7 @@ import { useMemo, useEffect, useState } from 'react';
 import { WaitingListProps } from './types';
 import { Customer } from 'utils/types';
 import ErrorView from 'components/ErrorView';
+import { getAbbreviatedCustomerName } from 'utils/helpers';
 
 export default function WaitingList({ division }: WaitingListProps) {
   const filters = useMemo(
@@ -47,7 +48,7 @@ export default function WaitingList({ division }: WaitingListProps) {
                   className="mb-2 flex items-center overflow-hidden rounded-lg border-4 p-4 2xl:p-6"
                   key={customer.id}
                 >
-                  {customer.name}
+                  {getAbbreviatedCustomerName(customer.name)}
                 </li>
               ))}
             </ul>

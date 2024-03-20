@@ -8,6 +8,16 @@ import {
   CustomerStatus
 } from './types';
 
+const getAbbreviatedCustomerName = (name: string) => {
+  const nameParts = name.split(' ');
+
+  if (nameParts.length === 1) {
+    return nameParts[0];
+  }
+
+  return `${nameParts[0]} ${nameParts[nameParts.length - 1][0]}.`;
+};
+
 const sortCustomers = (customers: Customer[]): Customer[] => {
   return customers.sort((a, b) => {
     const order = [['Served', 'No Show'], 'Serving', 'Waiting'];
@@ -309,5 +319,6 @@ export {
   sanitizeRawCustomer,
   sortCustomers,
   convertLocalToUtc,
-  parseServerDateAsUtc
+  parseServerDateAsUtc,
+  getAbbreviatedCustomerName
 };
