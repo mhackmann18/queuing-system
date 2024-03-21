@@ -143,11 +143,13 @@ export default function CustomerPanelActions({
       const { onConfirm } = actionEventHandlers.updateReasonsForVisit;
       return (
         <UpdateReasonsForVisit
+          currentReasonsForVisit={customer.reasonsForVisit}
           onCancel={() => setPanelState('default')}
-          onConfirm={() =>
+          onConfirm={(newReasonsForVisit) =>
             onConfirm({
               onSuccess: () => setPanelState('default'),
-              onFailure: () => null
+              onFailure: () => null,
+              newReasonsForVisit
             })
           }
         />

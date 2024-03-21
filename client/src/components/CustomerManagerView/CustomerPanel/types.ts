@@ -6,10 +6,12 @@ export interface CustomerPanelActionEventHandlers {
     onCancel: () => void;
     onConfirm: ({
       onSuccess,
-      onFailure
+      onFailure,
+      newReasonsForVisit
     }: {
       onSuccess: () => void;
       onFailure: () => void;
+      newReasonsForVisit: string[];
     }) => void;
   };
   delete: {
