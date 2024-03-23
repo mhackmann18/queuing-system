@@ -369,6 +369,157 @@ public partial class CustomerController : ControllerBase
         return null;
     }
 
+    // PUT: api/v1/customers/offices/{officeId}/customers/{customerId}/divisions
+    [Authorize(Policy = "AtDesk")]
+    [HttpPut("offices/{officeId}/customers/{customerId}/divisions")]
+    public async Task<ActionResult<CustomerDto>> PutCustomerDivision(
+        Guid officeId,
+        Guid customerId,
+        [FromBody] List<PutCustomerDivisionBody> cdsToUpdate
+    )
+    {
+        // Check that customer exists
+        Customer? customer = await _context.Customer.FindAsync(customerId);
+        if (customer == null)
+        {
+            return NotFound($"No customer found with id {customerId}");
+        }
+
+        // Check that the customer has divisions
+        if (cdsToUpdate.Count == 0)
+        {
+            return BadRequest("Must provide at least one division");
+        }
+
+        // Update each of the customer's divisions
+        foreach (PutCustomerDivisionBody cdUpdatedProps in cdsToUpdate)
+        {
+            // If the customer is not yet a member of the division, add them
+            if(await _context.CustomerDivision.FindAsync(customerId, cdUpdatedProps.Name, officeId) == null)
+            {
+                // Find divisions with the given name and officeId
+                Division? division = await _context.Division.FindAsync(cdUpdatedProps.Name, officeId);
+
+                // If no divisions are found, return an error
+                if (division == null)
+                {
+                    return BadRequest($"Invalid division '{cdUpdatedProps.Name}' provided");
+                }
+                else
+                {
+                    int maxWLIndex = await GetMaxWLIndexFromDivision(officeId, cdUpdatedProps.Name);
+
+                    // Insert into CustomerDivision
+                    CustomerDivision cd = new CustomerDivision
+                    {
+                        CustomerId = customerId,
+                        DivisionName = cdUpdatedProps.Name,
+                        Status = "Waiting",
+                        DivisionOfficeId = officeId,
+                        WaitingListIndex = maxWLIndex + 1
+                    };
+
+                    await _context.CustomerDivision.AddAsync(cd);
+                }
+                // If the customer is already a member of the division, update their division entry
+            } else {
+                var response = await UpdateCustomerDivision(officeId, customerId, new PatchCustomerBody.PatchCustomerBodyDivision
+                {
+                    Name = cdUpdatedProps.Name,
+                    Status = cdUpdatedProps.Status,
+                    WaitingListIndex = cdUpdatedProps.WaitingListIndex
+                });
+                if (response != null)
+                {
+                    return response;
+                }
+            }
+        }
+
+        // Get divisions that are not in the request body and need to be removed
+        var cdsToUpdateNames = cdsToUpdate.Select(cd => cd.Name).ToList();
+
+        List<CustomerDivision> cdsToRemove = await _context
+            .CustomerDivision
+            .Where(cd => cd.CustomerId == customerId && cd.DivisionOfficeId == officeId)
+            .ToListAsync();
+
+        cdsToRemove = cdsToRemove
+            .Where(cd => !cdsToUpdateNames.Contains(cd.DivisionName))
+            .ToList();
+
+        // Remove customer from desk if they are at a desk in a division that is being removed
+        foreach (CustomerDivision cdToRemove in cdsToRemove)
+        {
+            if (DeskRegex().IsMatch(cdToRemove.Status))
+            {
+                CustomerAtDesk? cad = await _context
+                    .CustomerAtDesk.Where(cad =>
+                        cad.CustomerId == customerId
+                        && cad.DeskDivisionOfficeId == officeId
+                        && cad.DeskDivisionName == cdToRemove.DivisionName
+                    )
+                    .FirstOrDefaultAsync();
+
+                if (cad != null)
+                {
+                    _context.CustomerAtDesk.Remove(cad);
+                }
+            }
+        }
+
+        // Update waitingListIndexes for divisions that are being removed
+        foreach (CustomerDivision cdToRemove in cdsToRemove)
+        {
+            // Update waitingListIndexes for division
+            if (cdToRemove.Status == "Waiting" && cdToRemove.WaitingListIndex != null)
+            {
+                int wlIndex = (int)cdToRemove.WaitingListIndex;
+
+                List<CustomerDivision> cdsToUpdate1 = (
+                    await GetDivisionWaitingList(officeId, cdToRemove.DivisionName)
+                )
+                    .Where(cdToUpdate =>
+                        cdToUpdate.CustomerId != customerId
+                        && cdToUpdate.WaitingListIndex > wlIndex
+                    )
+                    .ToList();
+
+                foreach (CustomerDivision cdToUpdate in cdsToUpdate1)
+                {
+                    cdToUpdate.WaitingListIndex--;
+                }
+            }
+
+            _context.CustomerDivision.Remove(cdToRemove);
+        }
+
+        // Save changes to the database
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving changes to the database.");
+            return StatusCode(500, "Error saving changes to the database.");
+        }
+
+        // Notify all clients that the customers have been updated
+        try
+        {
+            await _hubContext.Clients.All.SendAsync("customersUpdated");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending SignalR message.");
+            return StatusCode(500, "Error sending SignalR message.");
+        }
+
+        // Return the updated customer
+        return await GetCustomer(customerId);
+    }
+
     [Authorize(Policy = "AtDesk")]
     [HttpPatch("offices/{officeId}/customers/{customerId}")]
     public async Task<ActionResult<CustomerDto>> PatchCustomer(
@@ -1225,4 +1376,11 @@ public class CustomersQueryBody
 public class PostUserBody
 {
     public required List<Guid> OfficeIds { get; init; }
+}
+
+public class PutCustomerDivisionBody
+{
+    public required string Name { get; set; }
+    public required string Status { get; set; }
+    public int? WaitingListIndex { get; set; }
 }
