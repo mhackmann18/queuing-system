@@ -27,7 +27,12 @@ export default function usePanelComponentActionBtnHandlers(
             onCancel: () => null,
             onConfirm: async ({ newReasonsForVisit, onSuccess, onFailure }) => {
               try {
-                console.log(newReasonsForVisit);
+                await api.updateReasonsForVisit(
+                  officeId,
+                  selectedCustomer.id,
+                  newReasonsForVisit,
+                  token
+                );
 
                 onSuccess();
               } catch (error) {

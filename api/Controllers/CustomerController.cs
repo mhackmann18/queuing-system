@@ -423,15 +423,18 @@ public partial class CustomerController : ControllerBase
                 }
                 // If the customer is already a member of the division, update their division entry
             } else {
-                var response = await UpdateCustomerDivision(officeId, customerId, new PatchCustomerBody.PatchCustomerBodyDivision
+                if(cdUpdatedProps.Status != null || cdUpdatedProps.WaitingListIndex != null)
                 {
-                    Name = cdUpdatedProps.Name,
-                    Status = cdUpdatedProps.Status,
-                    WaitingListIndex = cdUpdatedProps.WaitingListIndex
-                });
-                if (response != null)
-                {
-                    return response;
+                    var response = await UpdateCustomerDivision(officeId, customerId, new PatchCustomerBody.PatchCustomerBodyDivision
+                    {
+                        Name = cdUpdatedProps.Name,
+                        Status = cdUpdatedProps.Status,
+                        WaitingListIndex = cdUpdatedProps.WaitingListIndex
+                    });
+                    if (response != null)
+                    {
+                        return response;
+                    }
                 }
             }
         }
@@ -1381,6 +1384,6 @@ public class PostUserBody
 public class PutCustomerDivisionBody
 {
     public required string Name { get; set; }
-    public required string Status { get; set; }
+    public string? Status { get; set; }
     public int? WaitingListIndex { get; set; }
 }

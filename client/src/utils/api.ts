@@ -41,6 +41,13 @@ const api = {
         ...(authToken && { Authorization: `Bearer ${authToken}` })
       }
     }),
+  put: (endpoint: string, body: object, authToken?: string) =>
+    axios.put(`${API_BASE_PATH}/${endpoint}`, body && JSON.stringify(body), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { Authorization: `Bearer ${authToken}` })
+      }
+    }),
   patch: (endpoint: string, body: object, authToken?: string) =>
     axios.patch(`${API_BASE_PATH}/${endpoint}`, body && JSON.stringify(body), {
       headers: {
@@ -56,7 +63,40 @@ const api = {
     })
 };
 
+interface DivisionData {
+  name: string;
+  status?: string;
+  waitingListIndex?: number;
+}
+
 const functions = {
+  updateReasonsForVisit: (
+    officeId: string,
+    customerId: string,
+    reasonsForVisit: Array<string>,
+    authToken: string
+  ) =>
+    api.get(`customers/${customerId}`, authToken).then((customer) => {
+      const divisions = customer.data.divisions as DivisionData[];
+
+      // Filter out divisions that are not in the reasonsForVisit array
+      const body = divisions.filter((division) =>
+        reasonsForVisit.includes(division.name)
+      );
+
+      // Add reasonsForVisit that are not in the divisions array
+      reasonsForVisit.forEach((reasonForVisit) => {
+        if (!divisions.find((division) => division.name === reasonForVisit)) {
+          body.push({ name: reasonForVisit });
+        }
+      });
+
+      return api.put(
+        `offices/${officeId}/customers/${customerId}/divisions`,
+        body,
+        authToken
+      );
+    }),
   postUserToDesk: (
     officeId: string,
     userId: string,
