@@ -66,19 +66,6 @@ public partial class CustomerController : ControllerBase
         return Ok(customers);
     }
 
-    public class PatchCustomerBody
-    {
-        public List<PatchCustomerBodyDivision>? Divisions { get; set; }
-
-        public class PatchCustomerBodyDivision
-        {
-            public required string Name { get; set; }
-            public string? Status { get; set; }
-            public int? WaitingListIndex { get; set; }
-            public List<DateTime>? TimesCalled { get; set; }
-        };
-    };
-
     private async Task<List<CustomerDivision>> GetDivisionWaitingList(
         Guid officeId,
         string divisionName
@@ -1387,3 +1374,16 @@ public class PutCustomerDivisionBody
     public string? Status { get; set; }
     public int? WaitingListIndex { get; set; }
 }
+
+public class PatchCustomerBody
+{
+    public List<PatchCustomerBodyDivision>? Divisions { get; set; }
+
+    public class PatchCustomerBodyDivision
+    {
+        public required string Name { get; set; }
+        public string? Status { get; set; }
+        public int? WaitingListIndex { get; set; }
+        public List<DateTime>? TimesCalled { get; set; }
+    };
+};
