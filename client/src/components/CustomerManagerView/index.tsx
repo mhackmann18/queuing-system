@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import CustomerPanel from './CustomerPanel';
 import { Customer } from 'utils/types';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useMemo } from 'react';
 import CustomerList from './CustomerList';
 import useCustomerFilters from 'hooks/useCustomerFilters';
 import useCustomers from 'hooks/api/useCustomers';
@@ -26,7 +26,13 @@ export default function CustomerManagerView() {
   const [error, setError] = useState<string>('');
   const { filters, ...filterUtils } = useCustomerFilters();
   const { customers, error: getCustomersError } = useCustomers(filters);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const selectedCustomer: Customer | null = useMemo(
+    () =>
+      (selectedCustomerId && customers.find((c) => c.id === selectedCustomerId)) ||
+      null,
+    [selectedCustomerId, customers]
+  );
   const nextSelectedCustomerCandidateId = useNextCustomerId(
     selectedCustomer,
     customers
@@ -83,22 +89,22 @@ export default function CustomerManagerView() {
   useEffect(() => {
     //  If there's no customers, there can be no selected customer.
     if (!customers?.length) {
-      setSelectedCustomer(null);
+      setSelectedCustomerId(null);
       return;
     }
 
     /* If selectedCustomer exists, find its updated version in the list, otherwise find 
     the next selected customer with the nextSelectedCustomerCandidateId. */
     const updatedSelectedCustomer =
-      (selectedCustomer && customers.find((c) => c.id === selectedCustomer.id)) ||
+      (selectedCustomerId && customers.find((c) => c.id === selectedCustomerId)) ||
       customers.find((c) => c.id === nextSelectedCustomerCandidateId);
 
     /* If an updated selected customer was found, set it as the selected customer. 
     Otherwise, find a new selected customer. */
-    setSelectedCustomer(
-      updatedSelectedCustomer || getNextSelectedCustomer(customers)
+    setSelectedCustomerId(
+      updatedSelectedCustomer?.id || getNextSelectedCustomer(customers).id
     );
-  }, [customers, selectedCustomer, nextSelectedCustomerCandidateId]);
+  }, [customers, selectedCustomerId, nextSelectedCustomerCandidateId]);
 
   const handleExtendSessionButtonClick = async () => {
     try {
@@ -139,7 +145,7 @@ export default function CustomerManagerView() {
           <CustomerList
             customers={customers}
             selectedCustomer={selectedCustomer}
-            setSelectedCustomer={setSelectedCustomer}
+            setSelectedCustomerId={setSelectedCustomerId}
             isPastDate={!sameDay(filters.date, new Date())}
             wlPosPicker={
               wlPosPicker && {

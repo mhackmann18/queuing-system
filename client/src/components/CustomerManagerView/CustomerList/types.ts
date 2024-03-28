@@ -3,7 +3,7 @@ import { Customer } from 'utils/types';
 export interface CustomerListProps {
   customers: Customer[];
   selectedCustomer: Customer;
-  setSelectedCustomer: (customer: Customer) => void;
+  setSelectedCustomerId: (customerId: string) => void;
   wlPosPicker: WaitingListPositionPicker | null;
   isPastDate: boolean;
 }

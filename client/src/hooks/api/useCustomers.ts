@@ -57,8 +57,6 @@ export default function useCustomers(filters: CustomerFilters) {
 
       const customers = response.data;
 
-      console.log(customers);
-
       setError('');
       setCustomers(
         sortCustomers(
@@ -76,13 +74,15 @@ export default function useCustomers(filters: CustomerFilters) {
 
   // Load new customers when filters change
   useEffect(() => {
+    console.log('Fetching customers');
     fetchCustomers();
   }, [fetchCustomers]);
 
   // Load new customers on update event
   useEffect(() => {
+    console.log('Subscribing to events');
     events({
-      onCustomersUpdated: fetchCustomers
+      onCustomersUpdated: () => Boolean(console.log('uh oh')) || fetchCustomers()
     });
   }, [events, filters.division, fetchCustomers]);
 

@@ -7,7 +7,7 @@ import ColumnHeaders from './ColumnHeaders';
 export default function CustomerList({
   customers,
   selectedCustomer,
-  setSelectedCustomer,
+  setSelectedCustomerId,
   wlPosPicker,
   isPastDate
 }: CustomerListProps) {
@@ -31,7 +31,7 @@ export default function CustomerList({
         ? () => wlPosPicker.setLocked(!wlPosPicker.locked)
         : () => null;
     } else {
-      return () => setSelectedCustomer(customer);
+      return () => setSelectedCustomerId(customer.id);
     }
   };
 
