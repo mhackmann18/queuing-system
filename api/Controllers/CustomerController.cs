@@ -1,7 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.RegularExpressions;
 using CustomerApi.Models;
 using CustomerApi.Services;
 using CustomerApi.Utilities;
@@ -147,7 +146,7 @@ public partial class CustomerController : ControllerBase
 
         // TODO: Validate 'Desk' statuses
 
-        if (oldStatus == "Waiting" && DeskRegex().IsMatch(newStatus))
+        if (oldStatus == "Waiting" && CustomerStatusUtils.IsDeskStatus(newStatus))
         {
             // If a customer's status is transitioning from 'Waiting' to 'Desk X', the current time should be added to their timesCalled
             CustomerDivisionTimeCalled cdtc =
@@ -183,7 +182,7 @@ public partial class CustomerController : ControllerBase
         }
 
         // If customer is transitioning from 'Desk X' to any other status, remove them from the desk. TODO: Add support for switching desks
-        if (DeskRegex().IsMatch(oldStatus) && newStatus != oldStatus)
+        if (CustomerStatusUtils.IsDeskStatus(oldStatus) && newStatus != oldStatus)
         {
             CustomerAtDesk? cad = await _context
                 .CustomerAtDesk.Where(cad => cad.CustomerId == customerId)
@@ -441,7 +440,7 @@ public partial class CustomerController : ControllerBase
         // Remove customer from desk if they are at a desk in a division that is being removed
         foreach (CustomerDivision cdToRemove in cdsToRemove)
         {
-            if (DeskRegex().IsMatch(cdToRemove.Status))
+            if (CustomerStatusUtils.IsDeskStatus(cdToRemove.Status))
             {
                 CustomerAtDesk? cad = await _context
                     .CustomerAtDesk.Where(cad =>
@@ -598,42 +597,39 @@ public partial class CustomerController : ControllerBase
         if (filters.Divisions == null && filters.Dates == null)
         {
             return BadRequest(
-                "Must provide at least one filter property. Valid filter properties include 'divisions', 'dates'"
+                "Must provide at least one valid filter property. Valid filter properties include 'divisions' and 'dates'"
             );
         }
 
-        // Check that division filters are valid
         if (filters.Divisions != null)
         {
             foreach (CustomersQueryBody.CustomersQueryBodyDivision division in filters.Divisions)
             {
-                // Check that each division has a name prop
-                if (division.Name == null)
-                {
-                    return BadRequest("Must provide a 'name' property for each division");
-                }
-                else
-                {
-                    // Check that office has a division with the provided name
-                    var divisionFound = await _context
-                        .Office.Where(o =>
-                            o.Id == officeId
-                            && o.Divisions != null
-                            && o.Divisions.Any(d => d.Name == division.Name)
-                        )
-                        .Include(o => o.Divisions)
-                        .FirstOrDefaultAsync();
+                // Check that office has a division with the provided name
+                var divisionFound = await _context
+                    .Office.Where(o =>
+                        o.Id == officeId
+                        && o.Divisions != null
+                        && o.Divisions.Any(d => d.Name == division.Name)
+                    )
+                    .Include(o => o.Divisions)
+                    .FirstOrDefaultAsync();
 
-                    // Return error if division doesn't exist
-                    if (divisionFound == null)
-                    {
-                        return BadRequest($"Office has no division '{division.Name}'");
-                    }
+                if (divisionFound == null)
+                {
+                    return BadRequest($"Office has no division '{division.Name}'");
                 }
+
                 // Check that the provided statuses are valid
                 if (division.Statuses != null)
                 {
-                    // TODO: Validate each status
+                    foreach (string status in division.Statuses)
+                    {
+                        if (!CustomerStatusUtils.IsValidStatus(status))
+                        {
+                            return BadRequest($"Invalid status '{status}' provided for division '{division.Name}'");
+                        }
+                    }
                 }
             }
         }
@@ -935,9 +931,6 @@ public partial class CustomerController : ControllerBase
 
         return Ok(customerToDelete[0]);
     }
-
-    [GeneratedRegex(@"^Desk\s\d+$")]
-    private static partial Regex DeskRegex();
 
     [Authorize]
     [HttpGet("offices/{officeId}/divisions")]
