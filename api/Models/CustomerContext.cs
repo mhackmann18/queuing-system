@@ -17,7 +17,7 @@ public class CustomerContext(DbContextOptions<CustomerContext> options) : DbCont
     public DbSet<UserAtDesk> UserAtDesk { get; set; } = null!;
     public DbSet<UserOffice> UserOffice { get; set; } = null!;
 
-    // If this method gets too big, see 'grouping configuration' 
+    // If this method gets too big, see 'grouping configuration'
     // in https://learn.microsoft.com/en-us/ef/core/modeling/
     // protected override void OnModelCreating(ModelBuilder modelBuilder)
     // {

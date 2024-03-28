@@ -6,17 +6,20 @@ using Microsoft.Extensions.Options;
 
 namespace CustomerApi.Middleware;
 
-/* This class is responsible for authenticating the user using Firebase. 
-   It inherits from the AuthenticationHandler class and overrides the HandleAuthenticateAsync method. 
-   This method is called when the authentication middleware is invoked. 
-   It extracts the token from the Authorization header and verifies it using the Firebase SDK. 
-   If the token is valid, it creates a ClaimsIdentity and a ClaimsPrincipal and returns an AuthenticationTicket with the principal. 
+/* This class is responsible for authenticating the user using Firebase.
+   It inherits from the AuthenticationHandler class and overrides the HandleAuthenticateAsync method.
+   This method is called when the authentication middleware is invoked.
+   It extracts the token from the Authorization header and verifies it using the Firebase SDK.
+   If the token is valid, it creates a ClaimsIdentity and a ClaimsPrincipal and returns an AuthenticationTicket with the principal.
    If the token is invalid, it returns an AuthenticateResult with a failure message. */
 public class FirebaseAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public FirebaseAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
-    {
-    }
+    public FirebaseAuthenticationHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder
+    )
+        : base(options, logger, encoder) { }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -32,7 +35,9 @@ public class FirebaseAuthenticationHandler : AuthenticationHandler<Authenticatio
 
         try
         {
-            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(
+                idToken
+            );
             string uid = decodedToken.Uid;
 
             var claimsIdentity = new ClaimsIdentity(uid);

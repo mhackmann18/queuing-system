@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CustomerApi.Controllers;
 
@@ -114,10 +114,13 @@ public partial class CustomerController : ControllerBase
         }
 
         // Select all customers in the waiting list for this division
-        List<CustomerDivision> cdsToUpdate = (await GetDivisionWaitingList(
-            customerDivision.DivisionOfficeId,
-            customerDivision.DivisionName
-        )).Where(cd => cd.WaitingListIndex > wlIndex)
+        List<CustomerDivision> cdsToUpdate = (
+            await GetDivisionWaitingList(
+                customerDivision.DivisionOfficeId,
+                customerDivision.DivisionName
+            )
+        )
+            .Where(cd => cd.WaitingListIndex > wlIndex)
             .ToList();
 
         // Move selected customers up one position in waiting list queue
@@ -381,10 +384,16 @@ public partial class CustomerController : ControllerBase
         foreach (PutCustomerDivisionBody cdUpdatedProps in cdsToUpdate)
         {
             // If the customer is not yet a member of the division, add them
-            if(await _context.CustomerDivision.FindAsync(customerId, cdUpdatedProps.Name, officeId) == null)
+            if (
+                await _context.CustomerDivision.FindAsync(customerId, cdUpdatedProps.Name, officeId)
+                == null
+            )
             {
                 // Find divisions with the given name and officeId
-                Division? division = await _context.Division.FindAsync(cdUpdatedProps.Name, officeId);
+                Division? division = await _context.Division.FindAsync(
+                    cdUpdatedProps.Name,
+                    officeId
+                );
 
                 // If no divisions are found, return an error
                 if (division == null)
@@ -408,15 +417,21 @@ public partial class CustomerController : ControllerBase
                     await _context.CustomerDivision.AddAsync(cd);
                 }
                 // If the customer is already a member of the division, update their division entry
-            } else {
-                if(cdUpdatedProps.Status != null || cdUpdatedProps.WaitingListIndex != null)
+            }
+            else
+            {
+                if (cdUpdatedProps.Status != null || cdUpdatedProps.WaitingListIndex != null)
                 {
-                    var response = await UpdateCustomerDivision(officeId, customerId, new PatchCustomerBody.PatchCustomerBodyDivision
-                    {
-                        Name = cdUpdatedProps.Name,
-                        Status = cdUpdatedProps.Status,
-                        WaitingListIndex = cdUpdatedProps.WaitingListIndex
-                    });
+                    var response = await UpdateCustomerDivision(
+                        officeId,
+                        customerId,
+                        new PatchCustomerBody.PatchCustomerBodyDivision
+                        {
+                            Name = cdUpdatedProps.Name,
+                            Status = cdUpdatedProps.Status,
+                            WaitingListIndex = cdUpdatedProps.WaitingListIndex
+                        }
+                    );
                     if (response != null)
                     {
                         return response;
@@ -429,13 +444,12 @@ public partial class CustomerController : ControllerBase
         var cdsToUpdateNames = cdsToUpdate.Select(cd => cd.Name).ToList();
 
         List<CustomerDivision> cdsToRemove = await _context
-            .CustomerDivision
-            .Where(cd => cd.CustomerId == customerId && cd.DivisionOfficeId == officeId)
+            .CustomerDivision.Where(cd =>
+                cd.CustomerId == customerId && cd.DivisionOfficeId == officeId
+            )
             .ToListAsync();
 
-        cdsToRemove = cdsToRemove
-            .Where(cd => !cdsToUpdateNames.Contains(cd.DivisionName))
-            .ToList();
+        cdsToRemove = cdsToRemove.Where(cd => !cdsToUpdateNames.Contains(cd.DivisionName)).ToList();
 
         // Remove customer from desk if they are at a desk in a division that is being removed
         foreach (CustomerDivision cdToRemove in cdsToRemove)
@@ -469,8 +483,7 @@ public partial class CustomerController : ControllerBase
                     await GetDivisionWaitingList(officeId, cdToRemove.DivisionName)
                 )
                     .Where(cdToUpdate =>
-                        cdToUpdate.CustomerId != customerId
-                        && cdToUpdate.WaitingListIndex > wlIndex
+                        cdToUpdate.CustomerId != customerId && cdToUpdate.WaitingListIndex > wlIndex
                     )
                     .ToList();
 
@@ -627,7 +640,9 @@ public partial class CustomerController : ControllerBase
                     {
                         if (!CustomerStatusUtils.IsValidStatus(status))
                         {
-                            return BadRequest($"Invalid status '{status}' provided for division '{division.Name}'");
+                            return BadRequest(
+                                $"Invalid status '{status}' provided for division '{division.Name}'"
+                            );
                         }
                     }
                 }
@@ -640,14 +655,17 @@ public partial class CustomerController : ControllerBase
         // Filter by divisions ...
         if (filters.Divisions != null)
         {
-            foreach (var filter in filters.Divisions)
+            foreach (var divisionFilter in filters.Divisions)
             {
                 var customersWithCurrentFilter = await _context
                     .Customer.Where(c =>
                         c.Divisions.Any(d =>
                             d.DivisionOfficeId == officeId
-                            && d.DivisionName == filter.Name
-                            && (filter.Statuses == null || filter.Statuses.Contains(d.Status))
+                            && d.DivisionName == divisionFilter.Name
+                            && (
+                                divisionFilter.Statuses == null
+                                || divisionFilter.Statuses.Contains(d.Status)
+                            )
                         )
                     )
                     .Include(c => c.Divisions)
@@ -1211,34 +1229,21 @@ public partial class CustomerController : ControllerBase
             }
 
             // Create new userOffice entry
-            UserOffice userOffice = new UserOffice
-            {
-                UserId = userId,
-                OfficeId = officeId
-            };
+            UserOffice userOffice = new UserOffice { UserId = userId, OfficeId = officeId };
 
             // Add userOffice entry to context
             await _context.UserOffice.AddAsync(userOffice);
         }
 
         // Create user model
-        User newUser =
-            new()
-            {
-                Id = userId
-            };
+        User newUser = new() { Id = userId };
 
         await _context.User.AddAsync(newUser);
 
         await _context.SaveChangesAsync();
 
         // Return created user to client
-        return Ok(
-            new
-            {
-                Id = newUser.Id
-            }
-        );
+        return Ok(new { Id = newUser.Id });
     }
 
     [Authorize]
@@ -1265,31 +1270,16 @@ public partial class CustomerController : ControllerBase
 
         var desk = await _context
             .UserAtDesk.Where(uad => uad.UserId == userId)
-            .Select(uad => new
-            {
-                DivisionName = uad.DeskDivisionName,
-                Number = uad.DeskNumber
-            })
+            .Select(uad => new { DivisionName = uad.DeskDivisionName, Number = uad.DeskNumber })
             .FirstOrDefaultAsync();
 
-        if(desk == null)
+        if (desk == null)
         {
-            return Ok(
-                new
-                {
-                    Id = user.Id
-                }
-            );
+            return Ok(new { Id = user.Id });
         }
 
         // Return the user to the client
-        return Ok(
-            new
-            {
-                Id = user.Id,
-                Desk = desk
-            }
-        );
+        return Ok(new { Id = user.Id, Desk = desk });
     }
 
     [Authorize]

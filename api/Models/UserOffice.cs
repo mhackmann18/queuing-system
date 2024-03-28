@@ -14,7 +14,6 @@ public class UserOffice
     [Column(TypeName = "char(36)")]
     public required Guid OfficeId { get; set; }
 
-
     // Dependent Navigation
     public Office Office { get; set; } = null!;
     public User User { get; set; } = null!;

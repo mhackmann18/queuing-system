@@ -1,41 +1,50 @@
+using CustomerApi.Middleware;
 using CustomerApi.Models;
 using CustomerApi.Requirements;
 using CustomerApi.Services;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Newtonsoft.Json;
-using CustomerApi.Middleware;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Check that firebase credentials are set
-if(builder.Configuration["FIREBASE_CREDENTIALS_FILE"] == null){
+if (builder.Configuration["FIREBASE_CREDENTIALS_FILE"] == null)
+{
     throw new Exception("FIREBASE_CREDENTIALS_FILE environment variable is missing");
 }
 
 // Firebase configuration starts here
-builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions
-{
-    // Credential = GoogleCredential.GetApplicationDefault(),
-    ProjectId = builder.Configuration["FIREBASE_PROJECT_ID"],
-    Credential = GoogleCredential.FromFile(builder.Configuration["FIREBASE_CREDENTIALS_FILE"])
-}));
+builder.Services.AddSingleton(
+    FirebaseApp.Create(
+        new AppOptions
+        {
+            // Credential = GoogleCredential.GetApplicationDefault(),
+            ProjectId = builder.Configuration["FIREBASE_PROJECT_ID"],
+            Credential = GoogleCredential.FromFile(
+                builder.Configuration["FIREBASE_CREDENTIALS_FILE"]
+            )
+        }
+    )
+);
 
 // var defaultAuth = FirebaseAuth.GetAuth(defaultApp);
 
 string? projectId = builder.Configuration["FIREBASE_PROJECT_ID"];
 
-if(projectId == null){
+if (projectId == null)
+{
     throw new Exception("FIREBASE_PROJECT_ID environment variable is missing");
 }
 
 builder
     .Services.AddAuthentication("Firebase")
     .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>("Firebase", null);
+
 // Firebase configuration ends here
 
 builder.Services.AddAuthorization(options =>
@@ -63,7 +72,8 @@ builder.Services.AddSignalR(hubOptions =>
 string? dbServer = builder.Configuration["DB_HOST"];
 string? dbPasswordPath = builder.Configuration["MYSQL_ROOT_PASSWORD_FILE"];
 
-if(dbPasswordPath == null){
+if (dbPasswordPath == null)
+{
     throw new Exception("MYSQL_ROOT_PASSWORD_FILE environment variable is missing");
 }
 
@@ -93,7 +103,8 @@ if (app.Environment.IsDevelopment())
 
 string? corsAllowedOrigin = builder.Configuration["CORS_ALLOWED_ORIGIN"];
 
-if(corsAllowedOrigin == null){
+if (corsAllowedOrigin == null)
+{
     throw new Exception("CORS_ALLOWED_ORIGIN environment variable is missing");
 }
 

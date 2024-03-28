@@ -1,6 +1,6 @@
 namespace CustomerApi.Models;
 
-public class UserDto 
+public class UserDto
 {
-  public required DeskDto Desk { get; set; }
+    public required DeskDto Desk { get; set; }
 }
