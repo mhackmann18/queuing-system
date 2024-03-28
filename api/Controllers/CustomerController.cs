@@ -594,6 +594,14 @@ public partial class CustomerController : ControllerBase
             return BadRequest("Invalid officeId provided");
         }
 
+        // Check that request body has at least one required property
+        if (filters.Divisions == null && filters.Dates == null)
+        {
+            return BadRequest(
+                "Must provide at least one filter property. Valid filter properties include 'divisions', 'dates'"
+            );
+        }
+
         // Check that division filters are valid
         if (filters.Divisions != null)
         {
@@ -628,14 +636,6 @@ public partial class CustomerController : ControllerBase
                     // TODO: Validate each status
                 }
             }
-        }
-
-        // Check that request body has at least one required property
-        if (filters.Divisions == null && filters.Dates == null)
-        {
-            return BadRequest(
-                "Must provide at least one filter property. Available filter properties: 'Divisions', 'Dates'"
-            );
         }
 
         // Initialize an empty list to hold the customers
