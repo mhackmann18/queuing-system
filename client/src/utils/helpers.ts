@@ -83,6 +83,7 @@ const sanitizeRawCustomer = (
   let status = 'Waiting' as CustomerStatus;
   const timesCalled = [];
   const reasonsForVisit = [];
+  let atOtherDivision = undefined;
   let waitingListIndex: number | undefined;
 
   for (const d of divisions) {
@@ -98,6 +99,8 @@ const sanitizeRawCustomer = (
           .sort((a, b) => b.getTime() - a.getTime())
       );
       waitingListIndex = d.waitingListIndex;
+    } else if (d.status === `Desk ${deskNum}`) {
+      atOtherDivision = d.name;
     }
   }
 
@@ -108,7 +111,8 @@ const sanitizeRawCustomer = (
     checkInTime: parseServerDateAsUtc(checkInTime),
     timesCalled,
     reasonsForVisit,
-    waitingListIndex
+    waitingListIndex,
+    atOtherDivision
   };
 };
 

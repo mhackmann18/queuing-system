@@ -158,9 +158,6 @@ export default function CustomerPanelActions({
     case 'default': {
       let actionsUnavailableMsg: string | undefined;
 
-      // if (currentDivision !== user.division) {
-      //   actionsUnavailableMsg = `Unavailable to ${user.division} stations.`;
-      // } else
       if (DESK_REGEX.test(customer.status)) {
         actionsUnavailableMsg = 'Unavailable while customer is at another desk.';
       } else if (customer.atOtherDivision) {
