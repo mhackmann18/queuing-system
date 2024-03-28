@@ -29,14 +29,19 @@ class Connector {
     this.connection.start().catch((err) => console.log(err));
     this.events = ({ onMessageReceived, onCustomersUpdated, onDesksUpdated }) => {
       if (onMessageReceived) {
+        // Remove previous event handler
+        this.connection.off('messageReceived');
+        // Add new event handler
         this.connection.on('messageReceived', (username, message) => {
           onMessageReceived(username, message);
         });
       }
       if (onCustomersUpdated) {
+        this.connection.off('customersUpdated');
         this.connection.on('customersUpdated', onCustomersUpdated);
       }
       if (onDesksUpdated) {
+        this.connection.off('desksUpdated');
         this.connection.on('desksUpdated', onDesksUpdated);
       }
     };
